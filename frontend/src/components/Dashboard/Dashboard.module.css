@@ -1,0 +1,128 @@
+/* General Layout and Reset */
+.Dashboard {
+    padding: 20px;
+    font-family: Arial, sans-serif; /* Use a common font */
+  }
+  
+  /* Header Styling */
+  .header {
+    margin-bottom: 30px;
+  }
+  
+  .block {
+    /* Styling for the small 'v0 block' box */
+    background-color: #333;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 10px;
+    display: inline-block;
+  }
+  
+  .greeting {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    /* Use flex to align 'v0 block' and 'Good morning, Jessica!' */
+    display: flex;
+    align-items: center;
+  }
+  
+  .prompt {
+    font-size: 1rem;
+    color: #666;
+    margin-top: 0;
+    text-align: left;
+  }
+  
+  /* Summary Grid */
+  .summaryGrid {
+    display: flex;
+    gap: 20px; /* Space between cards */
+    justify-content: flex-start;
+  }
+  
+  /* Summary Card Styling */
+  .summaryCard {
+    flex: 1; /* Makes all cards take up equal width */
+    min-width: 280px; /* Ensures they don't get too small */
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft, subtle shadow */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .cardHeader {
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  
+  .cardBody {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .cardValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+  }
+  
+  .iconBackground {
+    /* Styling for the small, light purple/green/grey circle with an icon */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  /* Custom colors for icons based on the image (approximations) */
+  .summaryCard:nth-child(1) .iconBackground { /* Weekly Budget */
+    background-color: #e0e0f0; /* Light purple */
+    color: #5d5dff;
+  }
+  .summaryCard:nth-child(2) .iconBackground { /* Meals Planned */
+    background-color: #e0f0e0; /* Light green */
+    color: #5d8e5d;
+  }
+  .summaryCard:nth-child(3) .iconBackground { /* Avg. Calories */
+    background-color: #f0f0f0; /* Light grey */
+    color: #666;
+  }
+  
+  .cardSubtext {
+    font-size: 0.85rem;
+    color: #999;
+  }
+  
+  /* Progress Bar Styling */
+  .progressBarContainer {
+    height: 8px;
+    background-color: #e0e0e0; /* Light grey track */
+    border-radius: 4px;
+    overflow: hidden; /* Ensures the fill stays within bounds */
+    margin-top: 15px; /* Add some space above the bar */
+  }
+  
+  .progressBarFill {
+    height: 100%;
+    border-radius: 4px;
+    background-color: #5d5dff; /* Blue/Purple color for the fill */
+    transition: width 0.3s ease-in-out;
+    /* The width is set dynamically via the style prop in the component */
+  }
