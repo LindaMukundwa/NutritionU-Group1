@@ -3,13 +3,14 @@
 //import viteLogo from '/vite.svg'
 import './App.css'
 import LandingPage from './components/LandingPage/LandingPage'
+import Dashboard from './components/Dashboard/Dashboard'
 
 function App() {
   //const [count, setCount] = useState(0)
 
   return (
     <div className="App">
-      <LandingPage />
+      <Dashboard />
     </div>
   );
 }
