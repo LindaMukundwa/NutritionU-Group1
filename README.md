@@ -15,7 +15,8 @@ npm run dev
 ```
 
 ## Creating a New Component
-To create a new component, run the following command:
+To create a new component, run the following command in the frontend folder:
 ```bash
+cd NutritionU-Group1/frontend
 npx generate-react-cli component [component-name]
 ```
