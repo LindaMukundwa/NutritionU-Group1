@@ -25,6 +25,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@types/mongoose": "^5.11.96"
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^24.6.0"
   }
 }
