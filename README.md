@@ -13,3 +13,9 @@ cd NutritionU-Group1/frontend
 npm install
 npm run dev
 ```
+
+## Creating a New Component
+To create a new component, run the following command:
+```bash
+npx generate-react-cli component [component-name]
+```
