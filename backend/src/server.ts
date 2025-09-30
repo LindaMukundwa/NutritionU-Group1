@@ -3,6 +3,7 @@ import { connectDB } from './db.ts';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const router = express.Router();
 
 // Middleware
 app.use(express.json());
@@ -24,5 +25,7 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+
 
 startServer();
