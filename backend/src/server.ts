@@ -1,9 +1,9 @@
 import express from 'express';
 import { connectDB } from './db.ts';
+import userRoutes from './routes/UserRoutes.ts';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const router = express.Router();
 
 // Middleware
 app.use(express.json());
@@ -12,6 +12,7 @@ app.use(express.json());
 app.get('/', (_, res) => {
   res.send('Welcome to the NutritionU API!');
 });
+app.use('/api/users', userRoutes);
 
 // Start the server
 const startServer = async () => {
@@ -25,7 +26,5 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-
-
 
 startServer();
