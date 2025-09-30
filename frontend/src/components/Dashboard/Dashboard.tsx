@@ -1,12 +1,11 @@
 import { type FC } from 'react';
 import styles from './Dashboard.module.css';
 
-// Define the shape for the summary data for clarity and type safety
 interface SummaryCardData {
   title: string;
   value: string | number;
   subtext: string;
-  icon: string; // Using a string to represent a placeholder or actual icon element
+  icon: string; 
   progressBar?: {
     current: number;
     total: number;
@@ -85,7 +84,7 @@ const Dashboard: FC<DashboardProps> = () => {
     <div className={styles.Dashboard}>
       {/* Header/Greeting Section */}
       <div className={styles.header}>
-        <h1 className={styles.greeting}>Good morning, Jessica! 👋</h1>
+        <h1 className={styles.greeting}>Good morning, User! 👋</h1>
         <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
       </div>
       
