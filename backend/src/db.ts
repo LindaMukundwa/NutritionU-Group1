@@ -1,17 +1,16 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config(); 
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mydatabase';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://jayden_melendez:Julian4162007*@nutritionudb.tnzxzwt.mongodb.net/';
 
-/**
- * Connects to the MongoDB database using Mongoose.
- */
+// Function to connect to MongoDB
 export async function connectDB(): Promise<void> {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log('✅ MongoDB connected successfully!');
   } catch (error) {
     console.error('❌ MongoDB connection failed:', error);
-    // Exit process with failure
     process.exit(1);
   }
 }
