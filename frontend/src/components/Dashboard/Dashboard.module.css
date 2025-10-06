@@ -151,7 +151,7 @@
 .tabNav {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 0px;
   background-color: #f1f5f9;
   padding: 4px;
   border-radius: 8px;
@@ -170,6 +170,7 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   text-align: center;
+  margin: 0;
 }
 
 .tabButton:hover {
