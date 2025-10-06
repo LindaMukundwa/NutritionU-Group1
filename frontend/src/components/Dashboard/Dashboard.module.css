@@ -198,3 +198,31 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   min-height: 400px;
 }
+
+/* Add to Dashboard.module.css */
+.mealScrollContainer {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding: 16px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.mealScrollContainer::-webkit-scrollbar {
+  height: 8px;
+}
+
+.mealScrollContainer::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.mealScrollContainer::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.mealScrollContainer::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

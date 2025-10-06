@@ -2,6 +2,7 @@
 
 import { type FC, useState } from "react"
 import styles from "./Dashboard.module.css"
+import MealContentCard from "../MealContentCard/MealContentCard"
 
 // Define the shape for the summary data for clarity and type safety
 interface SummaryCardData {
@@ -19,12 +20,65 @@ interface DashboardProps {}
 
 // --- Shell components for each content area ---
 function MealContent() {
+  const sampleMeals = [
+    {
+      imageUrl: undefined, // You can add actual image URLs here
+      title: "Mediterranean Chickpea Bowl",
+      description: "A nutritious bowl packed with chickpeas, fresh vegetables, and tahini dressing",
+      time: "25 min",
+      price: "$4.50",
+      calories: 420,
+      rating: 4.5,
+      isVegetarian: true,
+      tags: ["High Protein", "Budget-Friendly"]
+    },
+    {
+      imageUrl: undefined,
+      title: "Avocado Toast with Eggs",
+      description: "Crispy whole grain bread topped with mashed avocado and sunny-side-up eggs",
+      time: "15 min",
+      price: "$3.20",
+      calories: 350,
+      rating: 4.2,
+      isVegetarian: true,
+      tags: ["Quick", "High Fiber"]
+    },
+    {
+      imageUrl: undefined,
+      title: "Teriyaki Chicken Bowl",
+      description: "Grilled chicken with teriyaki sauce served over rice with steamed vegetables",
+      time: "30 min",
+      price: "$5.80",
+      calories: 520,
+      rating: 4.7,
+      tags: ["High Protein", "Asian"]
+    }
+  ];
+  
   return (
     <div>
       <h2 className={styles.greeting}>Meal Recommendations</h2>
       <p className={styles.prompt}>Content for meal recommendations will go here.</p>
+      
+     {/* Horizontal Scroll Container */}
+      <div className={styles.mealScrollContainer}>
+        {sampleMeals.map((meal, index) => (
+          <MealContentCard
+            key={index}
+            imageUrl={meal.imageUrl}
+            title={meal.title}
+            description={meal.description}
+            time={meal.time}
+            price={meal.price}
+            calories={meal.calories}
+            rating={meal.rating}
+            isVegetarian={meal.isVegetarian}
+            tags={meal.tags}
+          />
+        ))}
+      </div>
     </div>
-  )
+  );
 }
 
 function PlannerContent() {
