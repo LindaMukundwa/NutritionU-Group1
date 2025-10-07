@@ -51,7 +51,7 @@ function MealContent() {
       price: "$5.80",
       calories: 520,
       rating: 4.7,
-      tags: ["High Protein", "Asian"]
+      tags: ["High Protein"]
     }
   ];
   
