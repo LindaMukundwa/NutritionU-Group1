@@ -1,8 +1,9 @@
 "use client"
 
-import { type FC, useState } from "react"
+import React, { type FC, useState } from "react"
 import styles from "./Dashboard.module.css"
 import MealContentCard from "./MealContentCard/MealContentCard"
+import SearchBar from './SearchBar/SearchBar';
 
 // Define the shape for the summary data for clarity and type safety
 interface SummaryCardData {
@@ -16,20 +17,22 @@ interface SummaryCardData {
   }
 }
 
-interface DashboardProps {}
+interface DashboardProps { }
 
 // --- Shell components for each content area ---
 function MealContent() {
+  const [searchQuery, setSearchQuery] = React.useState("")
+
   const sampleMeals = [
     {
-      imageUrl: undefined, // You can add actual image URLs here
+      imageUrl: undefined,
       title: "Mediterranean Chickpea Bowl",
       description: "A nutritious bowl packed with chickpeas, fresh vegetables, and tahini dressing",
       time: "25 min",
       price: "$4.50",
       calories: 420,
       rating: 4.5,
-      tags: ["High Protein", "Budget-Friendly", "Vegetarian"]
+      tags: ["High Protein", "Budget-Friendly", "Vegetarian"],
     },
     {
       imageUrl: undefined,
@@ -39,7 +42,7 @@ function MealContent() {
       price: "$3.20",
       calories: 350,
       rating: 4.2,
-      tags: ["Quick", "High Fiber", "Vegetarian"]
+      tags: ["Quick", "High Fiber", "Vegetarian"],
     },
     {
       imageUrl: undefined,
@@ -49,18 +52,37 @@ function MealContent() {
       price: "$5.80",
       calories: 520,
       rating: 4.7,
-      tags: ["High Protein"]
-    }
-  ];
-  
+      tags: ["High Protein"],
+    },
+  ]
+
+  const filteredMeals = sampleMeals.filter(
+    (meal) =>
+      meal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      meal.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      meal.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
+  )
+
+  const handleFilterClick = () => {
+    console.log("Filter button clicked")
+    // You can add filter modal/dropdown logic here later
+  }
+
   return (
     <div>
       <h2 className={styles.greeting}>Meal Recommendations</h2>
-      <p className={styles.prompt}>Content for meal recommendations will go here.</p>
-      
-     {/* Horizontal Scroll Container */}
+      <p className={styles.prompt}>Discover delicious recipes tailored to your preferences.</p>
+
+      <SearchBar
+        placeholder="Search for Recipes"
+        value={searchQuery}
+        onChange={setSearchQuery}
+        onFilterClick={handleFilterClick}
+      />
+
+      {/* Horizontal Scroll Container */}
       <div className={styles.mealScrollContainer}>
-        {sampleMeals.map((meal, index) => (
+        {filteredMeals.map((meal, index) => (
           <MealContentCard
             key={index}
             imageUrl={meal.imageUrl}
@@ -74,8 +96,15 @@ function MealContent() {
           />
         ))}
       </div>
+
+      {filteredMeals.length === 0 && (
+        <div style={{ textAlign: "center", padding: "40px", color: "#6b7280" }}>
+          <p>No meals found matching "{searchQuery}"</p>
+          <p style={{ fontSize: "0.875rem", marginTop: "8px" }}>Try adjusting your search terms</p>
+        </div>
+      )}
     </div>
-  );
+  )
 }
 
 function PlannerContent() {
@@ -124,9 +153,8 @@ function DashboardContentSwitcher() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`${styles.tabButton} ${
-              activeTab === tab.id ? styles.active : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === tab.id ? styles.active : ""
+              }`}
           >
             {tab.label}
           </button>
