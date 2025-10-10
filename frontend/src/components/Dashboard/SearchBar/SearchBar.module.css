@@ -14,10 +14,12 @@
   align-items: center;
 }
 
+/* Updated icon styling for SVG instead of emoji */
 .searchIcon {
   position: absolute;
   left: 12px;
-  font-size: 16px;
+  width: 16px;
+  height: 16px;
   color: #6b7280;
   pointer-events: none;
 }
@@ -70,8 +72,11 @@
   box-shadow: 0 0 0 3px rgba(92, 107, 204, 0.1);
 }
 
+/* Updated filter icon styling for SVG */
 .filterIcon {
-  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #555555;
 }
 
 /* Responsive */

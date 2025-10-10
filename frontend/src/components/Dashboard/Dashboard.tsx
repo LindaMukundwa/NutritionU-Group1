@@ -3,9 +3,8 @@
 import React, { type FC, useState } from "react"
 import styles from "./Dashboard.module.css"
 import MealContentCard from "./MealContentCard/MealContentCard"
-import SearchBar from './SearchBar/SearchBar';
+import SearchBar from "./SearchBar/SearchBar"
 
-// Define the shape for the summary data for clarity and type safety
 interface SummaryCardData {
   title: string
   value: string | number
@@ -17,7 +16,7 @@ interface SummaryCardData {
   }
 }
 
-interface DashboardProps { }
+type DashboardProps = {}
 
 // --- Shell components for each content area ---
 function MealContent() {
@@ -56,12 +55,7 @@ function MealContent() {
     },
   ]
 
-  const filteredMeals = sampleMeals.filter(
-    (meal) =>
-      meal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      meal.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      meal.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
-  )
+  const filteredMeals = sampleMeals.filter((meal) => meal.title.toLowerCase().includes(searchQuery.toLowerCase()))
 
   const handleFilterClick = () => {
     console.log("Filter button clicked")
@@ -153,8 +147,7 @@ function DashboardContentSwitcher() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`${styles.tabButton} ${activeTab === tab.id ? styles.active : ""
-              }`}
+            className={`${styles.tabButton} ${activeTab === tab.id ? styles.active : ""}`}
           >
             {tab.label}
           </button>
@@ -207,10 +200,7 @@ const Dashboard: FC<DashboardProps> = () => {
     const percentage = (current / total) * 100
     return (
       <div className={styles.progressBarContainer}>
-        <div
-          className={styles.progressBarFill}
-          style={{ width: `${percentage}%` }}
-        />
+        <div className={styles.progressBarFill} style={{ width: `${percentage}%` }} />
       </div>
     )
   }
@@ -238,15 +228,11 @@ const Dashboard: FC<DashboardProps> = () => {
       {/* Header/Greeting Section */}
       <div className={styles.header}>
         <h1 className={styles.greeting}>Good morning, Jessica! 👋</h1>
-        <p className={styles.prompt}>
-          Ready to plan some delicious meals for this week?
-        </p>
+        <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
       </div>
 
       {/* Summary Cards Section */}
-      <div className={styles.summaryGrid}>
-        {dashboardSummary.map(renderSummaryCard)}
-      </div>
+      <div className={styles.summaryGrid}>{dashboardSummary.map(renderSummaryCard)}</div>
 
       {/* Dashboard Content Switcher Section */}
       <DashboardContentSwitcher />
