@@ -2,7 +2,7 @@
 
 import { type FC, useState } from "react"
 import styles from "./Dashboard.module.css"
-import MealContentCard from "../MealContentCard/MealContentCard"
+import MealContentCard from "./MealContentCard/MealContentCard"
 
 // Define the shape for the summary data for clarity and type safety
 interface SummaryCardData {
@@ -29,8 +29,7 @@ function MealContent() {
       price: "$4.50",
       calories: 420,
       rating: 4.5,
-      isVegetarian: true,
-      tags: ["High Protein", "Budget-Friendly"]
+      tags: ["High Protein", "Budget-Friendly", "Vegetarian"]
     },
     {
       imageUrl: undefined,
@@ -40,8 +39,7 @@ function MealContent() {
       price: "$3.20",
       calories: 350,
       rating: 4.2,
-      isVegetarian: true,
-      tags: ["Quick", "High Fiber"]
+      tags: ["Quick", "High Fiber", "Vegetarian"]
     },
     {
       imageUrl: undefined,
@@ -72,7 +70,6 @@ function MealContent() {
             price={meal.price}
             calories={meal.calories}
             rating={meal.rating}
-            isVegetarian={meal.isVegetarian}
             tags={meal.tags}
           />
         ))}

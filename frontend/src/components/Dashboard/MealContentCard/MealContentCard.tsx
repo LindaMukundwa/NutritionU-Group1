@@ -10,7 +10,6 @@ interface MealContentCardProps {
   price: string;
   calories: number;
   rating?: number;
-  isVegetarian?: boolean;
   tags?: string[];
 }
 
@@ -22,7 +21,6 @@ const MealContentCard: FC<MealContentCardProps> = ({
   price,
   calories,
   rating,
-  isVegetarian = false,
   tags = []
 }) => {
   const [isLiked, setIsLiked] = useState(false);
@@ -50,10 +48,6 @@ const MealContentCard: FC<MealContentCardProps> = ({
           {isLiked ? '❤️' : '🤍'}
         </button>
 
-        {/* Vegetarian Badge */}
-        {isVegetarian && (
-          <div className={styles.vegetarianBadge}>Vegetarian</div>
-        )}
       </div>
 
       {/* Content Section */}
