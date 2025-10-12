@@ -4,13 +4,14 @@
 import './App.css'
 import LandingPage from './components/LandingPage/LandingPage'
 import Dashboard from './components/Dashboard/Dashboard'
+import OnboardingPage from './components/OnboardingPage/OnboardingPage'
 
 function App() {
   //const [count, setCount] = useState(0)
 
   return (
     <div className="App">
-      <Dashboard />
+      <OnboardingPage />
     </div>
   );
 }

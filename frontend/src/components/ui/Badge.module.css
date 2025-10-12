@@ -1,0 +1,73 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.badge:hover {
+  transform: translateY(-1px);
+}
+
+.default {
+  background: #5c6bcc;
+  color: white;
+}
+
+.default:hover {
+  background: #4a5bb8;
+}
+
+.secondary {
+  background: #f8fafc;
+  color: #555555;
+  border-color: #e2e8f0;
+}
+
+.secondary:hover {
+  background: #f1f5f9;
+  border-color: #6ab3a7;
+}
+
+.outline {
+  background: transparent;
+  color: #555555;
+  border-color: #e2e8f0;
+}
+
+.outline:hover {
+  background: #f8fafc;
+  border-color: #6ab3a7;
+}
+
+.destructive {
+  background: #ef4444;
+  color: white;
+}
+
+.destructive:hover {
+  background: #dc2626;
+}
+
+.cultural {
+  background: #10b981;
+  color: white;
+}
+
+.cultural:hover {
+  background: #059669;
+}
+
+.goals {
+  background: #5c6bcc;
+  color: white;
+}
+
+.goals:hover {
+  background: #4a5bb8;
+}

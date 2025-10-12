@@ -1,0 +1,81 @@
+/* Button Base Styles */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  gap: 0.5rem;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:focus {
+  outline: 2px solid #5c6bcc;
+  outline-offset: 2px;
+}
+
+/* Button Sizes */
+.sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.md {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
+.lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+/* Button Variants */
+.default {
+  background: #5c6bcc;
+  color: white;
+}
+
+.default:hover:not(:disabled) {
+  background: #4a5bb8;
+  transform: translateY(-1px);
+}
+
+.outline {
+  background: transparent;
+  color: #555555;
+  border: 1px solid #e2e8f0;
+}
+
+.outline:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #6ab3a7;
+}
+
+.secondary {
+  background: #f8fafc;
+  color: #555555;
+  border: 1px solid #e2e8f0;
+}
+
+.secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #6ab3a7;
+}
+
+.destructive {
+  background: #ef4444;
+  color: white;
+}
+
+.destructive:hover:not(:disabled) {
+  background: #dc2626;
+}
