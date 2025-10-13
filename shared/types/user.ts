@@ -73,3 +73,10 @@ export interface MealHistoryEntry {
   cookedDate: Date;
   notes?: string;
 }
+
+export interface MedicalRestrictions {
+  allergies: "Gluten" | "Dairy" | "Nuts" | "Peanuts" | "Soy" | "Eggs" |
+  "Shellfish" | "Wheat" | "Sesame" | "Corn" | "Sulfites" |
+  "FODMAP" | "Histamine" | "Sodium (Low)" | "Sugar (Low)" | "None",
+  description: "Medical and health dietary restrictions"
+}
