@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { default as User } from '../models/user.ts';
+import { default as User } from '../models/UserModel.ts';
 import { error } from 'console';
 
 // Create a new user
@@ -28,4 +28,39 @@ export const getUser = async (req: Request, res: Response) => {
         console.log('Error getting user:', error);
         res.status(500).json({ message: 'Internal server error'});
     }
+}
+
+// Delete an existing user
+export const deleteUser = async (req: Request, res: Response) => {
+
+}
+
+// Update user preferences
+export const patchUserPreferences = async (req: Request, res: Response) => {
+
+}
+
+// Update user budget
+export const patchUserBudget = async (req: Request, res: Response) => {
+
+}
+
+// Update lifestyle diets
+export const patchUserLifestyleDiets = async (req: Request, res: Response) => {
+
+}
+
+// Update culutral diets
+export const patchUserCulturalDiets = async (req: Request, res: Response) => {
+
+}
+
+// Update medical restrictions
+export const patchUserMedicalRestrictions = async (req: Request, res: Response) => {
+
+}
+
+// Update goals
+export const patchUserGoals = async (req: Request, res: Response) => {
+
 }
