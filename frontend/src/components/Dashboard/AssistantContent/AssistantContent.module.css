@@ -147,7 +147,7 @@
     padding: 10px 0;
     border-top: 1px solid #e5e7eb;
     }
-    
+   
     .input-group {
     display: flex;
     gap: 8px;
@@ -162,6 +162,8 @@
     font-size: 1rem;
     outline: none;
     transition: border-color 0.3s ease;
+    background-color: #ffffff;
+    color: black;
     }
     
     .chat-input:focus {
