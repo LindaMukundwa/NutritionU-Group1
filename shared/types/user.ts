@@ -56,8 +56,6 @@ export interface User {
   dietaryRestrictions: DietaryRestrictions;
   nutritionGoals: NutritionGoals;
   preferences: UserPreferences;
-  //notificationSettings: NotificationSettings;
-  //timezone: string;
   onboardingCompleted: boolean;
   lastLogin: Date;
   planGenerationCount: number;
