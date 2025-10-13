@@ -2,7 +2,6 @@
 .Dashboard {
   padding: 20px;
   font-family: Arial, sans-serif;
-  /* Use a common font */
 }
 
 /* Header Styling */
@@ -11,7 +10,6 @@
 }
 
 .block {
-  /* Styling for the small 'v0 block' box */
   background-color: #333;
   color: white;
   padding: 2px 6px;
@@ -28,7 +26,6 @@
   color: #333;
   margin-top: 5px;
   margin-bottom: 5px;
-  /* Use flex to align 'v0 block' and 'Good morning, Jessica!' */
   display: flex;
   align-items: center;
 }
@@ -44,21 +41,17 @@
 .summaryGrid {
   display: flex;
   gap: 20px;
-  /* Space between cards */
   justify-content: flex-start;
 }
 
 /* Summary Card Styling */
 .summaryCard {
   flex: 1;
-  /* Makes all cards take up equal width */
   min-width: 280px;
-  /* Ensures they don't get too small */
   background-color: white;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  /* Soft, subtle shadow */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -85,7 +78,6 @@
 }
 
 .iconBackground {
-  /* Styling for the small, light purple/green/grey circle with an icon */
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -96,25 +88,18 @@
   font-weight: 600;
 }
 
-/* Custom colors for icons based on the image (approximations) */
 .summaryCard:nth-child(1) .iconBackground {
-  /* Weekly Budget */
   background-color: #e0e0f0;
-  /* Light purple */
   color: #5d5dff;
 }
 
 .summaryCard:nth-child(2) .iconBackground {
-  /* Meals Planned */
   background-color: #e0f0e0;
-  /* Light green */
   color: #5d8e5d;
 }
 
 .summaryCard:nth-child(3) .iconBackground {
-  /* Avg. Calories */
   background-color: #f0f0f0;
-  /* Light grey */
   color: #666;
 }
 
@@ -127,12 +112,9 @@
 .progressBarContainer {
   height: 8px;
   background-color: #e0e0e0;
-  /* Light grey track */
   border-radius: 4px;
   overflow: hidden;
-  /* Ensures the fill stays within bounds */
   margin-top: 15px;
-  /* Add some space above the bar */
 }
 
 .progressBarFill {
@@ -140,7 +122,6 @@
   border-radius: 4px;
   background-color: #5d5dff;
   transition: width 0.3s ease-in-out;
-  /* The width is set dynamically via the style prop in the component */
 }
 
 /* --- Dashboard Content Switcher --- */
@@ -185,7 +166,6 @@
   font-weight: 600;
 }
 
-/* Remove any focus styles completely for these tabs */
 .tabButton:focus,
 .tabButton:focus-visible {
   outline: none;
@@ -197,4 +177,222 @@
   padding: 2rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   min-height: 400px;
+}
+
+/* Added filter chips styling */
+.filterChipsContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.filterChip:hover {
+  border-color: #5c6bcc;
+  color: #5c6bcc;
+  background-color: #f8f9ff;
+}
+
+.filterChipActive {
+  background-color: #5c6bcc;
+  color: #ffffff;
+  border-color: #5c6bcc;
+}
+
+.filterChipActive:hover {
+  background-color: #4a5ab8;
+  border-color: #4a5ab8;
+}
+
+.filterChip:focus,
+.filterChip:focus-visible {
+  outline: none;
+}
+
+/* Horizontal Scroll Container */
+.mealScrollContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 16px 0;
+}
+
+@media (max-width: 1200px) {
+  .mealScrollContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mealScrollContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Search Bar Container */
+.searchBarContainer {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* Added filter dropdown styles */
+.filterDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.filterDropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filterDropdown::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.filterDropdown::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.filterDropdown::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.filterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.filterTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #555555;
+  margin: 0;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  color: #5c6bcc;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.clearButton:hover {
+  background-color: #f8f9ff;
+}
+
+.filterSection {
+  margin-bottom: 20px;
+}
+
+.filterSection:last-child {
+  margin-bottom: 0;
+}
+
+.filterLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #555555;
+  margin-bottom: 10px;
+}
+
+.filterOptions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterOption {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.filterOption:hover {
+  border-color: #5c6bcc;
+  color: #5c6bcc;
+  background-color: #f8f9ff;
+}
+
+.filterOptionActive {
+  background-color: #5c6bcc;
+  color: #ffffff;
+  border-color: #5c6bcc;
+}
+
+.filterOptionActive:hover {
+  background-color: #4a5ab8;
+  border-color: #4a5ab8;
+}
+
+.filterCheckboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #555555;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #d1d5db;
+  cursor: pointer;
+  accent-color: #5c6bcc;
+}
+
+.checkbox:checked {
+  background-color: #5c6bcc;
+  border-color: #5c6bcc;
 }
