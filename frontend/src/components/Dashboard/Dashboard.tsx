@@ -48,7 +48,6 @@ function NutritionContent() {
 function AIAssistantContent() {
   return (
     <div>
-      <h2 className={styles.greeting}>AI Assistant</h2>
       <AssistantContent />
     </div>
   )
