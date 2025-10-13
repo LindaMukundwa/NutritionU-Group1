@@ -53,7 +53,7 @@ export interface User {
   height?: number;
   weight?: number;
   activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
-  dietaryRestrictions: DietaryRestrictions;
+  medicalRestrictions: MedicalRestrictions;
   nutritionGoals: NutritionGoals;
   preferences: UserPreferences;
   onboardingCompleted: boolean;
@@ -75,8 +75,21 @@ export interface MealHistoryEntry {
 }
 
 export interface MedicalRestrictions {
-  allergies: "Gluten" | "Dairy" | "Nuts" | "Peanuts" | "Soy" | "Eggs" |
-  "Shellfish" | "Wheat" | "Sesame" | "Corn" | "Sulfites" |
-  "FODMAP" | "Histamine" | "Sodium (Low)" | "Sugar (Low)" | "None",
+  gluten: boolean;
+  dairy: boolean;
+  nuts: boolean;
+  peanuts: boolean;
+  soy: boolean;
+  eggs: boolean;
+  shellfish: boolean;
+  wheat: boolean;
+  sesame: boolean;
+  corn: boolean;
+  sulfites: boolean;
+  fodmap: boolean;
+  histamine: boolean;
+  lowSodium: boolean;
+  lowSugar: boolean;
+  none: boolean;
   description: "Medical and health dietary restrictions"
 }
