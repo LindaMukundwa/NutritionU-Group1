@@ -12,16 +12,6 @@ export interface DietaryRestrictions {
   custom: string[];
 }
 
-export interface NutritionGoals {
-  dailyCalories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
-  sodium: number;
-}
-
 export interface UserPreferences {
   cuisineTypes: string[];
   cookingTime: 'quick' | 'moderate' | 'lengthy';
@@ -32,16 +22,6 @@ export interface UserPreferences {
   };
   servingSize: number;
 }
-/*
-// Notification settings for user defined but commented out till needed in future.
-export interface NotificationSettings {
-  mealReminders: boolean;
-  groceryReminders: boolean;
-  hydrationReminders: boolean;
-  weeklyPlanReminders: boolean;
-  preferredTime: string;
-}
-  */
 
 export interface User {
   _id: string;
@@ -54,6 +34,7 @@ export interface User {
   weight?: number;
   activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
   medicalRestrictions: MedicalRestrictions;
+  budget: Budget;
   nutritionGoals: NutritionGoals;
   preferences: UserPreferences;
   onboardingCompleted: boolean;
@@ -90,6 +71,22 @@ export interface MedicalRestrictions {
   histamine: boolean;
   lowSodium: boolean;
   lowSugar: boolean;
-  none: boolean;
   description: "Medical and health dietary restrictions"
+}
+
+export interface Budget {
+  minimum?: number;
+  maximum?: number;
+  step: 25; // Increment
+  default: 100; // Value if budget is not set
+  description: "Weekly food budget in dollars";
+}
+
+export interface NutritionGoals {
+  goals?: "Save Money" | "Eat Healthier" | "Save Time" | "Learn to Cook" | "Lose Weight" | "Gain Muscle" | "None";
+  calories: number; 
+  protein: number; // In grams
+  carbs: number; // In grams
+  fats: number; // In grams
+  description: "User nutrition and lifestyle goals";
 }
