@@ -46,16 +46,32 @@ export const deleteUser = async (req: Request, res: Response) => {
     res.status(201).json(req);
 }
 
-// Update user preferences
-export const patchUserPreferences = async (req: Request, res: Response) => {
-    res.status(201).json(req);
-
-}
-
 // Update user budget
 export const patchUserBudget = async (req: Request, res: Response) => {
-    res.status(201).json(req);
+    try {
+        const { id } = req.params;
+        const { budget } = req.body;
 
+        if (!budget) {
+            return res.status(400).json({ message: 'Budget is required' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { budget },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Error updating user budget:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+    res.status(201).json(req);
 }
 
 // Update lifestyle diets

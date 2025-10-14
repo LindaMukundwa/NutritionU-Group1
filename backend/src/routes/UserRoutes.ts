@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { createUser, getUser, deleteUser, patchUserPreferences, patchUserBudget, patchUserLifestyleDiets, patchUserCulturalDiets, patchUserMedicalRestrictions, patchUserGoals } from '../controllers/UserController.ts';
+import { createUser, getUser, deleteUser, patchUserBudget, patchUserLifestyleDiets, patchUserCulturalDiets, patchUserMedicalRestrictions, patchUserGoals } from '../controllers/UserController.ts';
 
 const router = Router();
 
@@ -12,9 +12,6 @@ router.get('/:id', getUser);
 
 // Route to delete user information
 router.delete('/:id', deleteUser);
-
-// Route to update user preferences
-router.patch('/:id/preferences', patchUserPreferences);
 
 // Route to update user budget
 router.patch('/:id/budget', patchUserBudget);
