@@ -32,35 +32,41 @@ export const getUser = async (req: Request, res: Response) => {
 
 // Delete an existing user
 export const deleteUser = async (req: Request, res: Response) => {
-
+    res.status(201).json(req);
 }
 
 // Update user preferences
 export const patchUserPreferences = async (req: Request, res: Response) => {
+    res.status(201).json(req);
 
 }
 
 // Update user budget
 export const patchUserBudget = async (req: Request, res: Response) => {
+    res.status(201).json(req);
 
 }
 
 // Update lifestyle diets
 export const patchUserLifestyleDiets = async (req: Request, res: Response) => {
+    res.status(201).json(req);
 
-}
+}   
 
 // Update culutral diets
 export const patchUserCulturalDiets = async (req: Request, res: Response) => {
+    res.status(201).json(req);
 
 }
 
 // Update medical restrictions
 export const patchUserMedicalRestrictions = async (req: Request, res: Response) => {
+    res.status(201).json(req);
 
 }
 
 // Update goals
 export const patchUserGoals = async (req: Request, res: Response) => {
+    res.status(201).json(req);
 
 }

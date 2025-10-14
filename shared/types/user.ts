@@ -1,58 +1,36 @@
 /**
  * Definining shared user types and interfaces to be used thhroughut application
  */
-export interface DietaryRestrictions {
-  vegetarian: boolean;
-  vegan: boolean;
-  glutenFree: boolean;
-  dairyFree: boolean;
-  nutFree: boolean;
-  //kosher: boolean;
-  halal: boolean;
-  custom: string[];
-}
-
-export interface UserPreferences {
-  cuisineTypes: string[];
-  cookingTime: 'quick' | 'moderate' | 'lengthy';
-  skillLevel: 'beginner' | 'intermediate' | 'advanced';
-  budgetRange: {
-    min: number;
-    max: number;
-  };
-  servingSize: number;
-}
-
 export interface User {
+  // Generally static
   _id: string;
   firebaseUid: string;
   email: string;
   displayName: string;
   photoURL?: string;
+
+  // Gathered from onboarding
   age?: number;
   height?: number;
   weight?: number;
+  bmi?: number;
   activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
-  medicalRestrictions: MedicalRestrictions;
-  budget: Budget;
+  medicalRestrictions: MedicalRestrictions; 
   nutritionGoals: NutritionGoals;
-  preferences: UserPreferences;
+  lifestyleDiets: LifestyleDiets;
+  culturalDiets: CulturalDiets;
+  budget: Budget;
+
+  // Update on action
   onboardingCompleted: boolean;
   lastLogin: Date;
   planGenerationCount: number;
-  mealHistory: MealHistoryEntry[];
-  favoriteRecipes: string[];
-  bmr?: number;
-  recommendedCalories?: number;
+  favoriteRecipes?: string[]; // string of recipe ids
   createdAt: Date;
   updatedAt: Date;
-}
 
-export interface MealHistoryEntry {
-  mealId: string;
-  rating: number;
-  cookedDate: Date;
-  notes?: string;
+  // Meals
+  recipe?: string[]; // string of recipe ids
 }
 
 export interface MedicalRestrictions {
@@ -71,7 +49,30 @@ export interface MedicalRestrictions {
   histamine: boolean;
   lowSodium: boolean;
   lowSugar: boolean;
-  description: "Medical and health dietary restrictions"
+  none: boolean;
+  description: "Medical and health dietary restrictions";
+}
+
+export interface LifestyleDiets {
+  vegeterian: boolean;
+  pescetarian: boolean;
+  flexiterian: boolean;
+  mediterranean: boolean;
+  paleo: boolean;
+  keto: boolean;
+  whole30: boolean;
+  none: boolean;
+  description: "Lifestyle and ethical dietary choices";
+}
+
+export interface CulturalDiets {
+  halal: boolean;
+  kosher: boolean;
+  jain: boolean;
+  hindu: boolean;
+  buddhist: boolean;
+  none: boolean;
+  description: "Cultural and religious dietary preferences";
 }
 
 export interface Budget {
@@ -84,9 +85,9 @@ export interface Budget {
 
 export interface NutritionGoals {
   goals?: "Save Money" | "Eat Healthier" | "Save Time" | "Learn to Cook" | "Lose Weight" | "Gain Muscle" | "None";
-  calories: number; 
-  protein: number; // In grams
-  carbs: number; // In grams
-  fats: number; // In grams
+  calories?: number;
+  protein?: number; // In grams
+  carbs?: number; // In grams
+  fats?: number; // In grams
   description: "User nutrition and lifestyle goals";
 }
