@@ -13,6 +13,7 @@ interface MealContentCardProps {
   calories: number
   rating?: number
   tags?: string[]
+  onViewRecipe?: () => void
 }
 
 const MealContentCard: FC<MealContentCardProps> = ({
@@ -24,6 +25,7 @@ const MealContentCard: FC<MealContentCardProps> = ({
   calories,
   rating,
   tags = [],
+  onViewRecipe,
 }) => {
   const [isLiked, setIsLiked] = useState(false)
 
@@ -148,7 +150,9 @@ const MealContentCard: FC<MealContentCardProps> = ({
         {/* Action Buttons */}
         <div className={styles.actionButtons}>
           <button className={styles.addButton}>+ Add to Plan</button>
-          <button className={styles.viewButton}>View Recipe</button>
+          <button className={styles.viewButton} onClick={onViewRecipe}>
+            View Recipe
+          </button>
         </div>
       </div>
     </div>
