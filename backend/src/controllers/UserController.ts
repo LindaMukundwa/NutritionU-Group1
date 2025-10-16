@@ -91,6 +91,23 @@ export const patchUserBudget = async (req: Request, res: Response) => {
 
 // Update lifestyle diets
 export const patchUserLifestyleDiets = async (req: Request, res: Response) => {
+    /* 
+    JSON Format
+        { 
+            "lifestyleDiets": {
+                "vegetarian": true,
+                "pescetarian": false,
+                "flexitarian": false,
+                "mediterranean": false,
+                "paleo": false,
+                "keto": false,
+                "whole30": false,
+                "none": false,
+                "description": "Lifestyle and ethical dietary choices"
+            }
+        }
+    */
+   
     try {
         const { id } = req.params;
         const { lifestyleDiets } = req.body;
@@ -118,7 +135,29 @@ export const patchUserLifestyleDiets = async (req: Request, res: Response) => {
 
 // Update culutral diets
 export const patchUserCulturalDiets = async (req: Request, res: Response) => {
-    res.status(201).json(req);
+    try {
+        const { id } = req.params;
+        const { culturalDiets } = req.body;
+
+        if (!culturalDiets) {
+            return res.status(400).json({ message: 'Cultural diets are required' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { culturalDiets },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Error updating cultural diets:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 
 }
 
