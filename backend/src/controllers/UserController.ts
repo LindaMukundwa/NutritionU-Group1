@@ -48,6 +48,21 @@ export const deleteUser = async (req: Request, res: Response) => {
 
 // Update user budget
 export const patchUserBudget = async (req: Request, res: Response) => {
+
+    /*
+    JSON Format
+    {
+        "budget": {
+            "minimum": 50,
+            "maximum": 200,
+            "step": 10,
+            "default": 75,
+            "description": "Updated weekly food budget in dollars"
+
+        }
+    }
+    
+    */
     try {
         const { id } = req.params;
         const { budget } = req.body;
@@ -76,8 +91,29 @@ export const patchUserBudget = async (req: Request, res: Response) => {
 
 // Update lifestyle diets
 export const patchUserLifestyleDiets = async (req: Request, res: Response) => {
-    res.status(201).json(req);
+    try {
+        const { id } = req.params;
+        const { lifestyleDiets } = req.body;
 
+        if (!lifestyleDiets) {
+            return res.status(400).json({ message: 'Lifestyle preferences required' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { lifestyleDiets },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Error updating lifestyle diets:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 }   
 
 // Update culutral diets
