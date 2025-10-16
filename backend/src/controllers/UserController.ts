@@ -22,11 +22,11 @@ export const getUser = async (req: Request, res: Response) => {
         const userData = await User.findById(id);
         if (!userData) {
             throw error("User with this id is not found");
-        } 
+        }
         res.status(201).json(userData);
-    } catch(error) {
+    } catch (error) {
         console.log('Error getting user:', error);
-        res.status(500).json({ message: 'Internal server error'});
+        res.status(500).json({ message: 'Internal server error' });
     }
 }
 
@@ -107,7 +107,7 @@ export const patchUserLifestyleDiets = async (req: Request, res: Response) => {
             }
         }
     */
-   
+
     try {
         const { id } = req.params;
         const { lifestyleDiets } = req.body;
@@ -131,10 +131,26 @@ export const patchUserLifestyleDiets = async (req: Request, res: Response) => {
         console.error('Error updating lifestyle diets:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}   
+}
 
 // Update culutral diets
 export const patchUserCulturalDiets = async (req: Request, res: Response) => {
+
+    /*
+    JSON Format
+        {
+            "culturalDiets": {
+                "halal": true,
+                "kosher": false,
+                "jain": false,
+                "hindu": true,
+                "buddhist": false,
+                "none": false,
+                "description": "Updated cultural and religious dietary preferences"
+            }
+        }
+    */
+
     try {
         const { id } = req.params;
         const { culturalDiets } = req.body;
@@ -163,7 +179,54 @@ export const patchUserCulturalDiets = async (req: Request, res: Response) => {
 
 // Update medical restrictions
 export const patchUserMedicalRestrictions = async (req: Request, res: Response) => {
-    res.status(201).json(req);
+    /*
+    JSON Format
+    {
+        "medicalRestrictions": {
+            "gluten": true,
+            "dairy": false,
+            "nuts": false,
+            "peanuts": true,
+            "soy": false,
+            "eggs": false,
+            "shellfish": true,
+            "wheat": false,
+            "sesame": false,
+            "corn": true,
+            "sulfites": false,
+            "fodmap": false,
+            "histamine": true,
+            "lowSodium": false,
+            "lowSugar": true,
+            "none": false,
+            "description": "Medical and health dietary restrictions"
+        }
+    }
+    */
+
+    try {
+        const { id } = req.params;
+        const { medicalRestrictions } = req.body;
+
+        if (!medicalRestrictions) {
+            return res.status(400).json({ message: 'Medical restrictions are required' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { medicalRestrictions },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Error updating medical restrictions:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 
 }
 
