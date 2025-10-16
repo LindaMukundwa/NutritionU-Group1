@@ -4,6 +4,83 @@ import { error } from 'console';
 
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
+
+    /* 
+    JSON Format
+        {
+            "_id": "testkey123",
+            "firebaseUid": "testfirebase123",
+            "email": "nutritionutester@gmail.com",
+            "displayName": "John Doe",
+            "photoURL": "https://example.com/photo.jpg",
+            "age": 30,
+            "height": 180,
+            "weight": 75,
+            "activityLevel": "moderately_active",
+            "bmi": 23.1,
+            "medicalRestrictions": {
+                "gluten": false,
+                "dairy": false,
+                "nuts": false,
+                "peanuts": false,
+                "soy": false,
+                "eggs": false,
+                "shellfish": false,
+                "wheat": false,
+                "sesame": false,
+                "corn": false,
+                "sulfites": false,
+                "fodmap": false,
+                "histamine": false,
+                "lowSodium": false,
+                "lowSugar": false,
+                "none": true,
+                "description": "Medical and health dietary restrictions"
+            },
+            "nutritionGoals": {
+                "goals": "Eat Healthier",
+                "calories": 2000,
+                "protein": 150,
+                "carbs": 250,
+                "fats": 70,
+                "description": "User nutrition and lifestyle goals"
+            },
+            "lifestyleDiets": {
+                "vegetarian": false,
+                "pescetarian": false,
+                "flexitarian": false,
+                "mediterranean": true,
+                "paleo": false,
+                "keto": false,
+                "whole30": false,
+                "none": false,
+                "description": "Lifestyle and ethical dietary choices"
+            },
+            "culturalDiets": {
+                "halal": true,
+                "kosher": false,
+                "jain": false,
+                "hindu": false,
+                "buddhist": false,
+                "none": false,
+                "description": "Cultural and religious dietary preferences"
+            },
+            "budget": {
+                "minimum": 50,
+                "maximum": 200,
+                "step": 25,
+                "default": 100,
+                "description": "Weekly food budget in dollars"
+            },
+            "onboardingCompleted": true,
+            "lastLogin": "2023-09-01T12:00:00.000Z",
+            "planGenerationCount": 5,
+            "favoriteRecipes": ["recipe123", "recipe456"],
+            "recipe": ["recipe789", "recipe101"],
+            "createdAt": "2023-09-01T12:00:00.000Z",
+            "updatedAt": "2023-09-01T12:00:00.000Z"
+        }
+    */
     try {
         const userData = req.body;
         const newUser = new User(userData);
