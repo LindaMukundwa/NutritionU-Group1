@@ -2,7 +2,7 @@ import React, { type FC, useState } from "react"
 import styles from "./Dashboard.module.css"
 import MealContentCard from "./MealContentCard/MealContentCard"
 import SearchBar from "./SearchBar/SearchBar"
-import PlannerMealCard from "../PlannerContentCard/PlannerContentCard"
+import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
 
 interface SummaryCardData {
   title: string
@@ -498,11 +498,306 @@ function MealContent() {
   )
 }
 
-function PlannerContent() {
-  const [selectedDay, setSelectedDay] = useState<keyof WeeklyMealPlan>("Monday")
+function PlannerContent({ 
+  selectedDay, 
+  setSelectedDay, 
+  weeklyMealPlan, 
+  setWeeklyMealPlan 
+}: { 
+  selectedDay: keyof WeeklyMealPlan
+  setSelectedDay: React.Dispatch<React.SetStateAction<keyof WeeklyMealPlan>>
+  weeklyMealPlan: WeeklyMealPlan
+  setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>
+}) {
   const [selectedRecipe, setSelectedRecipe] = useState<Meal | null>(null)
   const [showRecipeModal, setShowRecipeModal] = useState(false)
 
+  const handleMealClick = (meal: any) => {
+    if (meal && meal.recipe) {
+      setSelectedRecipe(meal)
+      setShowRecipeModal(true)
+    }
+  }
+
+  const handleDeleteMeal = (day: string, mealType: string, mealIndex: number) => {
+    const dayKey = day as keyof WeeklyMealPlan
+    const mealTypeKey = mealType as keyof DayMealPlan
+    setWeeklyMealPlan((prev) => ({
+      ...prev,
+      [dayKey]: {
+        ...prev[dayKey],
+        [mealTypeKey]: prev[dayKey][mealTypeKey].filter((_: Meal, index: number) => index !== mealIndex),
+      },
+    }))
+  }
+
+  const handleAddMeal = (mealType: string) => {
+    console.log(`Add meal to ${mealType}`)
+    // You can implement a modal or form to add meals here
+  }
+
+  const days = Object.keys(weeklyMealPlan) as Array<keyof WeeklyMealPlan>
+  const currentDayIndex = days.indexOf(selectedDay)
+
+  const goToPreviousDay = () => {
+    const prevIndex = currentDayIndex > 0 ? currentDayIndex - 1 : days.length - 1
+    setSelectedDay(days[prevIndex])
+  }
+
+  const goToNextDay = () => {
+    const nextIndex = currentDayIndex < days.length - 1 ? currentDayIndex + 1 : 0
+    setSelectedDay(days[nextIndex])
+  }
+
+  const calculateDailyTotals = () => {
+    const dayPlan = weeklyMealPlan[selectedDay]
+    const totalCalories =
+      dayPlan.breakfast.reduce((sum, meal) => sum + meal.calories, 0) +
+      dayPlan.lunch.reduce((sum, meal) => sum + meal.calories, 0) +
+      dayPlan.dinner.reduce((sum, meal) => sum + meal.calories, 0) +
+      dayPlan.snacks.reduce((sum, snack) => sum + snack.calories, 0)
+
+    const totalCost =
+      dayPlan.breakfast.reduce((sum, meal) => sum + Number.parseFloat(meal.cost.replace("$", "")), 0) +
+      dayPlan.lunch.reduce((sum, meal) => sum + Number.parseFloat(meal.cost.replace("$", "")), 0) +
+      dayPlan.dinner.reduce((sum, meal) => sum + Number.parseFloat(meal.cost.replace("$", "")), 0) +
+      dayPlan.snacks.reduce((sum, snack) => sum + Number.parseFloat(snack.cost.replace("$", "")), 0)
+
+    return { totalCalories, totalCost: totalCost.toFixed(2) }
+  }
+
+  const { totalCalories, totalCost } = calculateDailyTotals()
+
+  return (
+    <div>
+      <div className={styles.plannerHeader}>
+        <div>
+          <h2 className={styles.greeting}>Daily Meal Planner</h2>
+          <p className={styles.prompt}>Click on any meal to view the full recipe</p>
+        </div>
+        <div className={styles.dayNavigation}>
+          <button className={styles.navButton} onClick={goToPreviousDay}>
+            ‹
+          </button>
+          <div className={styles.dayButtons}>
+            {days.map((day) => (
+              <button
+                key={day}
+                className={`${styles.dayButton} ${selectedDay === day ? styles.dayButtonActive : ""}`}
+                onClick={() => setSelectedDay(day)}
+              >
+                {day.slice(0, 3)}
+              </button>
+            ))}
+          </div>
+          <button className={styles.navButton} onClick={goToNextDay}>
+            ›
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.plannerContent}>
+        <PlannerMealCard
+          mealType="breakfast"
+          meals={weeklyMealPlan[selectedDay].breakfast}
+          color="#f97316"
+          label="Breakfast"
+          selectedDay={selectedDay}
+          onMealClick={handleMealClick}
+          onDeleteMeal={handleDeleteMeal}
+          onAddMeal={handleAddMeal}
+        />
+        <PlannerMealCard
+          mealType="lunch"
+          meals={weeklyMealPlan[selectedDay].lunch}
+          color="#22c55e"
+          label="Lunch"
+          selectedDay={selectedDay}
+          onMealClick={handleMealClick}
+          onDeleteMeal={handleDeleteMeal}
+          onAddMeal={handleAddMeal}
+        />
+        <PlannerMealCard
+          mealType="dinner"
+          meals={weeklyMealPlan[selectedDay].dinner}
+          color="#3b82f6"
+          label="Dinner"
+          selectedDay={selectedDay}
+          onMealClick={handleMealClick}
+          onDeleteMeal={handleDeleteMeal}
+          onAddMeal={handleAddMeal}
+        />
+        <PlannerMealCard
+          mealType="snacks"
+          meals={weeklyMealPlan[selectedDay].snacks}
+          color="#a855f7"
+          label="Snacks"
+          selectedDay={selectedDay}
+          onMealClick={handleMealClick}
+          onDeleteMeal={handleDeleteMeal}
+          onAddMeal={handleAddMeal}
+        />
+      </div>
+
+      <div className={styles.plannerFooter}>
+        <div className={styles.dailyTotals}>
+          <span className={styles.totalItem}>
+            <strong>{totalCalories}</strong> total calories
+          </span>
+          <span className={styles.totalItem}>
+            <strong>${totalCost}</strong> daily cost
+          </span>
+        </div>
+        <button className={styles.primaryButton}>🛒 Add to Grocery List</button>
+      </div>
+
+      {showRecipeModal && selectedRecipe && (
+        <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
+      )}
+    </div>
+  )
+}
+
+function NutritionContent({ selectedDay, weeklyMealPlan }: { selectedDay: keyof WeeklyMealPlan; weeklyMealPlan: WeeklyMealPlan }) {
+  // Calculate nutrition data based on the selected day's meals
+  const calculateNutritionData = () => {
+    const dayPlan = weeklyMealPlan[selectedDay];
+    
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFat = 0;
+    let totalFiber = 0;
+
+    // Sum up nutrition from all meals in the day
+    const mealTypes: (keyof DayMealPlan)[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
+    
+    mealTypes.forEach(mealType => {
+      dayPlan[mealType].forEach(meal => {
+        totalCalories += meal.calories;
+        totalProtein += meal.recipe.nutrition.protein;
+        totalCarbs += meal.recipe.nutrition.carbs;
+        totalFat += meal.recipe.nutrition.fat;
+        totalFiber += meal.recipe.nutrition.fiber;
+      });
+    });
+
+    // Target values (you can customize these based on user goals)
+    const targets = {
+      calories: 2000,
+      protein: 120,
+      carbs: 250,
+      fat: 78,
+      fiber: 25
+    };
+
+    return {
+      calories: { consumed: totalCalories, target: targets.calories },
+      protein: { consumed: totalProtein, target: targets.protein },
+      carbs: { consumed: totalCarbs, target: targets.carbs },
+      fat: { consumed: totalFat, target: targets.fat },
+      fiber: { consumed: totalFiber, target: targets.fiber },
+    };
+  };
+
+  const nutritionData = calculateNutritionData();
+
+  const renderProgressBar = (consumed: number, target: number, color: string) => {
+    const percentage = Math.min((consumed / target) * 100, 100);
+    return (
+      <div className={styles.progressBarContainer}>
+        <div className={styles.progressBarFill} style={{ width: `${percentage}%`, backgroundColor: color }} />
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <h2 className={styles.greeting}>Today's Nutrition - {selectedDay}</h2>
+      <p className={styles.prompt}>Nutrition data based on your {selectedDay.toLowerCase()} meal plan</p>
+
+      <div className={styles.nutritionTracker}>
+        <div className={styles.nutritionItem}>
+          <div className={styles.nutritionHeader}>
+            <div className={styles.nutritionLabel}>
+              <span className={styles.nutritionIcon}>⚡</span>
+              <span>Calories</span>
+            </div>
+            <span className={styles.nutritionValue}>
+              {nutritionData.calories.consumed} / {nutritionData.calories.target}
+            </span>
+          </div>
+          {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "#f97316")}
+        </div>
+
+        <div className={styles.nutritionItem}>
+          <div className={styles.nutritionHeader}>
+            <div className={styles.nutritionLabel}>
+              <span className={styles.nutritionIcon}>💪</span>
+              <span>Protein</span>
+            </div>
+            <span className={styles.nutritionValue}>
+              {nutritionData.protein.consumed}g / {nutritionData.protein.target}g
+            </span>
+          </div>
+          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#ef4444")}
+        </div>
+
+        <div className={styles.nutritionItem}>
+          <div className={styles.nutritionHeader}>
+            <div className={styles.nutritionLabel}>
+              <span className={styles.nutritionIcon}>🍎</span>
+              <span>Carbohydrates</span>
+            </div>
+            <span className={styles.nutritionValue}>
+              {nutritionData.carbs.consumed}g / {nutritionData.carbs.target}g
+            </span>
+          </div>
+          {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "#22c55e")}
+        </div>
+
+        <div className={styles.nutritionItem}>
+          <div className={styles.nutritionHeader}>
+            <div className={styles.nutritionLabel}>
+              <span className={styles.nutritionIcon}>💧</span>
+              <span>Fat</span>
+            </div>
+            <span className={styles.nutritionValue}>
+              {nutritionData.fat.consumed}g / {nutritionData.fat.target}g
+            </span>
+          </div>
+          {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "#eab308")}
+        </div>
+
+        <div className={styles.nutritionItem}>
+          <div className={styles.nutritionHeader}>
+            <div className={styles.nutritionLabel}>
+              <span className={styles.nutritionIcon}>🌾</span>
+              <span>Fiber</span>
+            </div>
+            <span className={styles.nutritionValue}>
+              {nutritionData.fiber.consumed}g / {nutritionData.fiber.target}g
+            </span>
+          </div>
+          {renderProgressBar(nutritionData.fiber.consumed, nutritionData.fiber.target, "#3b82f6")}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AIAssistantContent() {
+  return (
+    <div>
+      <h2 className={styles.greeting}>AI Assistant</h2>
+      <p className={styles.prompt}>Content for AI nutrition assistant will go here.</p>
+    </div>
+  )
+}
+
+function DashboardContentSwitcher() {
+  const [activeTab, setActiveTab] = useState("meals");
+  const [selectedDay, setSelectedDay] = useState<keyof WeeklyMealPlan>("Monday");
   const [weeklyMealPlan, setWeeklyMealPlan] = useState<WeeklyMealPlan>({
     Monday: {
       breakfast: [
@@ -689,269 +984,14 @@ function PlannerContent() {
       dinner: [],
       snacks: [],
     },
-  })
-
-  const handleMealClick = (meal: any) => {
-    if (meal && meal.recipe) {
-      setSelectedRecipe(meal)
-      setShowRecipeModal(true)
-    }
-  }
-
-  const handleDeleteMeal = (day: string, mealType: string, mealIndex: number) => {
-    const dayKey = day as keyof WeeklyMealPlan
-    const mealTypeKey = mealType as keyof DayMealPlan
-    setWeeklyMealPlan((prev) => ({
-      ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        [mealTypeKey]: prev[dayKey][mealTypeKey].filter((_: Meal, index: number) => index !== mealIndex),
-      },
-    }))
-  }
-
-  const handleAddMeal = (mealType: string) => {
-    console.log(`Add meal to ${mealType}`)
-    // You can implement a modal or form to add meals here
-  }
-
-  const days = Object.keys(weeklyMealPlan) as Array<keyof WeeklyMealPlan>
-  const currentDayIndex = days.indexOf(selectedDay)
-
-  const goToPreviousDay = () => {
-    const prevIndex = currentDayIndex > 0 ? currentDayIndex - 1 : days.length - 1
-    setSelectedDay(days[prevIndex])
-  }
-
-  const goToNextDay = () => {
-    const nextIndex = currentDayIndex < days.length - 1 ? currentDayIndex + 1 : 0
-    setSelectedDay(days[nextIndex])
-  }
-
-  const calculateDailyTotals = () => {
-    const dayPlan = weeklyMealPlan[selectedDay]
-    const totalCalories =
-      dayPlan.breakfast.reduce((sum, meal) => sum + meal.calories, 0) +
-      dayPlan.lunch.reduce((sum, meal) => sum + meal.calories, 0) +
-      dayPlan.dinner.reduce((sum, meal) => sum + meal.calories, 0) +
-      dayPlan.snacks.reduce((sum, snack) => sum + snack.calories, 0)
-
-    const totalCost =
-      dayPlan.breakfast.reduce((sum, meal) => sum + Number.parseFloat(meal.cost.replace("$", "")), 0) +
-      dayPlan.lunch.reduce((sum, meal) => sum + Number.parseFloat(meal.cost.replace("$", "")), 0) +
-      dayPlan.dinner.reduce((sum, meal) => sum + Number.parseFloat(meal.cost.replace("$", "")), 0) +
-      dayPlan.snacks.reduce((sum, snack) => sum + Number.parseFloat(snack.cost.replace("$", "")), 0)
-
-    return { totalCalories, totalCost: totalCost.toFixed(2) }
-  }
-
-  const { totalCalories, totalCost } = calculateDailyTotals()
-
-  return (
-    <div>
-      <div className={styles.plannerHeader}>
-        <div>
-          <h2 className={styles.greeting}>Daily Meal Planner</h2>
-          <p className={styles.prompt}>Click on any meal to view the full recipe</p>
-        </div>
-        <div className={styles.dayNavigation}>
-          <button className={styles.navButton} onClick={goToPreviousDay}>
-            ‹
-          </button>
-          <div className={styles.dayButtons}>
-            {days.map((day) => (
-              <button
-                key={day}
-                className={`${styles.dayButton} ${selectedDay === day ? styles.dayButtonActive : ""}`}
-                onClick={() => setSelectedDay(day)}
-              >
-                {day.slice(0, 3)}
-              </button>
-            ))}
-          </div>
-          <button className={styles.navButton} onClick={goToNextDay}>
-            ›
-          </button>
-        </div>
-      </div>
-
-      <div className={styles.plannerContent}>
-        <PlannerMealCard
-          mealType="breakfast"
-          meals={weeklyMealPlan[selectedDay].breakfast}
-          color="#f97316"
-          label="Breakfast"
-          selectedDay={selectedDay}
-          onMealClick={handleMealClick}
-          onDeleteMeal={handleDeleteMeal}
-          onAddMeal={handleAddMeal}
-        />
-        <PlannerMealCard
-          mealType="lunch"
-          meals={weeklyMealPlan[selectedDay].lunch}
-          color="#22c55e"
-          label="Lunch"
-          selectedDay={selectedDay}
-          onMealClick={handleMealClick}
-          onDeleteMeal={handleDeleteMeal}
-          onAddMeal={handleAddMeal}
-        />
-        <PlannerMealCard
-          mealType="dinner"
-          meals={weeklyMealPlan[selectedDay].dinner}
-          color="#3b82f6"
-          label="Dinner"
-          selectedDay={selectedDay}
-          onMealClick={handleMealClick}
-          onDeleteMeal={handleDeleteMeal}
-          onAddMeal={handleAddMeal}
-        />
-        <PlannerMealCard
-          mealType="snacks"
-          meals={weeklyMealPlan[selectedDay].snacks}
-          color="#a855f7"
-          label="Snacks"
-          selectedDay={selectedDay}
-          onMealClick={handleMealClick}
-          onDeleteMeal={handleDeleteMeal}
-          onAddMeal={handleAddMeal}
-        />
-      </div>
-
-      <div className={styles.plannerFooter}>
-        <div className={styles.dailyTotals}>
-          <span className={styles.totalItem}>
-            <strong>{totalCalories}</strong> total calories
-          </span>
-          <span className={styles.totalItem}>
-            <strong>${totalCost}</strong> daily cost
-          </span>
-        </div>
-        <button className={styles.primaryButton}>🛒 Add to Grocery List</button>
-      </div>
-
-      {showRecipeModal && selectedRecipe && (
-        <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
-      )}
-    </div>
-  )
-}
-
-function NutritionContent() {
-  const nutritionData = {
-    calories: { consumed: 1650, target: 2000 },
-    protein: { consumed: 85, target: 120 },
-    carbs: { consumed: 180, target: 250 },
-    fat: { consumed: 65, target: 78 },
-    fiber: { consumed: 22, target: 25 },
-  }
-
-  const renderProgressBar = (consumed: number, target: number, color: string) => {
-    const percentage = Math.min((consumed / target) * 100, 100)
-    return (
-      <div className={styles.progressBarContainer}>
-        <div className={styles.progressBarFill} style={{ width: `${percentage}%`, backgroundColor: color }} />
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <h2 className={styles.greeting}>Today's Nutrition</h2>
-      <p className={styles.prompt}>Track your daily nutrition goals</p>
-
-      <div className={styles.nutritionTracker}>
-        <div className={styles.nutritionItem}>
-          <div className={styles.nutritionHeader}>
-            <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>⚡</span>
-              <span>Calories</span>
-            </div>
-            <span className={styles.nutritionValue}>
-              {nutritionData.calories.consumed} / {nutritionData.calories.target}
-            </span>
-          </div>
-          {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "#f97316")}
-        </div>
-
-        <div className={styles.nutritionItem}>
-          <div className={styles.nutritionHeader}>
-            <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>💪</span>
-              <span>Protein</span>
-            </div>
-            <span className={styles.nutritionValue}>
-              {nutritionData.protein.consumed}g / {nutritionData.protein.target}g
-            </span>
-          </div>
-          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#ef4444")}
-        </div>
-
-        <div className={styles.nutritionItem}>
-          <div className={styles.nutritionHeader}>
-            <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>🍎</span>
-              <span>Carbohydrates</span>
-            </div>
-            <span className={styles.nutritionValue}>
-              {nutritionData.carbs.consumed}g / {nutritionData.carbs.target}g
-            </span>
-          </div>
-          {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "#22c55e")}
-        </div>
-
-        <div className={styles.nutritionItem}>
-          <div className={styles.nutritionHeader}>
-            <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>💧</span>
-              <span>Fat</span>
-            </div>
-            <span className={styles.nutritionValue}>
-              {nutritionData.fat.consumed}g / {nutritionData.fat.target}g
-            </span>
-          </div>
-          {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "#eab308")}
-        </div>
-
-        <div className={styles.nutritionItem}>
-          <div className={styles.nutritionHeader}>
-            <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>🌾</span>
-              <span>Fiber</span>
-            </div>
-            <span className={styles.nutritionValue}>
-              {nutritionData.fiber.consumed}g / {nutritionData.fiber.target}g
-            </span>
-          </div>
-          {renderProgressBar(nutritionData.fiber.consumed, nutritionData.fiber.target, "#3b82f6")}
-        </div>
-
-        <div className={styles.nutritionActions}>
-          <button className={styles.primaryButton}>+ Log Food</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function AIAssistantContent() {
-  return (
-    <div>
-      <h2 className={styles.greeting}>AI Assistant</h2>
-      <p className={styles.prompt}>Content for AI nutrition assistant will go here.</p>
-    </div>
-  )
-}
-
-function DashboardContentSwitcher() {
-  const [activeTab, setActiveTab] = useState("meals")
+  });
 
   const tabs = [
     { id: "meals", label: "Meals" },
     { id: "planner", label: "Planner" },
     { id: "nutrition", label: "Nutrition" },
     { id: "ai-assistant", label: "AI Assistant" },
-  ]
+  ];
 
   return (
     <div className={styles.contentSwitcher}>
@@ -971,12 +1011,24 @@ function DashboardContentSwitcher() {
       {/* Tab Content */}
       <div className={styles.tabContent}>
         {activeTab === "meals" && <MealContent />}
-        {activeTab === "planner" && <PlannerContent />}
-        {activeTab === "nutrition" && <NutritionContent />}
+        {activeTab === "planner" && (
+          <PlannerContent 
+            selectedDay={selectedDay}
+            setSelectedDay={setSelectedDay}
+            weeklyMealPlan={weeklyMealPlan}
+            setWeeklyMealPlan={setWeeklyMealPlan}
+          />
+        )}
+        {activeTab === "nutrition" && (
+          <NutritionContent 
+            selectedDay={selectedDay} 
+            weeklyMealPlan={weeklyMealPlan} 
+          />
+        )}
         {activeTab === "ai-assistant" && <AIAssistantContent />}
       </div>
     </div>
-  )
+  );
 }
 
 const Dashboard: FC<DashboardProps> = () => {

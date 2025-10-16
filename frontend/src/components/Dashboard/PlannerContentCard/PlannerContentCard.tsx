@@ -1,4 +1,4 @@
-import styles from "../Dashboard/Dashboard.module.css"
+import styles from "../Dashboard.module.css"
 
 interface Meal {
   name: string
