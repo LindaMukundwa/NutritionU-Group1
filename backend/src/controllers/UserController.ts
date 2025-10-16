@@ -232,6 +232,44 @@ export const patchUserMedicalRestrictions = async (req: Request, res: Response) 
 
 // Update goals
 export const patchUserGoals = async (req: Request, res: Response) => {
-    res.status(201).json(req);
+    /*
+    JSON Format
+    {
+        "nutrition-goals": {
+            "goals": "Eat Healthier",
+            "calories": 2000,
+            "protein": 150,
+            "carbs": 250,
+            "fats": 70,
+            "description": "User nutrition and lifestyle goals"
+        }
+    }
+    */
+
+    try {
+        const { id } = req.params;
+        const { nutritionGoals } = req.body;
+
+        console.log(req.body);
+
+        if (!nutritionGoals) {
+            return res.status(400).json({ message: 'Goals are required' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { nutritionGoals },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Error updating user goals:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 
 }

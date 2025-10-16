@@ -26,7 +26,7 @@ router.patch('/:id/cultural-diets', patchUserCulturalDiets);
 router.patch('/:id/medical-restrictions', patchUserMedicalRestrictions);
 
 // Route to update user goald
-router.patch(':id/goals', patchUserGoals);
+router.patch('/:id/goals', patchUserGoals);
 
 
 
