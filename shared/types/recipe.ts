@@ -4,11 +4,12 @@
 export interface Ingredient {
   openFoodFactsId?: string;
   name: string;
-  amount: number;
-  unit: 'grams' | 'kg' | 'ml' | 'liters' | 'cups' | 'tbsp' | 'tsp' | 'pieces' | 'slices';
+  amount: number; // The quantity of the ingredient required for the recipe
+  unit: 
+    | { type: 'metric'; value: 'grams' | 'kg' | 'ml' | 'liters' }
+    | { type: 'imperial'; value: 'pounds' | 'cups' | 'ounces' | 'tbsp' | 'tsp' | 'pieces' | 'slices' };
   category: 'protein' | 'vegetable' | 'fruit' | 'grain' | 'dairy' | 'spice' | 'condiment' | 'other';
-  nutrition: NutritionInfo;
-  estimatedCost: number;    // Cost if we end up deciding to track this as a feature
+  nutritionInfo: NutritionInfo;
 }
 
 export interface InstructionStep {
@@ -44,15 +45,12 @@ export interface Recipe {
   servings: number;
   ingredients: Ingredient[];
   instructions: InstructionStep[];
-  totalNutrition: NutritionInfo;
+  nutritionInfo: NutritionInfo;
   estimatedCostPerServing: number;
   dietaryTags: string[];
   source: 'openai_generated' | 'user_created' | 'imported' | 'curated';
   openaiPrompt?: string;
-  averageRating?: number;
-  ratingCount?: number;
   createdBy?: string;
-  isPublic: boolean;
   nutritionPerServing?: NutritionInfo;
   createdAt: Date;
   updatedAt: Date;
