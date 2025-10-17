@@ -4,6 +4,7 @@ import { Schema, model } from 'mongoose';
 export interface RecipeDocument extends Recipe, Document {}
 
 const RecipeSchema = new Schema<RecipeDocument>({
+    _id: { type: String, required: true },
     title: { type: String, required: true },
     description: { type: String },
     imageUrl: { type: String },
