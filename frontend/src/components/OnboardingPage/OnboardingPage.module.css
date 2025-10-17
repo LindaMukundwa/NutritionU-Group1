@@ -147,6 +147,166 @@ font-weight: 500;
   color: #5c6bcc;         
 }
 
+/* PERSONAL INFORMATION SECTION */
+
+/* Personal info section container */
+.personalInfoSection {
+  margin-top: 0.5rem;       
+}
+
+/* Unit selection section */
+.unitSelection {
+  margin-bottom: 1.5rem;    
+}
+
+/* Unit selection label */
+.unitLabel {
+  font-size: 1rem;          
+  font-weight: 500;         
+  margin-bottom: 0.75rem;   
+  display: block;          
+  color: #555555 !important; 
+}
+
+/* Unit options container */
+.unitOptions {
+  display: flex;            
+  gap: 1rem;              
+}
+
+/* Individual unit card */
+.unitCard {
+  cursor: pointer;          
+  transition: all 0.2s ease; 
+  border: 1px solid #e2e8f0; 
+  flex: 1;                  
+}
+
+/* Hover state for unit cards */
+.unitCard:hover {
+  border-color: #5c6bcc;   
+}
+
+/* Selected state for unit cards */
+.unitCard.selected {
+  border-color: #5c6bcc;   
+  background: rgba(92, 107, 204, 0.05); 
+}
+
+/* Content inside unit cards */
+.unitCardContent {
+  padding: 0.75rem;         
+}
+
+/* Individual unit option layout */
+.unitOption {
+  display: flex;           
+  align-items: center;   
+  gap: 0.75rem;           
+  color: #555555 !important; 
+}
+
+/* Unit option text */
+.unitOption span {
+  color: #555555 !important; 
+}
+
+/* Row of input fields (age, height, weight) */
+.inputRow {
+  display: grid;            
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 2.5rem;              
+  margin-bottom: 1.5rem;   
+  width: 100%;              
+  box-sizing: border-box;   
+}
+
+/* Individual input group */
+.inputGroup {
+  display: flex;           
+  flex-direction: column;  
+  width: 100%;             
+  box-sizing: border-box;  
+}
+
+/* Number input fields */
+.numberInput {
+  width: 100%;             
+  padding: 0.75rem;        
+  border: 1px solid #e2e8f0; 
+  border-radius: 8px;       
+  background: white;        
+  font-size: 1rem;          
+  margin-top: 0.5rem;       
+  color: #555555;           
+  text-align: center;       
+  box-sizing: border-box;   
+  max-width: 100%;         
+}
+
+/* Focus state for number inputs */
+.numberInput:focus {
+  outline: 2px solid #5c6bcc; 
+  outline-offset: 2px;      
+}
+
+/* Activity level section */
+.activityLevelSection {
+  margin-top: 1rem;         
+}
+
+/* Activity level label */
+.activityLevelLabel {
+  font-size: 1rem;          
+  font-weight: 500;         
+  margin-bottom: 0.75rem;   
+  display: block;          
+  color: #555555 !important; 
+}
+
+/* Activity level options container */
+.activityLevelOptions {
+  display: grid;            
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 0.5rem;            
+}
+
+/* Individual activity level card */
+.activityLevelCard {
+  cursor: pointer;          
+  transition: all 0.2s ease; 
+  border: 1px solid #e2e8f0; 
+}
+
+/* Hover state for activity level cards */
+.activityLevelCard:hover {
+  border-color: #5c6bcc;   
+}
+
+/* Selected state for activity level cards */
+.activityLevelCard.selected {
+  border-color: #5c6bcc;   
+  background: rgba(92, 107, 204, 0.05); 
+}
+
+/* Content inside activity level cards */
+.activityLevelCardContent {
+  padding: 0.75rem;         
+}
+
+/* Individual activity level option layout */
+.activityLevelOption {
+  display: flex;           
+  align-items: center;   
+  gap: 0.75rem;           
+  color: #555555 !important; 
+}
+
+/* Activity level option text */
+.activityLevelOption span {
+  color: #555555 !important; 
+}
+
 /* COOKING EXPERIENCE SECTION */
 
 /* Cooking section container */

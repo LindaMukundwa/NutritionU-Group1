@@ -52,7 +52,8 @@ export interface User {
   age?: number;
   height?: number;
   weight?: number;
-  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
+  units: 'imperial' | 'metric';
+  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active';
   dietaryRestrictions: DietaryRestrictions;
   nutritionGoals: NutritionGoals;
   preferences: UserPreferences;
