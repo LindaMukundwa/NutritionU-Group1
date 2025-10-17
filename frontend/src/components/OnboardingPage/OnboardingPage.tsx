@@ -9,6 +9,11 @@ import styles from './OnboardingPage.module.css';
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    age: undefined as number | undefined,
+    height: undefined as number | undefined,
+    weight: undefined as number | undefined,
+    units: 'imperial' as 'imperial' | 'metric',
+    activityLevel: '' as 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | '',
     budget: 100,
     cookingLevel: '',
     lifestyleDiets: [] as string[],
@@ -18,9 +23,15 @@ export default function OnboardingPage() {
     mealPrep: '',
   });
 
-  const totalSteps = 4;
+  const totalSteps = 5;
   const progress = (step / totalSteps) * 100;
 
+  const activityLevels = [
+    { value: 'sedentary', label: 'Sedentary - Little to no exercise' },
+    { value: 'lightly_active', label: 'Lightly Active - excercise 1-3 days/week' },
+    { value: 'moderately_active', label: 'Moderately Active - excercise 3-5 days/week' },
+    { value: 'very_active', label: 'Very Active - excercise 6-7 days/week' }
+  ];
   const lifestyleDiets = ["Vegetarian", "Vegan", "Pescatarian", "Flexitarian", "Mediterranean", "Paleo", "Keto", "Whole30"];
   const medicalRestrictions = ["Gluten", "Dairy", "Nuts", "Peanuts", "Soy", "Eggs", "Shellfish", "Wheat", "Sesame", "Corn", "Sulfites", "FODMAP", "Histamine", "Sodium (Low)", "Sugar (Low)"];
   const culturalDiets = ["Halal", "Kosher", "Jain", "Hindu (No Beef)", "Buddhist (Vegetarian)"];
@@ -61,8 +72,106 @@ export default function OnboardingPage() {
 
         <Card>
           <CardContent className={styles.cardContent}>
-            {/* Step 1: Cooking Experience */}
+            {/* Step 1: Personal Information */}
             {step === 1 && (
+              <div className={styles.stepContent}>
+                <div className={styles.stepHeader}>
+                  <CardTitle className={styles.stepTitle}>Tell us about yourself</CardTitle>
+                  <CardDescription>This helps us determine your nutritional needs</CardDescription>
+                </div>
+
+                <div className={styles.personalInfoSection}>
+                  {/* Unit Selection */}
+                  <div className={styles.unitSelection}>
+                    <Label className={styles.unitLabel}>Units</Label>
+                    <div className={styles.unitOptions}>
+                      <Card
+                        className={`${styles.unitCard} ${formData.units === 'imperial' ? styles.selected : ''}`}
+                        onClick={() => setFormData({ ...formData, units: 'imperial' })}
+                      >
+                        <CardContent className={styles.unitCardContent}>
+                          <div className={styles.unitOption}>
+                            <div className={`${styles.radio} ${formData.units === 'imperial' ? styles.radioSelected : ''}`} />
+                            <span>Imperial (ft/in, lbs)</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card
+                        className={`${styles.unitCard} ${formData.units === 'metric' ? styles.selected : ''}`}
+                        onClick={() => setFormData({ ...formData, units: 'metric' })}
+                      >
+                        <CardContent className={styles.unitCardContent}>
+                          <div className={styles.unitOption}>
+                            <div className={`${styles.radio} ${formData.units === 'metric' ? styles.radioSelected : ''}`} />
+                            <span>Metric (cm, kg)</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  <div className={styles.inputRow}>
+                    <div className={styles.inputGroup}>
+                      <Label>Age (years)</Label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="120"
+                        value={formData.age || ''}
+                        onChange={(e) => setFormData({ ...formData, age: e.target.value ? parseInt(e.target.value) : undefined })}
+                        className={styles.numberInput}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <Label>Height ({formData.units === 'imperial' ? 'ft' : 'cm'})</Label>
+                      <input
+                        type="number"
+                        min={formData.units === 'imperial' ? '3' : '50'}
+                        max={formData.units === 'imperial' ? '8' : '300'}
+                        step={formData.units === 'imperial' ? '0.1' : '1'}
+                        value={formData.height || ''}
+                        onChange={(e) => setFormData({ ...formData, height: e.target.value ? parseFloat(e.target.value) : undefined })}
+                        className={styles.numberInput}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <Label>Weight ({formData.units === 'imperial' ? 'lbs' : 'kg'})</Label>
+                      <input
+                        type="number"
+                        min={formData.units === 'imperial' ? '50' : '20'}
+                        max={formData.units === 'imperial' ? '1000' : '500'}
+                        value={formData.weight || ''}
+                        onChange={(e) => setFormData({ ...formData, weight: e.target.value ? parseInt(e.target.value) : undefined })}
+                        className={styles.numberInput}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.activityLevelSection}>
+                    <Label className={styles.activityLevelLabel}>Activity Level</Label>
+                    <div className={styles.activityLevelOptions}>
+                      {activityLevels.map((option) => (
+                        <Card
+                          key={option.value}
+                          className={`${styles.activityLevelCard} ${formData.activityLevel === option.value ? styles.selected : ''}`}
+                          onClick={() => setFormData({ ...formData, activityLevel: option.value as any })}
+                        >
+                          <CardContent className={styles.activityLevelCardContent}>
+                            <div className={styles.activityLevelOption}>
+                              <div className={`${styles.radio} ${formData.activityLevel === option.value ? styles.radioSelected : ''}`} />
+                              <span>{option.label}</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Cooking Experience */}
+            {step === 2 && (
               <div className={styles.stepContent}>
                 <div className={styles.stepHeader}>
                   <CardTitle className={styles.stepTitle}>What's your cooking experience?</CardTitle>
@@ -105,8 +214,8 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* Step 2: Budget */}
-            {step === 2 && (
+            {/* Step 3: Budget */}
+            {step === 3 && (
               <div className={styles.stepContent}>
                 <div className={styles.stepHeader}>
                   <CardTitle className={styles.stepTitle}>What's your weekly food budget?</CardTitle>
@@ -135,8 +244,8 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* Step 3: Dietary Preferences */}
-            {step === 3 && (
+            {/* Step 4: Dietary Preferences */}
+            {step === 4 && (
               <div className={styles.stepContent}>
                 <div className={styles.stepHeader}>
                   <CardTitle className={styles.stepTitle}>Dietary preferences & restrictions</CardTitle>
@@ -204,8 +313,8 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* Step 4: Goals */}
-            {step === 4 && (
+            {/* Step 5: Goals */}
+            {step === 5 && (
               <div className={styles.stepContent}>
                 <div className={styles.stepHeader}>
                   <CardTitle className={styles.stepTitle}>What are your goals?</CardTitle>

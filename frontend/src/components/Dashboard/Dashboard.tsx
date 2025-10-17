@@ -1,14 +1,15 @@
 import React, { type FC, useState } from "react"
 import styles from "./Dashboard.module.css"
+import AssistantContent from "./AssistantContent/AssistantContent"
 import MealContentCard from "./MealContentCard/MealContentCard"
 import SearchBar from "./SearchBar/SearchBar"
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
 
 interface SummaryCardData {
-  title: string
-  value: string | number
-  subtext: string
-  icon: string
+  title: string;
+  value: string | number;
+  subtext: string;
+  icon: string; 
   progressBar?: {
     current: number
     total: number
@@ -814,8 +815,7 @@ function NutritionContent({ selectedDay, weeklyMealPlan }: { selectedDay: keyof 
 function AIAssistantContent() {
   return (
     <div>
-      <h2 className={styles.greeting}>AI Assistant</h2>
-      <p className={styles.prompt}>Content for AI nutrition assistant will go here.</p>
+      <AssistantContent />
     </div>
   )
 }
