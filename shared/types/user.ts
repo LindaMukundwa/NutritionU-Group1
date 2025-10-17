@@ -13,9 +13,10 @@ export interface User {
   age?: number;
   height?: number;
   weight?: number;
+  units: 'imperial' | 'metric';
   bmi?: number;
-  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
-  medicalRestrictions: MedicalRestrictions; 
+  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active';
+  medicalRestrictions: MedicalRestrictions;
   nutritionGoals: NutritionGoals;
   lifestyleDiets: LifestyleDiets;
   culturalDiets: CulturalDiets;
