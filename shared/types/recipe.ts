@@ -46,7 +46,7 @@ export interface Recipe {
   nutritionInfo: NutritionInfo;
   estimatedCostPerServing: number;
   dietaryTags: string[];
-  source: 'openai_generated' | 'user_created' | 'imported' | 'curated';
+  source: 'openai_generated' | 'user_created';
   openaiPrompt?: string;
   createdBy?: string;
   nutritionPerServing?: NutritionInfo;
