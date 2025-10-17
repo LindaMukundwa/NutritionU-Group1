@@ -14,9 +14,7 @@ export interface Ingredient {
 
 export interface InstructionStep {
   stepNumber: number;
-  instruction: string;
-  estimatedTime?: number;
-  temperature?: string;
+  instruction: string; // Instruction text (ie. what to do, how to do it, temperature, time, etc)
   equipment: string[];
 }
 
