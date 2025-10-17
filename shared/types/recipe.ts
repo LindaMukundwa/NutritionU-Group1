@@ -49,8 +49,8 @@ export interface Recipe {
   dietaryTags: string[];
   source: 'openai_generated' | 'user_created' | 'imported' | 'curated';
   openaiPrompt?: string;
-  averageRating: number;
-  ratingCount: number;
+  averageRating?: number;
+  ratingCount?: number;
   createdBy?: string;
   isPublic: boolean;
   nutritionPerServing?: NutritionInfo;
