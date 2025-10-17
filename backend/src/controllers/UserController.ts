@@ -16,6 +16,7 @@ export const createUser = async (req: Request, res: Response) => {
             "age": 30,
             "height": 180,
             "weight": 75,
+            "units": "metric",
             "activityLevel": "moderately_active",
             "bmi": 23.1,
             "medicalRestrictions": {
