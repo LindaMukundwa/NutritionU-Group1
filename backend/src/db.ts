@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config(); 
 
+const MONGODB_URI = "mongodb+srv://jayden_melendez:Julian4162007*@nutritionudb.tnzxzwt.mongodb.net/"
 
 if (!MONGODB_URI) {
   console.error('❌ MONGODB_URI environment variable is not set.');
