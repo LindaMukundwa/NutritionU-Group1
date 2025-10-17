@@ -58,6 +58,7 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        {/* Keep the header as it was */}
         <div className={styles.modalHeader}>
           <div>
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
@@ -73,27 +74,53 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
         </div>
 
         <div className={styles.modalBody}>
-          {/* Nutrition Info */}
-          <div className={styles.nutritionGrid}>
-            <div className={styles.nutritionItem}>
-              <p className={styles.nutritionValue}>{recipe.recipe.nutrition.protein}g</p>
-              <p className={styles.nutritionLabel}>Protein</p>
+          {/* FIXED NUTRITION GRID - just change this part */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(4, 1fr)', 
+            gap: '16px', 
+            padding: '16px', 
+            backgroundColor: '#f8fafc',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            marginBottom: '24px'
+          }}>
+            <div style={{ textAlign: 'center', padding: '8px' }}>
+              <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                {recipe.recipe.nutrition.protein}g
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                Protein
+              </p>
             </div>
-            <div className={styles.nutritionItem}>
-              <p className={styles.nutritionValue}>{recipe.recipe.nutrition.carbs}g</p>
-              <p className={styles.nutritionLabel}>Carbs</p>
+            <div style={{ textAlign: 'center', padding: '8px' }}>
+              <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                {recipe.recipe.nutrition.carbs}g
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                Carbs
+              </p>
             </div>
-            <div className={styles.nutritionItem}>
-              <p className={styles.nutritionValue}>{recipe.recipe.nutrition.fat}g</p>
-              <p className={styles.nutritionLabel}>Fat</p>
+            <div style={{ textAlign: 'center', padding: '8px' }}>
+              <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                {recipe.recipe.nutrition.fat}g
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                Fat
+              </p>
             </div>
-            <div className={styles.nutritionItem}>
-              <p className={styles.nutritionValue}>{recipe.recipe.nutrition.fiber}g</p>
-              <p className={styles.nutritionLabel}>Fiber</p>
+            <div style={{ textAlign: 'center', padding: '8px' }}>
+              <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                {recipe.recipe.nutrition.fiber}g
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                Fiber
+              </p>
             </div>
           </div>
+          {/* END OF FIXED NUTRITION GRID */}
 
-          {/* Ingredients */}
+          {/* Keep the rest exactly as it was */}
           <div className={styles.recipeSection}>
             <h3 className={styles.sectionTitle}>Ingredients</h3>
             <ul className={styles.ingredientsList}>
@@ -106,7 +133,6 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
             </ul>
           </div>
 
-          {/* Instructions */}
           <div className={styles.recipeSection}>
             <h3 className={styles.sectionTitle}>Instructions</h3>
             <ol className={styles.instructionsList}>
@@ -119,7 +145,6 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
             </ol>
           </div>
 
-          {/* Actions */}
           <div className={styles.modalActions}>
             <button className={styles.primaryButton}>🛒 Add to Grocery List</button>
             <button className={styles.secondaryButton}>✏️ Edit Recipe</button>
