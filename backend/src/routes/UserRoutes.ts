@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { createUser, getUser, deleteUser, patchUserBudget, patchUserLifestyleDiets, patchUserCulturalDiets, patchUserMedicalRestrictions, patchUserGoals, postUserRecipe, getUserRecipe, deleteUserRecipe } from '../controllers/UserController.ts';
+import { createUser, getUser, deleteUser, patchUserBudget, patchUserLifestyleDiets, patchUserCulturalDiets, patchUserMedicalRestrictions, patchUserGoals, postUserRecipe, getUserRecipes, deleteUserRecipe } from '../controllers/UserController.ts';
 
 const router = Router();
 
@@ -32,7 +32,7 @@ router.patch('/:id/goals', patchUserGoals);
 router.post('/:id/recipes', postUserRecipe);
 
 // Route to get a recipes owned by a user
-router.get('/:id/recipes', getUserRecipe);
+router.get('/:id/recipes', getUserRecipes);
 
 // Route to delete a recipe owned by a user 
 router.delete('/:id/recipes/:recipeId', deleteUserRecipe)

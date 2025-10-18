@@ -494,7 +494,7 @@ export const postUserRecipe = async (req: Request, res: Response) => {
 }
 
 // Get all user recipes
-export const getUserRecipe = async (req: Request, res: Response) => {
+export const getUserRecipes = async (req: Request, res: Response) => {
     /* 
     JSON Returned:
         [
