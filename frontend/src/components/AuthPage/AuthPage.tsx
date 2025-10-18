@@ -24,8 +24,8 @@ const AuthPage: React.FC = () => {
       if (!result.success) {
         setError(result.error);
       } else {
-        // Navigate to dashboard on successful auth
-        navigate('/dashboard');
+        // Navigate to onboarding on successful auth
+        navigate('/onboarding');
       }
     } catch (err: any) {
       setError('An unexpected error occurred. Please try again.');

@@ -1,0 +1,511 @@
+/* MAIN CONTAINER & LAYOUT */
+
+/* Main page container - white background */
+.container {
+  background: #ffffff;       
+  padding: 0;
+  /* Override body's flex centering for natural height */
+  align-self: flex-start;
+  width: 100%;
+}
+
+/* Content wrapper - centers content with max width */
+.content {
+  width: 100%;              
+  max-width: 1400px;        
+  margin: 0 auto;          
+  padding: 1rem;           
+  background: #ffffff;     
+}
+/* HEADER SECTION */
+
+/* Main header container - centered with compact spacing */
+.header {
+  text-align: center;       
+  margin-bottom: 1rem;     
+  padding: 0.5rem 0;       
+}
+
+/* Main page title - large, bold, dark gray */
+.title {
+  font-size: 1.75rem;      
+  font-weight: 700;        
+  color: #555555;          
+  margin: 0 0 0.5rem 0;    /* Small margin below title */
+}
+
+/* Subtitle text - smaller, slightly transparent */
+.subtitle {
+  color: #555555;          
+  margin: 0;               
+  font-size: 1rem;        
+  opacity: 0.8;           
+}
+
+/* PROGRESS BAR SECTION */
+
+/* Progress container - light gray background with border */
+.progressContainer {
+  margin-bottom: 1rem;      
+  background: #f8fafc;     
+  padding: 0.75rem;           
+  border-radius: 8px;      
+  border: 1px solid #e2e8f0; 
+}
+
+/* Progress labels - step counter and percentage */
+.progressLabels {
+  display: flex;            
+  justify-content: space-between; 
+  font-size: 0.875rem;     
+  color: #555555;          
+  margin-bottom: 0.5rem;   
+font-weight: 500;        
+}
+
+/* MAIN CARD & STEP CONTENT */
+
+/* Main content card - white background with shadow */
+.cardContent {
+  padding: 1.5rem;         
+  background: #ffffff;     
+  border: 1px solid #e2e8f0; 
+  border-radius: 12px;     
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+}
+
+/* Step content area - natural height based on content */
+
+/* Step header - centered title for each step */
+.stepHeader {
+  text-align: center;       
+  margin-bottom: 1rem;     
+}
+
+/* Step title - large, bold text for each step */
+.stepTitle {
+  font-size: 1.75rem;      
+  margin-bottom: 0.5rem;   
+}
+
+/* BUDGET SECTION */
+
+/* Budget section container */
+.budgetSection {
+  margin-top: 0.5rem;       
+}
+
+/* Slider container - holds the range slider */
+.sliderContainer {
+  margin-top: 1rem;         
+}
+
+/* Range slider - custom styled for budget selection */
+.slider {
+  width: 100%;              
+  height: 8px;              
+  border-radius: 4px;       
+  background: #f1f5f9;     
+  outline: none;            
+  -webkit-appearance: none; 
+  appearance: none;         
+}
+
+/* Slider thumb for WebKit browsers (Chrome, Safari) */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; 
+  appearance: none;         
+  width: 20px;             
+  height: 20px;            
+  border-radius: 50%;      
+  background: #5c6bcc;     
+  cursor: pointer;         
+}
+
+/* Slider thumb for Firefox */
+.slider::-moz-range-thumb {
+  width: 20px;             
+  height: 20px;            
+  border-radius: 50%;      
+  background: #5c6bcc;     
+  cursor: pointer;         
+  border: none;            
+}
+
+/* Slider labels - min, current, max values */
+.sliderLabels {
+  display: flex;            
+  justify-content: space-between; 
+  font-size: 0.875rem;     
+  color: #555555;          
+  margin-top: 0.5rem;      
+}
+
+/* Current value - highlighted in purple */
+.currentValue {
+  font-weight: 600;        
+  color: #5c6bcc;         
+}
+
+/* PERSONAL INFORMATION SECTION */
+
+/* Personal info section container */
+.personalInfoSection {
+  margin-top: 0.5rem;       
+}
+
+/* Unit selection section */
+.unitSelection {
+  margin-bottom: 1.5rem;    
+}
+
+/* Unit selection label */
+.unitLabel {
+  font-size: 1rem;          
+  font-weight: 500;         
+  margin-bottom: 0.75rem;   
+  display: block;          
+  color: #555555 !important; 
+}
+
+/* Unit options container */
+.unitOptions {
+  display: flex;            
+  gap: 1rem;              
+}
+
+/* Individual unit card */
+.unitCard {
+  cursor: pointer;          
+  transition: all 0.2s ease; 
+  border: 1px solid #e2e8f0; 
+  flex: 1;                  
+}
+
+/* Hover state for unit cards */
+.unitCard:hover {
+  border-color: #5c6bcc;   
+}
+
+/* Selected state for unit cards */
+.unitCard.selected {
+  border-color: #5c6bcc;   
+  background: rgba(92, 107, 204, 0.05); 
+}
+
+/* Content inside unit cards */
+.unitCardContent {
+  padding: 0.75rem;         
+}
+
+/* Individual unit option layout */
+.unitOption {
+  display: flex;           
+  align-items: center;   
+  gap: 0.75rem;           
+  color: #555555 !important; 
+}
+
+/* Unit option text */
+.unitOption span {
+  color: #555555 !important; 
+}
+
+/* Row of input fields (age, height, weight) */
+.inputRow {
+  display: grid;            
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 2.5rem;              
+  margin-bottom: 1.5rem;   
+  width: 100%;              
+  box-sizing: border-box;   
+}
+
+/* Individual input group */
+.inputGroup {
+  display: flex;           
+  flex-direction: column;  
+  width: 100%;             
+  box-sizing: border-box;  
+}
+
+/* Number input fields */
+.numberInput {
+  width: 100%;             
+  padding: 0.75rem;        
+  border: 1px solid #e2e8f0; 
+  border-radius: 8px;       
+  background: white;        
+  font-size: 1rem;          
+  margin-top: 0.5rem;       
+  color: #555555;           
+  text-align: center;       
+  box-sizing: border-box;   
+  max-width: 100%;         
+}
+
+/* Focus state for number inputs */
+.numberInput:focus {
+  outline: 2px solid #5c6bcc; 
+  outline-offset: 2px;      
+}
+
+/* Activity level section */
+.activityLevelSection {
+  margin-top: 1rem;         
+}
+
+/* Activity level label */
+.activityLevelLabel {
+  font-size: 1rem;          
+  font-weight: 500;         
+  margin-bottom: 0.75rem;   
+  display: block;          
+  color: #555555 !important; 
+}
+
+/* Activity level options container */
+.activityLevelOptions {
+  display: grid;            
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 0.5rem;            
+}
+
+/* Individual activity level card */
+.activityLevelCard {
+  cursor: pointer;          
+  transition: all 0.2s ease; 
+  border: 1px solid #e2e8f0; 
+}
+
+/* Hover state for activity level cards */
+.activityLevelCard:hover {
+  border-color: #5c6bcc;   
+}
+
+/* Selected state for activity level cards */
+.activityLevelCard.selected {
+  border-color: #5c6bcc;   
+  background: rgba(92, 107, 204, 0.05); 
+}
+
+/* Content inside activity level cards */
+.activityLevelCardContent {
+  padding: 0.75rem;         
+}
+
+/* Individual activity level option layout */
+.activityLevelOption {
+  display: flex;           
+  align-items: center;   
+  gap: 0.75rem;           
+  color: #555555 !important; 
+}
+
+/* Activity level option text */
+.activityLevelOption span {
+  color: #555555 !important; 
+}
+
+/* COOKING EXPERIENCE SECTION */
+
+/* Cooking section container */
+.cookingSection {
+  margin-top: 0.5rem;       
+}
+
+/* Dropdown select for cooking level */
+.select {
+  width: 100%;              
+  padding: 0.75rem;         
+  border: 1px solid #e2e8f0; 
+  border-radius: 8px;       
+  background: white;        
+  font-size: 1rem;          
+  margin-top: 0.5rem;       
+  color: #555555 !important; 
+}
+
+/* Select options text color */
+.select option {
+  color: #555555;          
+  background: white;        
+}
+
+/* Focus state for select dropdown */
+.select:focus {
+  outline: 2px solid #5c6bcc; 
+  outline-offset: 2px;      
+}
+
+/* Meal prep section - radio button options */
+.mealPrepSection {
+  margin-top: 0.75rem;      
+}
+
+/* Meal prep label */
+.mealPrepLabel {
+  font-size: 1rem;          
+  font-weight: 500;         
+  margin-bottom: 0.75rem;   
+  display: block;          
+  color: #555555 !important; 
+}
+
+/* Grid of meal prep options */
+.mealPrepOptions {
+  display: grid;            
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 0.5rem;            
+}
+
+/* Individual meal prep option card */
+.mealPrepCard {
+  cursor: pointer;          
+  transition: all 0.2s ease; 
+  border: 1px solid #e2e8f0; 
+}
+
+/* Hover state for meal prep cards */
+.mealPrepCard:hover {
+  border-color: #5c6bcc;   
+}
+
+/* Selected state for meal prep cards */
+.mealPrepCard.selected {
+  border-color: #5c6bcc;   
+  background: rgba(92, 107, 204, 0.05); 
+}
+
+/* Content inside meal prep cards */
+.mealPrepCardContent {
+  padding: 0.75rem;         
+}
+
+/* Individual meal prep option layout */
+.mealPrepOption {
+  display: flex;           
+  align-items: center;   
+  gap: 0.75rem;           
+  color: #555555 !important; 
+}
+
+/* Meal prep option text */
+.mealPrepOption span {
+  color: #555555 !important; 
+}
+
+/* Custom radio button */
+.radio {
+  width: 16px;            
+  height: 16px;            
+  border-radius: 50%;      
+  border: 2px solid #e2e8f0; 
+  transition: all 0.2s ease; 
+}
+
+/* Selected radio button */
+.radioSelected {
+  border-color: #5c6bcc;   
+  background: #5c6bcc;     
+}
+
+/* DIETARY PREFERENCES SECTION */
+
+/* Dietary section container */
+.dietarySection {
+  margin-top: 0.5rem;       
+}
+
+/* Individual dietary group (restrictions, allergies) */
+.dietaryGroup {
+  margin-bottom: 1rem;      
+}
+
+/* Dietary group label */
+.dietaryLabel {
+  font-size: 1rem;          
+  font-weight: 500;         
+  margin-bottom: 0.75rem;   
+  display: block;          
+  color: #555555 !important; 
+}
+
+/* Container for dietary badges */
+.badgeContainer {
+  display: flex;            
+  flex-wrap: wrap;          
+  gap: 0.5rem;             
+}
+
+/* GOALS SECTION */
+
+/* Goals section container */
+.goalsSection {
+  margin-top: 0.5rem;       
+}
+
+/* Completion card - final step message */
+.completionCard {
+  background: #f8fafc;     
+  border: 2px dashed #e2e8f0; 
+  margin-top: 1rem;         
+}
+
+/* Content inside completion card */
+.completionContent {
+  padding: 1.5rem;         
+  text-align: center;      
+}
+
+/* Completion title */
+.completionTitle {
+  font-size: 1.125rem;     
+  font-weight: 600;        
+  margin: 0 0 0.5rem 0;    
+  color: #555555;          
+}
+
+/* Completion description text */
+.completionText {
+  font-size: 0.875rem;     
+  color: #555555;          
+  margin: 0;               
+  opacity: 0.8;            
+}
+
+/* NAVIGATION BUTTONS */
+
+/* Navigation container - holds back/next buttons */
+.navigation {
+  display: flex;            
+  justify-content: space-between; 
+  margin-top: 1rem;         
+}
+
+/* Back button - secondary style */
+.backButton {
+  background: transparent !important;  
+  color: #555555 !important;          
+  border: 1px solid #e2e8f0 !important; 
+}
+
+/* Back button hover state */
+.backButton:hover {
+  background: #f8fafc !important;     
+  border-color: #6ab3a7 !important;   
+  color: #555555 !important;         
+}
+
+/* Next button - primary style */
+.nextButton {
+  background: #5c6bcc !important;    
+  color: white !important;            
+  border: none !important;            
+}
+
+/* Next button hover state */
+.nextButton:hover {
+  background: #4a5bb8 !important;    
+  color: white !important;            
+}

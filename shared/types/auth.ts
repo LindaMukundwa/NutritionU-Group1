@@ -18,4 +18,6 @@ export interface AuthContextType {
   signIn: (formData: AuthFormData) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<boolean>;
+  // Fetch latest user from backend and update context
+  refreshUser?: () => Promise<null | import('./user').User>;
 }

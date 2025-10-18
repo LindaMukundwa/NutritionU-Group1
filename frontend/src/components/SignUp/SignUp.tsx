@@ -1,12 +1,14 @@
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { GoogleAuthProvider } from "firebase/auth";
-import { auth } from "../../config/firebase"
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../config/firebase";
 import { useState } from "react";
 import "./SignUp.css";
+import { AuthService } from "../../../services/firebaseAuth";
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const [email, SetEmail] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const SignupWithEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,20 +37,17 @@ const Signup = () => {
 
   const SignUpWithGoogle = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-     
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      if (!credential) {
-        console.error("Error in user Credential")
-        return
+      const resp = await AuthService.signInWithGoogle();
+      if (resp.success && resp.user) {
+        // navigate to onboarding (new users should complete onboarding first)
+        navigate('/onboarding');
+      } else if (!resp.success && !resp.error) {
+        // redirect flow started (signInWithRedirect) — nothing more to do here
+        console.log('Redirecting to Google sign-in...');
+      } else {
+        console.error('Google sign-up error', resp.error);
       }
-      const token = credential.accessToken;
-      const user = result.user;
-      console.log(user, token)
-       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+    } catch (error) {
       console.error('Google sign-up error', error);
     }
   };

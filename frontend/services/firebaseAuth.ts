@@ -3,14 +3,17 @@ import {
   signInWithEmailAndPassword, 
   signOut,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signInWithRedirect
 } from 'firebase/auth';
 import { auth } from '../src/config/firebase'; // Your firebase config
 import type { AuthFormData, AuthResponse } from '../../shared/types/auth';
-import type { User, DietaryRestrictions, NutritionGoals, UserPreferences } from '../../shared/types/user'; // Adjust path as needed
+import type { User } from '../../shared/types/user'; // Adjust path as needed
 
 // Default values for new users
-const defaultDietaryRestrictions: DietaryRestrictions = {
+const defaultDietaryRestrictions = {
   vegetarian: false,
   vegan: false,
   glutenFree: false,
@@ -20,28 +23,86 @@ const defaultDietaryRestrictions: DietaryRestrictions = {
   custom: []
 };
 
-const defaultNutritionGoals: NutritionGoals = {
-  dailyCalories: 2000,
+const defaultNutritionGoals = {
+  goals: 'None',
+  calories: 2000,
   protein: 50,
   carbs: 250,
-  fat: 70,
-  fiber: 25,
-  sugar: 50,
-  sodium: 2300
+  fats: 70,
+  description: 'Default goals'
 };
 
-const defaultUserPreferences: UserPreferences = {
+const defaultUserPreferences = {
   cuisineTypes: [],
   cookingTime: 'moderate',
   skillLevel: 'beginner',
-  budgetRange: {
-    min: 0,
-    max: 100
-  },
+  budgetRange: { min: 0, max: 100 },
   servingSize: 2
 };
 
 export class AuthService {
+  /**
+   * Sign in with Google using popup when possible.
+   * If the popup is blocked or cancelled, fall back to redirect-based sign-in.
+   * Note: redirect flow will navigate away and the result must be handled on app load
+   * (e.g. with getRedirectResult or by checking auth state in AuthContext).
+   */
+  static async signInWithGoogle(): Promise<AuthResponse> {
+    try {
+      const provider = new GoogleAuthProvider();
+      // Try popup first (better UX). Many browsers block popups unless triggered
+      // directly by a user gesture; if blocked, catch the error and redirect.
+      const result = await signInWithPopup(auth, provider);
+
+      const firebaseUser = result.user;
+      if (!firebaseUser) {
+        return { user: null, error: 'No user returned from Google sign-in', success: false };
+      }
+
+      // Try to fetch backend user or create fallback like signIn() does
+      let user = await this.getUserFromBackend(firebaseUser.uid);
+      if (!user) {
+        user = {
+          _id: '',
+          firebaseUid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          displayName: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : ''),
+          photoURL: firebaseUser.photoURL || undefined,
+          activityLevel: 'moderately_active',
+          dietaryRestrictions: defaultDietaryRestrictions,
+          nutritionGoals: defaultNutritionGoals,
+          preferences: defaultUserPreferences,
+          onboardingCompleted: false,
+          lastLogin: new Date(),
+          planGenerationCount: 0,
+          mealHistory: [],
+          favoriteRecipes: [],
+          createdAt: new Date(),
+          updatedAt: new Date()
+        } as unknown as User;
+
+        // Optionally save to backend; this is a no-op until implemented
+        await this.saveUserToBackend(user);
+      }
+
+      return { user, error: null, success: true };
+    } catch (err: any) {
+      // Popup blocked or cancelled — fall back to redirect flow
+      if (err?.code === 'auth/popup-blocked' || err?.code === 'auth/cancelled-popup-request') {
+        try {
+          const provider = new GoogleAuthProvider();
+          await signInWithRedirect(auth, provider);
+          // Redirecting - caller should handle that the page will reload/navigate.
+          return { user: null, error: null, success: false };
+        } catch (redirectErr: any) {
+          return { user: null, error: redirectErr?.message || String(redirectErr), success: false };
+        }
+      }
+
+      return { user: null, error: err?.message || String(err), success: false };
+    }
+  }
+
   static async signUp(formData: AuthFormData): Promise<AuthResponse> {
     try {
       const { user: firebaseUser } = await createUserWithEmailAndPassword(
@@ -57,14 +118,15 @@ export class AuthService {
         });
       }
 
-      // Create user object matching your User interface
-      const user: User = {
+      // Create user object matching our User interface
+      const user = {
         _id: '', // This will be set by your backend
         firebaseUid: firebaseUser.uid,
         email: firebaseUser.email!,
         displayName: formData.displayName || firebaseUser.email!.split('@')[0],
         photoURL: firebaseUser.photoURL || undefined,
         activityLevel: 'moderately_active',
+        // note: other fields (units, medicalRestrictions etc) will be filled during onboarding
         dietaryRestrictions: defaultDietaryRestrictions,
         nutritionGoals: defaultNutritionGoals,
         preferences: defaultUserPreferences,
@@ -75,9 +137,9 @@ export class AuthService {
         favoriteRecipes: [],
         createdAt: new Date(),
         updatedAt: new Date()
-      };
+      } as unknown as User;
 
-      // Here you would typically save the user to your backend
+      //  then save the user to your backend
       await this.saveUserToBackend(user);
 
       return { user, error: null, success: true };
@@ -98,7 +160,7 @@ export class AuthService {
         formData.password
       );
 
-      // Fetch user data from your backend
+      // Fetch user data from backend
       let user = await this.getUserFromBackend(firebaseUser.uid);
 
       // If backend doesn't have user data yet, create a fallback user from firebase profile
@@ -110,31 +172,9 @@ export class AuthService {
           displayName: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : ''),
           photoURL: firebaseUser.photoURL || undefined,
           activityLevel: 'moderately_active',
-          dietaryRestrictions: {
-            vegetarian: false,
-            vegan: false,
-            glutenFree: false,
-            dairyFree: false,
-            nutFree: false,
-            halal: false,
-            custom: []
-          },
-          nutritionGoals: {
-            dailyCalories: 2000,
-            protein: 50,
-            carbs: 250,
-            fat: 70,
-            fiber: 25,
-            sugar: 50,
-            sodium: 2300
-          },
-          preferences: {
-            cuisineTypes: [],
-            cookingTime: 'moderate',
-            skillLevel: 'beginner',
-            budgetRange: { min: 0, max: 100 },
-            servingSize: 2
-          },
+          dietaryRestrictions: defaultDietaryRestrictions,
+          nutritionGoals: defaultNutritionGoals,
+          preferences: defaultUserPreferences,
           onboardingCompleted: false,
           lastLogin: new Date(),
           planGenerationCount: 0,
@@ -142,7 +182,7 @@ export class AuthService {
           favoriteRecipes: [],
           createdAt: new Date(),
           updatedAt: new Date()
-        } as User;
+        } as unknown as User;
 
         // Optionally save to backend
         await this.saveUserToBackend(user);
@@ -171,24 +211,32 @@ export class AuthService {
     }
   }
 
+  // helper methods for backend interaction
   private static async saveUserToBackend(user: User): Promise<void> {
-    // Implement your API call to save user to backend
-    // Example:
-    // await fetch('/api/users', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(user)
-    // });
-    console.log('Saving user to backend:', user);
+    try {
+      const API_BASE = (import.meta.env.VITE_API_BASE as string) || 'http://localhost:3001';
+      await fetch(`${API_BASE}/api/users/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
+      });
+    } catch (err) {
+      console.warn('saveUserToBackend failed', err);
+    }
   }
 
+  // fetching data from backend for user
   static async getUserFromBackend(firebaseUid: string): Promise<User | null> {
-    // Implement your API call to get user from backend
-    // Example:
-    // const response = await fetch(`/api/users/${firebaseUid}`);
-    // return await response.json();
-    console.log('Fetching user from backend:', firebaseUid);
-    return null; // Replace with actual implementation
+    try {
+      const API_BASE = (import.meta.env.VITE_API_BASE as string) || 'http://localhost:3001';
+      const resp = await fetch(`${API_BASE}/api/users/${firebaseUid}`);
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      return data as User;
+    } catch (err) {
+      console.warn('getUserFromBackend failed', err);
+      return null;
+    }
   }
 
   private static getAuthErrorMessage(errorCode: string): string {
