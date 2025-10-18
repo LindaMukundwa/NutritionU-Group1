@@ -1,3 +1,4 @@
+// Blueprint for out user documents in MOngoDB
 import type { User } from '../../../shared/types/user';
 import { Schema, model } from 'mongoose';
 
@@ -69,6 +70,8 @@ const UserSchema = new Schema<UserDocument>({
         default: { type: Number, default: 100 },
         description: { type: String, default: "Weekly food budget in dollars" }
     },
+    // Free-form profile object to store onboarding form data
+    profile: { type: Schema.Types.Mixed },
     onboardingCompleted: { type: Boolean, default: false },
     lastLogin: { type: Date },
     planGenerationCount: { type: Number, default: 0 },

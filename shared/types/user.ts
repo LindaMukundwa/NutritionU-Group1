@@ -32,6 +32,8 @@ export interface User {
 
   // Meals
   recipe?: string[]; // string of recipe ids
+  // free-form onboarding/profile data
+  profile?: any;
 }
 
 export interface MedicalRestrictions {

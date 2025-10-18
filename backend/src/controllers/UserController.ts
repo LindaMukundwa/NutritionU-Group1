@@ -350,6 +350,41 @@ export const patchUserGoals = async (req: Request, res: Response) => {
         console.error('Error updating user goals:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
+
+}
+
+// Patch user's onboarding/profile data. Accepts either Mongo _id or firebaseUid as :id
+export const patchUserProfile = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const profile = req.body;
+
+        if (!profile || typeof profile !== 'object') {
+            return res.status(400).json({ message: 'Profile data is required' });
+        }
+
+        const updates = {
+            profile,
+            onboardingCompleted: true,
+            updatedAt: new Date(),
+        };
+
+        // Allow caller to pass either the Mongo _id or the firebaseUid
+        const filter = { $or: [{ _id: id }, { firebaseUid: id }] } as any;
+
+        // Upsert: if the user doesn't exist yet, create a minimal record using the id
+        const updatedUser = await User.findOneAndUpdate(
+            filter,
+            { $set: updates, $setOnInsert: { _id: id, firebaseUid: id, createdAt: new Date() } },
+            { new: true, upsert: true, setDefaultsOnInsert: true }
+        );
+
+        return res.status(200).json(updatedUser);
+    } catch (err) {
+        console.error('Error patching user profile:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
 }
 
 // Post a recipe to user recipes array and add recipe to database

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 
 interface LandingPageProps {
@@ -17,10 +18,10 @@ const LandingPage: React.FC<LandingPageProps> = () => {
     // features section or open a tutorial
   };
 
+  const navigate = useNavigate();
+
   const handleSignIn = (): void => {
-    // Handle sign in button click
-    console.log('Sign In clicked');
-    // login page or open auth modal
+    navigate('/signup');
   };
 
   const handleNavAuthClick = (action: string): void => {

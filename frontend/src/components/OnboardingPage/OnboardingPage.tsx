@@ -5,6 +5,9 @@ import Label from '../ui/Label';
 import Badge from '../ui/Badge';
 import Progress from '../ui/Progress';
 import styles from './OnboardingPage.module.css';
+import { auth } from '../../config/firebase';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -39,6 +42,57 @@ export default function OnboardingPage() {
 
   const nextStep = () => setStep(Math.min(step + 1, totalSteps));
   const prevStep = () => setStep(Math.max(step - 1, 1));
+  const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const { refreshUser } = useAuth();
+
+  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
+
+  const handleComplete = async () => {
+    // Finalize onboarding: send profile to backend and navigate to dashboard
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) {
+        console.error('No authenticated firebase user found');
+        navigate('/auth');
+        return;
+      }
+
+      setSubmitting(true);
+      const idToken = await firebaseUser.getIdToken();
+      // make sure we are sending the firebase uid to the backend
+      const resp = await fetch(`${API_BASE}/api/users/${firebaseUser.uid}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        console.error('Failed to save onboarding:', resp.status, text);
+        setSubmitting(false);
+        return;
+      }
+
+      // Refresh AuthContext so PrivateRoute sees the latest user
+      try {
+        if (refreshUser) await refreshUser();
+      } catch (err) {
+        console.warn('refreshUser failed', err);
+      }
+
+      // Optionally refresh AuthContext here by fetching the user from backend
+      // but for now navigate to dashboard
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Error completing onboarding', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const toggleArrayItem = (array: string[], item: string, setter: (items: string[]) => void) => {
     if (array.includes(item)) {
@@ -362,10 +416,11 @@ export default function OnboardingPage() {
               </Button>
 
               <Button
-                onClick={step === totalSteps ? () => console.log('Complete!') : nextStep}
+                onClick={step === totalSteps ? handleComplete : nextStep}
                 className={styles.nextButton}
+                disabled={submitting}
               >
-                {step === totalSteps ? "Complete Setup" : "Continue →"}
+                {step === totalSteps ? (submitting ? 'Saving...' : 'Complete Setup') : 'Continue →'}
               </Button>
             </div>
           </CardContent>

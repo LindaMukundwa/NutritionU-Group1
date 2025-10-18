@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { createUser, getUser, deleteUser, patchUserBudget, patchUserLifestyleDiets, patchUserCulturalDiets, patchUserMedicalRestrictions, patchUserGoals, postUserRecipe, getUserRecipes, deleteUserRecipe } from '../controllers/UserController.ts';
+import { createUser, getUser, deleteUser, patchUserBudget, patchUserLifestyleDiets, patchUserCulturalDiets, patchUserMedicalRestrictions, patchUserGoals, patchUserProfile, postUserRecipe, getUserRecipes, deleteUserRecipe } from '../controllers/UserController.ts';
 
 const router = Router();
 
@@ -15,6 +15,9 @@ router.delete('/:id', deleteUser);
 
 // Route to update user budget
 router.patch('/:id/budget', patchUserBudget);
+
+// Route to update user's onboarding/profile (accepts firebaseUid or Mongo _id)
+router.patch('/:id', patchUserProfile);
 
 // Route to update user lifestyle diets
 router.patch('/:id/lifestyle-diets', patchUserLifestyleDiets);
