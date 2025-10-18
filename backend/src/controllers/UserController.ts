@@ -385,7 +385,6 @@ export const patchUserProfile = async (req: Request, res: Response) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
-}
 
 // Post a recipe to user recipes array and add recipe to database
 export const postUserRecipe = async (req: Request, res: Response) => {

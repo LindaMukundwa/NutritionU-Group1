@@ -4,7 +4,7 @@ import { connectDB } from './db.ts';
 import userRoutes from './routes/UserRoutes.ts';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 // Enable CORS so the frontend (vite dev server) can call the API.
