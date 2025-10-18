@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectDB } from './db.ts';
 import userRoutes from './routes/UserRoutes.ts';
+import recipeRoutes from './routes/RecipeRoutes.ts';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,6 +25,7 @@ app.get('/', (_, res) => {
   res.send('Welcome to the NutritionU API!');
 });
 app.use('/api/users', userRoutes);
+app.use('/api/recipes', recipeRoutes);
 
 // Start the server
 const startServer = async () => {
