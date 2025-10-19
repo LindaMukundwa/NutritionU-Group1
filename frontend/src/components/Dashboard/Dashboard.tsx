@@ -1,5 +1,7 @@
 "use client"
 
+"use client"
+
 import React, { type FC, useState } from "react"
 import styles from "./Dashboard.module.css"
 import AssistantContent from "./AssistantContent/AssistantContent"
@@ -24,6 +26,7 @@ interface SummaryCardData {
 type DashboardProps = {}
 
 // --- Shell components for each content area ---
+// --- Shell components for each content area ---
 function MealContent() {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [showFilters, setShowFilters] = React.useState(false)
@@ -41,15 +44,21 @@ function MealContent() {
       description: "A nutritious bowl packed with chickpeas, fresh vegetables, and tahini dressing",
       time: 25,
       price: 4.5,
+      time: 25,
+      price: 4.5,
       calories: 420,
       rating: 4.5,
       tags: ["High Protein", "Budget-Friendly", "Vegetarian"],
       category: "Lunch",
     },
     {
+    },
+    {
       imageUrl: undefined,
       title: "Avocado Toast with Eggs",
       description: "Crispy whole grain bread topped with mashed avocado and sunny-side-up eggs",
+      time: 15,
+      price: 3.2,
       time: 15,
       price: 3.2,
       calories: 350,
@@ -58,9 +67,13 @@ function MealContent() {
       category: "Breakfast",
     },
     {
+    },
+    {
       imageUrl: undefined,
       title: "Teriyaki Chicken Bowl",
       description: "Grilled chicken with teriyaki sauce served over rice with steamed vegetables",
+      time: 30,
+      price: 5.8,
       time: 30,
       price: 5.8,
       calories: 520,
@@ -69,9 +82,13 @@ function MealContent() {
       category: "Dinner",
     },
     {
+    },
+    {
       imageUrl: undefined,
       title: "Greek Yogurt Parfait",
       description: "Creamy yogurt layered with granola, fresh berries, and honey",
+      time: 10,
+      price: 2.8,
       time: 10,
       price: 2.8,
       calories: 280,
@@ -85,15 +102,21 @@ function MealContent() {
       description: "Whole wheat wrap filled with hummus, fresh vegetables, and feta cheese",
       time: 12,
       price: 3.5,
+      time: 12,
+      price: 3.5,
       calories: 320,
       rating: 4.3,
       tags: ["Quick", "Vegetarian", "Budget-Friendly"],
       category: "Lunch",
     },
     {
+    },
+    {
       imageUrl: undefined,
       title: "Trail Mix Energy Bites",
       description: "No-bake energy balls with oats, peanut butter, and dark chocolate chips",
+      time: 5,
+      price: 1.5,
       time: 5,
       price: 1.5,
       calories: 180,
@@ -106,6 +129,8 @@ function MealContent() {
   const filteredMeals = sampleMeals.filter((meal) => {
     const matchesSearch = meal.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedFilters.category === "All" || meal.category === selectedFilters.category
+    const matchesTime = selectedFilters.maxTime === "Any" || meal.time <= Number.parseInt(selectedFilters.maxTime)
+    const matchesPrice = selectedFilters.maxPrice === "Any" || meal.price <= Number.parseFloat(selectedFilters.maxPrice)
     const matchesTime = selectedFilters.maxTime === "Any" || meal.time <= Number.parseInt(selectedFilters.maxTime)
     const matchesPrice = selectedFilters.maxPrice === "Any" || meal.price <= Number.parseFloat(selectedFilters.maxPrice)
     const matchesDietary =
@@ -242,6 +267,8 @@ function MealContent() {
             description={meal.description}
             time={`${meal.time} min`}
             price={`$${meal.price.toFixed(2)}`}
+            time={`${meal.time} min`}
+            price={`$${meal.price.toFixed(2)}`}
             calories={meal.calories}
             rating={meal.rating}
             tags={meal.tags}
@@ -332,6 +359,7 @@ function PlannerContent({
 
   const { totalCalories, totalCost } = calculateDailyTotals()
 
+function PlannerContent() {
   return (
     <div>
       <div className={styles.plannerHeader}>
@@ -812,6 +840,8 @@ function DashboardContentSwitcher() {
     <div>
       <h2 className={styles.greeting}>Meal Planner</h2>
       <p className={styles.prompt}>Content for meal planning will go here.</p>
+      <h2 className={styles.greeting}>Meal Planner</h2>
+      <p className={styles.prompt}>Content for meal planning will go here.</p>
     </div>
   )
 }
@@ -819,6 +849,8 @@ function DashboardContentSwitcher() {
 function NutritionContent() {
   return (
     <div>
+      <h2 className={styles.greeting}>Nutrition Tracker</h2>
+      <p className={styles.prompt}>Content for nutrition tracking will go here.</p>
       <h2 className={styles.greeting}>Nutrition Tracker</h2>
       <p className={styles.prompt}>Content for nutrition tracking will go here.</p>
     </div>
@@ -834,18 +866,16 @@ function AIAssistantContent() {
 }
 
 // --- Dashboard Content Switcher ---
+// --- Dashboard Content Switcher ---
 function DashboardContentSwitcher() {
   const [activeTab, setActiveTab] = useState("meals")
-=======
-  });
->>>>>>> dd39bbb (Made nutrition tab match the day the planner is on)
 
   const tabs = [
     { id: "meals", label: "Meals" },
     { id: "planner", label: "Planner" },
     { id: "nutrition", label: "Nutrition" },
     { id: "ai-assistant", label: "AI Assistant" },
-  ];
+  ]
 
   return (
     <div className={styles.contentSwitcher}>
@@ -865,24 +895,12 @@ function DashboardContentSwitcher() {
       {/* Tab Content */}
       <div className={styles.tabContent}>
         {activeTab === "meals" && <MealContent />}
-        {activeTab === "planner" && (
-          <PlannerContent 
-            selectedDay={selectedDay}
-            setSelectedDay={setSelectedDay}
-            weeklyMealPlan={weeklyMealPlan}
-            setWeeklyMealPlan={setWeeklyMealPlan}
-          />
-        )}
-        {activeTab === "nutrition" && (
-          <NutritionContent 
-            selectedDay={selectedDay} 
-            weeklyMealPlan={weeklyMealPlan} 
-          />
-        )}
+        {activeTab === "planner" && <PlannerContent />}
+        {activeTab === "nutrition" && <NutritionContent />}
         {activeTab === "ai-assistant" && <AIAssistantContent />}
       </div>
     </div>
-  );
+  )
 }
 
 const Dashboard: FC<DashboardProps> = () => {
@@ -915,6 +933,7 @@ const Dashboard: FC<DashboardProps> = () => {
     },
   ]
 
+  // Helper function to render the progress bar
   // Helper function to render the progress bar
   const renderProgressBar = (current: number, total: number) => {
     const percentage = (current / total) * 100
