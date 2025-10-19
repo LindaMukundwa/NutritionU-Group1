@@ -1,44 +1,65 @@
-"use client"
-
-// MealContentCard.tsx
 import { type FC, useState } from "react"
 import styles from "./MealContentCard.module.css"
 
 interface MealContentCardProps {
-  imageUrl?: string
-  title: string
-  description: string
-  time: string
-  price: string
-  calories: number
-  rating?: number
-  tags?: string[]
+  recipeId: string;
+  imageUrl?: string;
+  title: string;
+  description?: string;
+  totalTime: number; // in minutes
+  estimatedCostPerServing: number;
+  nutritionInfo: {
+    calories: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+  };
+  dietaryTags?: string[];
+  onViewRecipe?: (recipeId: string) => void;
+  onAddToPlan?: (recipeId: string) => void;
 }
 
 const MealContentCard: FC<MealContentCardProps> = ({
+  recipeId,
   imageUrl,
   title,
   description,
-  time,
-  price,
-  calories,
-  rating,
-  tags = [],
+  totalTime,
+  estimatedCostPerServing,
+  nutritionInfo,
+  dietaryTags = [],
+  onViewRecipe,
+  onAddToPlan,
 }) => {
-  const [isLiked, setIsLiked] = useState(false)
+  const [isLiked, setIsLiked] = useState(false);
 
   const handleLikeToggle = () => {
-    setIsLiked(!isLiked)
-  }
+    setIsLiked(!isLiked);
+    // TODO: Save to favorites in backend
+  };
+
+  const handleAddToPlan = () => {
+    if (onAddToPlan) {
+      onAddToPlan(recipeId);
+    }
+  };
+
+  const handleViewRecipe = () => {
+    if (onViewRecipe) {
+      onViewRecipe(recipeId);
+    }
+  };
 
   return (
     <div className={styles.MealContentCard}>
       {/* Image Section */}
       <div className={styles.imageContainer}>
         {imageUrl ? (
-          <img src={imageUrl || "/placeholder.svg"} alt={title} className={styles.mealImage} />
+          <img src={imageUrl} alt={title} className={styles.mealImage} />
         ) : (
-          <div className={styles.imagePlaceholder}>Meal Image</div>
+          <div className={styles.imagePlaceholder}>
+            {title.charAt(0).toUpperCase()}
+          </div>
         )}
 
         {/* Like Button */}
@@ -67,36 +88,27 @@ const MealContentCard: FC<MealContentCardProps> = ({
 
       {/* Content Section */}
       <div className={styles.content}>
-        {/* Title and Rating Row */}
+        {/* Title */}
         <div className={styles.titleRow}>
           <h3 className={styles.title}>{title}</h3>
-          {rating && (
-            <div className={styles.rating}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M7 1L8.854 5.146L13 6.708L9.5 9.854L10.708 14L7 11.646L3.292 14L4.5 9.854L1 6.708L5.146 5.146L7 1Z"
-                  stroke="#fbbf24"
-                  strokeWidth="1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              {rating}
-            </div>
-          )}
         </div>
 
         {/* Description */}
-        <p className={styles.description}>{description}</p>
+        {description && (
+          <p className={styles.description}>{description}</p>
+        )}
 
         {/* Tags */}
-        {tags.length > 0 && (
+        {dietaryTags.length > 0 && (
           <div className={styles.tags}>
-            {tags.map((tag, index) => (
+            {dietaryTags.slice(0, 3).map((tag, index) => (
               <span key={index} className={styles.tag}>
                 {tag}
               </span>
             ))}
+            {dietaryTags.length > 3 && (
+              <span className={styles.tag}>+{dietaryTags.length - 3}</span>
+            )}
           </div>
         )}
 
@@ -115,7 +127,7 @@ const MealContentCard: FC<MealContentCardProps> = ({
               <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
               <path d="M8 4V8L10.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
-            <span className={styles.detailText}>{time}</span>
+            <span className={styles.detailText}>{totalTime} min</span>
           </div>
 
           {/* Price */}
@@ -136,19 +148,27 @@ const MealContentCard: FC<MealContentCardProps> = ({
                 strokeLinejoin="round"
               />
             </svg>
-            <span className={styles.detailText}>{price}</span>
+            <span className={styles.detailText}>
+              ${estimatedCostPerServing.toFixed(2)}
+            </span>
           </div>
 
           {/* Calories */}
           <div className={styles.detailItem}>
-            <span className={styles.detailText}>{calories} cal</span>
+            <span className={styles.detailText}>
+              {Math.round(nutritionInfo.calories)} cal
+            </span>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className={styles.actionButtons}>
-          <button className={styles.addButton}>+ Add to Plan</button>
-          <button className={styles.viewButton}>View Recipe</button>
+          <button className={styles.addButton} onClick={handleAddToPlan}>
+            + Add to Plan
+          </button>
+          <button className={styles.viewButton} onClick={handleViewRecipe}>
+            View Recipe
+          </button>
         </div>
       </div>
     </div>

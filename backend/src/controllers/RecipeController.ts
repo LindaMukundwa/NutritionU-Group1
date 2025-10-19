@@ -1,8 +1,10 @@
-import type { Request, Response } from 'express';
-import openai from '../openai.ts'
+/*import type { Request, Response } from 'express';
+//import openai from '../openai.ts'
+import fatSecretService from '../services/fatSecretService';
+import Recipe from '../models/RecipeModel';
 
 // Route to generate recipes from open ai
-export const generateRecipeFromOpenAI = async (req: Request, res: Response) => {
+ export const generateRecipeFromOpenAI = async (req: Request, res: Response) => {
     const user = req.body;
 
     if (!user) {
@@ -99,4 +101,160 @@ export const generateRecipeFromOpenAI = async (req: Request, res: Response) => {
         console.error('Error generating recipe:', error);
         res.status(500).json({ message: 'Failed to generate recipe', error });
     }
-}
+} */
+import { Request, Response } from 'express';
+import fatSecretService from '../services/fatSecretService';
+import Recipe from '../models/RecipeModel';
+
+/**
+ * Search recipes from FatSecret API
+ */
+export const searchRecipes = async (req: Request, res: Response) => {
+  try {
+    const { query, maxResults = 20 } = req.query;
+
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ 
+        error: 'Query parameter is required' 
+      });
+    }
+
+    const recipes = await fatSecretService.searchRecipes(
+      query, 
+      parseInt(maxResults as string)
+    );
+
+    // Convert FatSecret recipes to our format
+    const convertedRecipes: any[] = [];
+    for (const r of recipes) {
+      try {
+        const converted = fatSecretService.convertToRecipeModel(r);
+        if (converted) convertedRecipes.push(converted);
+      } catch (convErr) {
+        console.warn('Failed to convert a recipe item, skipping it:', convErr);
+        // continue with next recipe
+      }
+    }
+
+    res.json({
+      success: true,
+      count: convertedRecipes.length,
+      recipes: convertedRecipes
+    });
+  } catch (error) {
+    console.error('Recipe search error:', error);
+    res.status(500).json({ 
+      error: 'Failed to search recipes' 
+    });
+  }
+};
+
+/**
+ * Get detailed recipe from FatSecret
+ */
+export const getRecipeById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Check if it's a FatSecret ID (starts with fatsecret_)
+    if (id.startsWith('fatsecret_')) {
+      const fatSecretId = id.replace('fatsecret_', '');
+      const recipe = await fatSecretService.getRecipe(fatSecretId);
+
+      if (!recipe) {
+        return res.status(404).json({ 
+          error: 'Recipe not found' 
+        });
+      }
+
+      const convertedRecipe = fatSecretService.convertToRecipeModel(recipe);
+      return res.json({
+        success: true,
+        recipe: convertedRecipe
+      });
+    }
+
+    // Otherwise, check our database
+    const recipe = await Recipe.findById(id);
+    
+    if (!recipe) {
+      return res.status(404).json({ 
+        error: 'Recipe not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      recipe
+    });
+  } catch (error) {
+    console.error('Get recipe error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get recipe' 
+    });
+  }
+};
+
+/**
+ * Search foods/ingredients from FatSecret
+ */
+export const searchFoods = async (req: Request, res: Response) => {
+  try {
+    const { query, maxResults = 20 } = req.query;
+
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ 
+        error: 'Query parameter is required' 
+      });
+    }
+
+    const foods = await fatSecretService.searchFoods(
+      query, 
+      parseInt(maxResults as string)
+    );
+
+    res.json({
+      success: true,
+      count: foods.length,
+      foods
+    });
+  } catch (error) {
+    console.error('Food search error:', error);
+    res.status(500).json({ 
+      error: 'Failed to search foods' 
+    });
+  }
+};
+
+/**
+ * Get detailed food/ingredient nutrition info
+ */
+export const getFoodById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const food = await fatSecretService.getFood(id);
+
+    if (!food) {
+      return res.status(404).json({ 
+        error: 'Food not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      food
+    });
+  } catch (error) {
+    console.error('Get food error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get food details' 
+    });
+  }
+};
+
+// Keep your existing OpenAI controller
+export const generateRecipeFromOpenAI = async (_req: Request, res: Response) => {
+  // Your existing OpenAI implementation
+  res.json({ message: 'OpenAI recipe generation - to be implemented' });
+};

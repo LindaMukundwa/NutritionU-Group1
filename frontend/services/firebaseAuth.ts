@@ -8,7 +8,7 @@ import {
   GoogleAuthProvider,
   signInWithRedirect
 } from 'firebase/auth';
-import { auth } from '../src/config/firebase'; // Your firebase config
+import { auth } from '../src/config/firebase'; // firebase config
 import type { AuthFormData, AuthResponse } from '../../shared/types/auth';
 import type { User } from '../../shared/types/user'; // Adjust path as needed
 
@@ -120,7 +120,7 @@ export class AuthService {
 
       // Create user object matching our User interface
       const user = {
-        _id: '', // This will be set by your backend
+        _id: '', // This will be set by backend
         firebaseUid: firebaseUser.uid,
         email: firebaseUser.email!,
         displayName: formData.displayName || firebaseUser.email!.split('@')[0],
@@ -139,7 +139,7 @@ export class AuthService {
         updatedAt: new Date()
       } as unknown as User;
 
-      //  then save the user to your backend
+      //  then save the user to backend
       await this.saveUserToBackend(user);
 
       return { user, error: null, success: true };
