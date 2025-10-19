@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateChatbotResponse } from '../controllers/ChatbotController';
+import { generateChatbotResponse } from '../controllers/ChatbotController.ts';
 
 
 const router = express.Router();

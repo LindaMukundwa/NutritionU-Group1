@@ -28,7 +28,7 @@ app.get('/', (_, res) => {
 });
 app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
-app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/chatbot', chatbotRoutes); // Open AI chat communcations
 
 // Start the server
 const startServer = async () => {
