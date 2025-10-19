@@ -228,6 +228,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   padding: 16px 0;
+  max-width: 100%;
 }
 
 @media (max-width: 1200px) {
