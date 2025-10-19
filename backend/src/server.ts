@@ -3,6 +3,8 @@ import cors from 'cors';
 import { connectDB } from './db.ts';
 import userRoutes from './routes/UserRoutes.ts';
 import recipeRoutes from './routes/RecipeRoutes.ts';
+import chatbotRoutes from './routes/ChatbotRoutes.ts';
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +28,7 @@ app.get('/', (_, res) => {
 });
 app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Start the server
 const startServer = async () => {

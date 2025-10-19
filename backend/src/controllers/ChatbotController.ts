@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import openai from '../openai.ts'
 
 
-export const postChatBotText = async (req: Request, res: Response) => {
+export const generateChatbotResponse = async (req: Request, res: Response) => {
     try {
         const { message } = req.body;
         
