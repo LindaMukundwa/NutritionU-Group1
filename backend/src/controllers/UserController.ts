@@ -1,14 +1,15 @@
 import type { Request, Response } from 'express';
 import { default as User } from '../models/UserModel.ts';
-import { error } from 'console';
+// ...existing imports
+import { default as Recipe } from '../models/RecipeModel.ts';
+
 
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
-
     /* 
     JSON Format
         {
-            "_id": "testkey123",
+            "_id": "U12345678",
             "firebaseUid": "testfirebase123",
             "email": "nutritionutester@gmail.com",
             "displayName": "John Doe",
@@ -83,10 +84,84 @@ export const createUser = async (req: Request, res: Response) => {
         }
     */
     try {
-        const userData = req.body;
-        const newUser = new User(userData);
+        const userData = req.body || {};
+
+        // Build a minimal valid user object with defaults for required fields
+        // Avoid using empty string values for ids
+        const idCandidate = userData._id && String(userData._id).trim() ? String(userData._id).trim() : undefined;
+        const firebaseCandidate = userData.firebaseUid && String(userData.firebaseUid).trim() ? String(userData.firebaseUid).trim() : undefined;
+
+        const minimalUser = {
+            _id: idCandidate || firebaseCandidate || undefined,
+            firebaseUid: firebaseCandidate || idCandidate || undefined,
+            email: userData.email || '',
+            displayName: userData.displayName || (userData.email ? String(userData.email).split('@')[0] : 'User'),
+            photoURL: userData.photoURL || undefined,
+            age: userData.age,
+            height: userData.height,
+            weight: userData.weight,
+            units: userData.units || 'imperial',
+            activityLevel: userData.activityLevel || 'moderately_active',
+            bmi: userData.bmi,
+            medicalRestrictions: userData.medicalRestrictions || {
+                gluten: false,
+                dairy: false,
+                nuts: false,
+                peanuts: false,
+                soy: false,
+                eggs: false,
+                shellfish: false,
+                wheat: false,
+                sesame: false,
+                corn: false,
+                sulfites: false,
+                fodmap: false,
+                histamine: false,
+                lowSodium: false,
+                lowSugar: false,
+                none: true,
+                description: 'Medical and health dietary restrictions'
+            },
+            nutritionGoals: userData.nutritionGoals || { goals: 'None', calories: undefined, protein: undefined, carbs: undefined, fats: undefined, description: 'User nutrition and lifestyle goals' },
+            lifestyleDiets: userData.lifestyleDiets || {
+                vegetarian: false,
+                pescetarian: false,
+                flexitarian: false,
+                mediterranean: false,
+                paleo: false,
+                keto: false,
+                whole30: false,
+                none: true,
+                description: 'Lifestyle and ethical dietary choices'
+            },
+            culturalDiets: userData.culturalDiets || {
+                halal: false,
+                kosher: false,
+                jain: false,
+                hindu: false,
+                buddhist: false,
+                none: true,
+                description: 'Cultural and religious dietary preferences'
+            },
+            budget: userData.budget || { minimum: undefined, maximum: undefined, step: 25, default: 100, description: 'Weekly food budget in dollars' },
+            onboardingCompleted: userData.onboardingCompleted || false,
+            lastLogin: userData.lastLogin || undefined,
+            planGenerationCount: userData.planGenerationCount || 0,
+            favoriteRecipes: userData.favoriteRecipes || [],
+            recipe: userData.recipe || [],
+            createdAt: userData.createdAt || new Date(),
+            updatedAt: userData.updatedAt || new Date(),
+        } as any;
+
+    // Ensure we have an _id (use firebaseUid if available). If still missing, let mongoose generate one
+    if (!minimalUser._id && minimalUser.firebaseUid) minimalUser._id = minimalUser.firebaseUid;
+
+    // If _id is still undefined, delete it from the object so mongoose will generate one
+    if (!minimalUser._id) delete (minimalUser as any)._id;
+
+        const newUser = new User(minimalUser);
         await newUser.save();
-        res.status(201).json(userData);
+        res.status(201).json(newUser);
     } catch (error) {
         console.error('Error creating user:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -99,9 +174,9 @@ export const getUser = async (req: Request, res: Response) => {
     try {
         const userData = await User.findById(id);
         if (!userData) {
-            throw error("User with this id is not found");
+            return res.status(404).json({ message: 'User not found' });
         }
-        res.status(201).json(userData);
+        return res.status(200).json(userData);
     } catch (error) {
         console.log('Error getting user:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -351,3 +426,347 @@ export const patchUserGoals = async (req: Request, res: Response) => {
     }
 
 }
+
+// Patch user's onboarding/profile data. Accepts either Mongo _id or firebaseUid as :id
+export const patchUserProfile = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const profile = req.body;
+
+        if (!profile || typeof profile !== 'object') {
+            return res.status(400).json({ message: 'Profile data is required' });
+        }
+
+        const updates = {
+            profile,
+            onboardingCompleted: true,
+            updatedAt: new Date(),
+        };
+
+        // Allow caller to pass either the Mongo _id or the firebaseUid
+        const filter = { $or: [{ _id: id }, { firebaseUid: id }] } as any;
+
+        // Upsert: if the user doesn't exist yet, create a minimal record using the id
+        const updatedUser = await User.findOneAndUpdate(
+            filter,
+            { $set: updates, $setOnInsert: { _id: id, firebaseUid: id, createdAt: new Date() } },
+            { new: true, upsert: true, setDefaultsOnInsert: true }
+        );
+
+        return res.status(200).json(updatedUser);
+    } catch (err) {
+        console.error('Error patching user profile:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+// Post a recipe to user recipes array and add recipe to database
+export const postUserRecipe = async (req: Request, res: Response) => {
+    /*
+    JSON Format
+    {
+        "recipe": {
+            "_id": "R12345678",
+            "title": "Spaghetti Bolognese",
+            "description": "A classic Italian pasta dish with a rich meat sauce.",
+            "imageUrl": "https://example.com/spaghetti.jpg",
+            "cuisine": "Italian",
+            "mealType": "dinner",
+            "difficulty": "beginner",
+            "prepTime": 15,
+            "cookTime": 45,
+            "totalTime": 60,
+            "servings": 4,
+            "ingredients": [
+                {
+                    "openFoodFactsId": "12345",
+                    "name": "Ground Beef",
+                    "amount": 500,
+                    "unit": {
+                        "type": "metric",
+                        "value": "grams"
+                    },
+                    "category": "protein",
+                    "nutritionInfo": {
+                        "calories": 250,
+                        "protein": 20,
+                        "carbs": 0,
+                        "fat": 15,
+                        "fiber": 0,
+                        "sugar": 0,
+                        "sodium": 70
+                    }
+                },
+                {
+                    "openFoodFactsId": "67890",
+                    "name": "Spaghetti",
+                    "amount": 400,
+                    "unit": {
+                        "type": "metric",
+                        "value": "grams"
+                    },
+                    "category": "grain",
+                    "nutritionInfo": {
+                        "calories": 350,
+                        "protein": 12,
+                        "carbs": 70,
+                        "fat": 1,
+                        "fiber": 3,
+                        "sugar": 2,
+                        "sodium": 5
+                    }
+                }
+            ],
+            "instructions": [
+                {
+                    "stepNumber": 1,
+                    "instruction": "Boil water and cook spaghetti according to package instructions.",
+                    "equipment": ["pot", "stove"]
+                },
+                {
+                    "stepNumber": 2,
+                    "instruction": "In a pan, cook ground beef until browned.",
+                    "equipment": ["pan", "stove"]
+                }
+            ],
+            "nutritionInfo": {
+                "calories": 600,
+                "protein": 32,
+                "carbs": 70,
+                "fat": 16,
+                "fiber": 3,
+                "sugar": 2,
+                "sodium": 75
+            },
+            "estimatedCostPerServing": 5,
+            "dietaryTags": ["high-protein", "low-sugar"],
+            "source": "user_created",
+            "createdBy": "user123",
+            "nutritionPerServing": {
+                "calories": 150,
+                "protein": 8,
+                "carbs": 17.5,
+                "fat": 4,
+                "fiber": 0.75,
+                "sugar": 0.5,
+                "sodium": 18.75
+            }
+        }
+    }
+    */
+
+    try {
+        const { id } = req.params;
+        const { recipe } = req.body;
+
+        // Check if recipe is in body
+        if (!recipe) {
+            return res.status(400).json({ message: 'Recipe is required' });
+        }
+
+        // Find the current user
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Ensures user has an array for recipes
+        if (!user.recipe) {
+            user.recipe = [];
+        }
+
+        // Check if the recipe already exists in the user's recipe array
+        if (user.recipe.includes(recipe._id)) {
+            return res.status(400).json({ message: 'Recipe already exists in user\'s recipe list' });
+        }
+
+        // Check if the recipe already exists in the Recipe collection
+        const existingRecipe = await Recipe.findById(recipe._id);
+        if (existingRecipe) {
+            return res.status(400).json({ message: 'Recipe already exists in the database' });
+        }
+
+        // Save recipe id to user
+        user.recipe.push(recipe._id);
+        await user.save();
+
+        // Create a new recipe object
+        const newRecipe = new Recipe(recipe);
+        await newRecipe.save();
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error adding recipe to user:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+// Get all user recipes
+export const getUserRecipes = async (req: Request, res: Response) => {
+    /* 
+    JSON Returned:
+        [
+            {
+                "nutritionInfo": {
+                    "calories": 600,
+                    "protein": 32,
+                    "carbs": 70,
+                    "fat": 16,
+                    "fiber": 3,
+                    "sugar": 2,
+                    "sodium": 75
+                },
+                "nutritionPerServing": {
+                    "calories": 150,
+                    "protein": 8,
+                    "carbs": 17.5,
+                    "fat": 4,
+                    "fiber": 0.75,
+                    "sugar": 0.5,
+                    "sodium": 18.75
+                },
+                "_id": "R12345678",
+                "title": "Spaghetti Marinara",
+                "description": "A classic Italian pasta dish with a rich meat sauce.",
+                "imageUrl": "https://example.com/spaghetti.jpg",
+                "cuisine": "Italian",
+                "mealType": "dinner",
+                "difficulty": "beginner",
+                "prepTime": 15,
+                "cookTime": 45,
+                "totalTime": 60,
+                "servings": 4,
+                "ingredients": [
+                    {
+                        "unit": {
+                            "type": "metric",
+                            "value": "grams"
+                        },
+                        "nutritionInfo": {
+                            "calories": 250,
+                            "protein": 20,
+                            "carbs": 0,
+                            "fat": 15,
+                            "fiber": 0,
+                            "sugar": 0,
+                            "sodium": 70
+                        },
+                        "openFoodFactsId": "12345",
+                        "name": "Ground Beef",
+                        "amount": 500,
+                        "category": "protein",
+                        "_id": "68f2ccb8b67ac4cfb48483d9"
+                    },
+                    {
+                        "unit": {
+                            "type": "metric",
+                            "value": "grams"
+                        },
+                        "nutritionInfo": {
+                            "calories": 350,
+                            "protein": 12,
+                            "carbs": 70,
+                            "fat": 1,
+                            "fiber": 3,
+                            "sugar": 2,
+                            "sodium": 5
+                        },
+                        "openFoodFactsId": "67890",
+                        "name": "Spaghetti",
+                        "amount": 400,
+                        "category": "grain",
+                        "_id": "68f2ccb8b67ac4cfb48483da"
+                    }
+                ],
+                "instructions": [
+                    {
+                        "stepNumber": 1,
+                        "instruction": "Boil water and cook spaghetti according to package instructions.",
+                        "equipment": [
+                            "pot",
+                            "stove"
+                        ],
+                        "_id": "68f2ccb8b67ac4cfb48483db"
+                    },
+                    {
+                        "stepNumber": 2,
+                        "instruction": "In a pan, cook ground beef until browned.",
+                        "equipment": [
+                            "pan",
+                            "stove"
+                        ],
+                        "_id": "68f2ccb8b67ac4cfb48483dc"
+                    }
+                ],
+                "estimatedCostPerServing": 5,
+                "dietaryTags": [
+                    "high-protein",
+                    "low-sugar"
+                ],
+                "source": "user_created",
+                "createdBy": "user123",
+                "createdAt": "2025-10-17T23:09:44.182Z",
+                "updatedAt": "2025-10-17T23:09:44.182Z",
+                "__v": 0
+            }
+        ]
+    */
+    try {
+        const { id } = req.params;
+
+        // Find user in database
+        const user = await User.findById(id);
+
+        // Check user existence
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Return empty array if user recipe is empty
+        if (!user.recipe || user.recipe.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        // Get the objects of recipes owned by a user
+        const recipes = await Recipe.find({ _id: { $in: user.recipe } });
+
+        res.status(200).json(recipes);
+    } catch (error) {
+        console.error('Error fetching user recipes:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// Delete a user recipe
+export const deleteUserRecipe = async (req: Request, res: Response) => {
+    try {
+        const { id, recipeId } = req.params;
+
+        // Find the user
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the recipe exists in the user's recipe array
+        if (!user.recipe || !user.recipe.includes(recipeId)) {
+            return res.status(404).json({ message: 'Recipe not found in user\'s recipe list' });
+        }
+
+        // Remove the recipe from the user's recipe array
+        user.recipe = user.recipe.filter((rId) => rId !== recipeId);
+        await user.save();
+
+        // Delete the recipe from the Recipe collection
+        const deletedRecipe = await Recipe.findByIdAndDelete(recipeId);
+        if (!deletedRecipe) {
+            return res.status(404).json({ message: 'Recipe not found in the database' });
+        }
+
+        res.status(200).json({ message: 'Recipe deleted successfully from user and database' });
+    } catch (error) {
+        console.error('Error deleting recipe from user:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+

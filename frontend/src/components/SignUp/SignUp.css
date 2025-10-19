@@ -1,0 +1,198 @@
+.nutritionU-signup-container {
+  min-height: 100vh;
+  min-width: 90vw;
+  background: linear-gradient(135deg, #a5d894 0%, #5d945e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  height: 100%;
+  width: 100%;
+}
+
+.nutritionU-signup-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 440px;
+}
+
+.nutritionU-logo {
+  width: 120px;
+  height: auto;
+  margin: 0 auto 20px;
+  display: block;
+}
+
+.nutritionU-signup-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.nutritionU-signup-subtitle {
+  text-align: center;
+  color: #718096;
+  margin-bottom: 32px;
+  font-size: 14px;
+}
+
+.nutritionU-form-group {
+  margin-bottom: 20px;
+}
+
+.nutritionU-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.nutritionU-form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.nutritionU-form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.nutritionU-primary-button {
+  width: 100%;
+  background: green;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.nutritionU-primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.nutritionU-secondary-button {
+  width: 100%;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.nutritionU-secondary-button:hover {
+  background: #667eea;
+  color: white;
+}
+
+.nutritionU-divider {
+  text-align: center;
+  margin: 24px 0;
+  color: #718096;
+  font-size: 14px;
+  position: relative;
+}
+
+.nutritionU-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.nutritionU-divider span {
+  background: white;
+  padding: 0 16px;
+  position: relative;
+}
+
+.nutritionU-social-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.nutritionU-social-button {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nutritionU-social-button:hover {
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+.nutritionU-social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.nutritionU-login-link {
+  text-align: center;
+  color: #718096;
+  font-size: 14px;
+}
+
+.nutritionU-login-link a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nutritionU-login-link a:hover {
+  text-decoration: underline;
+}
+
+.forgot-password-link {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
