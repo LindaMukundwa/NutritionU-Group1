@@ -31,23 +31,58 @@ const AssistantContent: React.FC = () => {
             timestamp: new Date()
         };
 
-        setMessages(prev => [...prev, userMessage]);
+        // Add user message to the chat
+        setMessages(prevMessages => [...prevMessages, userMessage]);
+        
+        // Clear input field
         setInputText('');
+        
+        // Set loading state
         setIsLoading(true);
-
-        // Simulate AI response
-        setTimeout(() => {
-            const aiMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                text: "I'm here to help with your nutrition questions! This is a placeholder response.",
+        
+        try {
+            // Call backend API
+            const response = await fetch('http://localhost:3001/api/chatbot/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userMessage.text })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to get response from the server');
+            }
+            
+            const data = await response.json();
+            
+            // Add assistant response to chat
+            const assistantMessage: Message = {
+                id: Date.now().toString(),
+                text: data.reply,
                 isUser: false,
                 timestamp: new Date()
             };
-            setMessages(prev => [...prev, aiMessage]);
+            
+            setMessages(prevMessages => [...prevMessages, assistantMessage]);
+            
+        } catch (error) {
+            console.error('Error fetching response:', error);
+            
+            // Add error message
+            const errorMessage: Message = {
+                id: Date.now().toString(),
+                text: "Sorry, I couldn't get a response. Please try again.",
+                isUser: false,
+                timestamp: new Date()
+            };
+            
+            setMessages(prevMessages => [...prevMessages, errorMessage]);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
-
+    
     const handleExampleClick = (prompt: string) => {
         setInputText(prompt);
     };
@@ -55,76 +90,75 @@ const AssistantContent: React.FC = () => {
     return (
         <div className={styles["assistant-content"]}>
             <div className={styles["chat-header"]}>
-            <h2>Nutrition Assistant</h2>
+                <h2>Nutrition Assistant</h2>
             </div>
-
-            <div className={styles["chat-container"]}>
+            
             {messages.length === 0 ? (
                 <div className={styles["welcome-section"]}>
-                <h3>Welcome! Try asking me about:</h3>
-                <div className={styles["example-prompts"]}>
-                    {examplePrompts.map((prompt, index) => (
-                    <button
-                        key={index}
-                        className={styles["example-prompt"]}
-                        onClick={() => handleExampleClick(prompt)}
-                    >
-                        {prompt}
-                    </button>
-                    ))}
-                </div>
+                    <h3>Ask me anything about nutrition, meal planning, or dietary advice.</h3>
+                    <div className={styles["example-prompts"]}>
+                        {examplePrompts.map((prompt) => (
+                            <button 
+                                key={prompt} 
+                                onClick={() => handleExampleClick(prompt)}
+                                className={styles["example-prompt"]}
+                            >
+                                {prompt}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             ) : (
-                <div className={styles["messages-container"]}>
-                {messages.map((message) => (
-                    <div
-                    key={message.id}
-                    className={`${styles["message"]} ${message.isUser ? styles["user-message"] : styles["ai-message"]}`}
-                    >
-                    <div className={styles["message-content"]}>
-                        {message.text}
+                <div className={styles["chat-container"]}>
+                    <div className={styles["messages-container"]}>
+                        {messages.map(message => (
+                            <div 
+                                key={message.id} 
+                                className={`${styles.message} ${message.isUser ? styles["user-message"] : styles["ai-message"]}`}
+                            >
+                                <div className={styles["message-content"]}>
+                                    {message.text}
+                                </div>
+                                <div className={styles["message-timestamp"]}>
+                                    {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </div>
+                            </div>
+                        ))}
+                        {isLoading && (
+                            <div className={`${styles.message} ${styles["ai-message"]}`}>
+                                <div className={styles["message-content"]}>
+                                    <div className={styles["typing-indicator"]}>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <div className={styles["message-timestamp"]}>
-                        {message.timestamp.toLocaleTimeString()}
-                    </div>
-                    </div>
-                ))}
-                {isLoading && (
-                    <div className={`${styles["message"]} ${styles["ai-message"]}`}>
-                    <div className={styles["message-content"]}>
-                        <div className={styles["typing-indicator"]}>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        </div>
-                    </div>
-                    </div>
-                )}
                 </div>
             )}
-            </div>
-
+            
             <div className={styles["chat-input-container"]}>
-            <div className={styles["input-group"]}>
-                <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask me anything about nutrition..."
-                className={styles["chat-input"]}
-                disabled={isLoading}
-                />
-                <button
-                onClick={handleSendMessage}
-                disabled={!inputText.trim() || isLoading}
-                className={styles["send-button"]}
-                >
-                Send
-                </button>
+                <div className={styles["input-group"]}>
+                    <input
+                        type="text"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder="Type a message..."
+                        className={styles["chat-input"]}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    />
+                    <button 
+                        onClick={handleSendMessage}
+                        className={styles["send-button"]}
+                        disabled={isLoading || !inputText.trim()}
+                    >
+                        Send
+                    </button>
+                </div>
             </div>
-            </div>
-     </div>
+        </div>
     );
 };
 
