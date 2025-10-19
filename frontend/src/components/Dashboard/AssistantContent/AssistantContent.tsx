@@ -33,13 +33,13 @@ const AssistantContent: React.FC = () => {
 
         // Add user message to the chat
         setMessages(prevMessages => [...prevMessages, userMessage]);
-
+        
         // Clear input field
         setInputText('');
-
+        
         // Set loading state
         setIsLoading(true);
-
+        
         try {
             // Call backend API
             const response = await fetch('http://localhost:3001/api/chatbot/generate', {
@@ -49,13 +49,13 @@ const AssistantContent: React.FC = () => {
                 },
                 body: JSON.stringify({ message: userMessage.text })
             });
-
+            
             if (!response.ok) {
                 throw new Error('Failed to get response from the server');
             }
-
+            
             const data = await response.json();
-
+            
             // Add assistant response to chat
             const assistantMessage: Message = {
                 id: Date.now().toString(),
@@ -63,12 +63,12 @@ const AssistantContent: React.FC = () => {
                 isUser: false,
                 timestamp: new Date()
             };
-
+            
             setMessages(prevMessages => [...prevMessages, assistantMessage]);
-
+            
         } catch (error) {
             console.error('Error fetching response:', error);
-
+            
             // Add error message
             const errorMessage: Message = {
                 id: Date.now().toString(),
@@ -76,13 +76,13 @@ const AssistantContent: React.FC = () => {
                 isUser: false,
                 timestamp: new Date()
             };
-
+            
             setMessages(prevMessages => [...prevMessages, errorMessage]);
         } finally {
             setIsLoading(false);
         }
     };
-
+    
     const handleExampleClick = (prompt: string) => {
         setInputText(prompt);
     };
@@ -92,14 +92,14 @@ const AssistantContent: React.FC = () => {
             <div className={styles["chat-header"]}>
                 <h2>Nutrition Assistant</h2>
             </div>
-
+            
             {messages.length === 0 ? (
                 <div className={styles["welcome-section"]}>
                     <h3>Ask me anything about nutrition, meal planning, or dietary advice.</h3>
                     <div className={styles["example-prompts"]}>
                         {examplePrompts.map((prompt) => (
-                            <button
-                                key={prompt}
+                            <button 
+                                key={prompt} 
                                 onClick={() => handleExampleClick(prompt)}
                                 className={styles["example-prompt"]}
                             >
@@ -112,24 +112,15 @@ const AssistantContent: React.FC = () => {
                 <div className={styles["chat-container"]}>
                     <div className={styles["messages-container"]}>
                         {messages.map(message => (
-                            <div
-                                key={message.id}
+                            <div 
+                                key={message.id} 
                                 className={`${styles.message} ${message.isUser ? styles["user-message"] : styles["ai-message"]}`}
                             >
                                 <div className={styles["message-content"]}>
-                                    {message.isUser ? (
-                                        message.text
-                                    ) : (
-                                        message.text.split('\n').map((line, i) => (
-                                            <React.Fragment key={i}>
-                                                {line}
-                                                {i < message.text.split('\n').length - 1 && <br />}
-                                            </React.Fragment>
-                                        ))
-                                    )}
+                                    {message.text}
                                 </div>
                                 <div className={styles["message-timestamp"]}>
-                                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                 </div>
                             </div>
                         ))}
@@ -147,7 +138,7 @@ const AssistantContent: React.FC = () => {
                     </div>
                 </div>
             )}
-
+            
             <div className={styles["chat-input-container"]}>
                 <div className={styles["input-group"]}>
                     <input
@@ -158,7 +149,7 @@ const AssistantContent: React.FC = () => {
                         className={styles["chat-input"]}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     />
-                    <button
+                    <button 
                         onClick={handleSendMessage}
                         className={styles["send-button"]}
                         disabled={isLoading || !inputText.trim()}
