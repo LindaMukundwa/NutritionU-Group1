@@ -31,7 +31,8 @@ const MealContentCard: FC<MealContentCardProps> = ({
   onViewRecipe,
   onAddToPlan,
 }) => {
-  const [isLiked, setIsLiked] = useState(false);
+  // For demo purposes start cards as favorited so they can be filtered/shown as favorites
+  const [isLiked, setIsLiked] = useState(true);
 
   const handleLikeToggle = () => {
     setIsLiked(!isLiked);
