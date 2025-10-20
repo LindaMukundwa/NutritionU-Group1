@@ -1,4 +1,5 @@
 import React, { type FC, useState } from "react"
+import { TopNavBar } from "../NavigationBar/TopNavBar"
 import styles from "./Dashboard.module.css"
 import AssistantContent from "./AssistantContent/AssistantContent"
 import MealContentCard from "./MealContentCard/MealContentCard"
@@ -1205,6 +1206,9 @@ const Dashboard: FC<DashboardProps> = () => {
 
   return (
     <div className={styles.Dashboard}>
+      {/* Top Navigation Bar */}
+      <TopNavBar userEmail="Linda.Mukundwa1@marist.edu" />
+
       {/* Header/Greeting Section */}
       <div className={styles.header}>
         <h1 className={styles.greeting}>Good morning, Linda! 👋</h1>

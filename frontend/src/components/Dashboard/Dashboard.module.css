@@ -1,6 +1,6 @@
 /* General Layout and Reset */
 .Dashboard {
-  padding: 20px;
+  /*padding: 20px;*/
   font-family: Arial, sans-serif;
 }
 
@@ -24,7 +24,7 @@
   font-size: 2rem;
   font-weight: 700;
   color: #333;
-  margin-top: 5px;
+  margin-top: 8px;
   margin-bottom: 5px;
   display: flex;
   align-items: center;
