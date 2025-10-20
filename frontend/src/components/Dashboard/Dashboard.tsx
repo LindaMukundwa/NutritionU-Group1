@@ -1,53 +1,55 @@
 import React, { type FC, useState } from "react"
+import { TopNavBar } from "../NavigationBar/TopNavBar"
 import styles from "./Dashboard.module.css"
 import AssistantContent from "./AssistantContent/AssistantContent"
 import MealContentCard from "./MealContentCard/MealContentCard"
 import SearchBar from "./SearchBar/SearchBar"
+import { recipeService } from '../../../services/recipeService';
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
 
 interface SummaryCardData {
   title: string;
   value: string | number;
   subtext: string;
-  icon: string; 
+  icon: string;
   progressBar?: {
-    current: number
-    total: number
-  }
+    current: number;
+    total: number;
+  };
 }
 
 interface Meal {
-  name: string
-  calories: number
-  time: string
-  cost: string
+  name: string;
+  calories: number;
+  time: string;
+  cost: string;
   recipe: {
-    ingredients: string[]
-    instructions: string[]
+    ingredients: string[];
+    instructions: string[];
     nutrition: {
-      protein: number
-      carbs: number
-      fat: number
-      fiber: number
-    }
-  }
+      protein: number;
+      carbs: number;
+      fat: number;
+      fiber: number;
+    };
+  };
 }
 
 interface DayMealPlan {
-  breakfast: Meal[]
-  lunch: Meal[]
-  dinner: Meal[]
-  snacks: Meal[]
+  breakfast: Meal[];
+  lunch: Meal[];
+  dinner: Meal[];
+  snacks: Meal[];
 }
 
 interface WeeklyMealPlan {
-  Monday: DayMealPlan
-  Tuesday: DayMealPlan
-  Wednesday: DayMealPlan
-  Thursday: DayMealPlan
-  Friday: DayMealPlan
-  Saturday: DayMealPlan
-  Sunday: DayMealPlan
+  Monday: DayMealPlan;
+  Tuesday: DayMealPlan;
+  Wednesday: DayMealPlan;
+  Thursday: DayMealPlan;
+  Friday: DayMealPlan;
+  Saturday: DayMealPlan;
+  Sunday: DayMealPlan;
 }
 
 type DashboardProps = {}
@@ -75,11 +77,11 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
 
         <div className={styles.modalBody}>
           {/* FIXED NUTRITION GRID - just change this part */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)', 
-            gap: '16px', 
-            padding: '16px', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '16px',
+            padding: '16px',
             backgroundColor: '#f8fafc',
             borderRadius: '8px',
             border: '1px solid #e2e8f0',
@@ -157,6 +159,8 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
 
 function MealContent() {
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [recipesFromApi, setRecipesFromApi] = React.useState<any[] | null>(null)
+  const [searchError, setSearchError] = React.useState<string | null>(null)
   const [showFilters, setShowFilters] = React.useState(false)
   const [selectedRecipe, setSelectedRecipe] = React.useState(null)
   const [showRecipeModal, setShowRecipeModal] = React.useState(false)
@@ -355,7 +359,35 @@ function MealContent() {
     },
   ]
 
-  const filteredMeals = sampleMeals.filter((meal) => {
+  // Use a local state copy of sample meals so we can populate images from the API on mount
+  const [demoMeals, setDemoMeals] = React.useState<any[]>(sampleMeals)
+
+  // On mount, fetch a small set of recipes and apply their images to the demo meals
+  React.useEffect(() => {
+    let mounted = true
+    const loadDemoImages = async () => {
+      try {
+        // Fetch one recipe per sample meal title so images correspond to the meal name
+        const promises = sampleMeals.map((m) => recipeService.searchRecipes(m.title, 1))
+        const resultsArr = await Promise.all(promises)
+
+        const updated = sampleMeals.map((m, i) => ({
+          ...m,
+          imageUrl: resultsArr[i] && resultsArr[i].length ? resultsArr[i][0].imageUrl : m.imageUrl,
+        }))
+
+        if (mounted) setDemoMeals(updated)
+      } catch (err) {
+        // Fail silently for demo purposes
+        console.warn('Failed to load demo images for sample meals', err)
+      }
+    }
+
+    loadDemoImages()
+    return () => { mounted = false }
+  }, [])
+
+  const filteredMeals = demoMeals.filter((meal) => {
     const matchesSearch = meal.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedFilters.category === "All" || meal.category === selectedFilters.category
     const matchesTime =
@@ -376,6 +408,48 @@ function MealContent() {
 
   const handleFilterClick = () => {
     setShowFilters(!showFilters)
+  }
+
+  const handleSearch = async () => {
+    const q = searchQuery.trim()
+  if (!q) return
+    setSearchError(null)
+    try {
+      const results = await recipeService.searchRecipes(q)
+      // Map API recipe shape to the meal shape used in this component
+      const mapped = results.map((r) => ({
+        id: r._id,
+        imageUrl: r.imageUrl,
+        title: r.title,
+        name: r.title,
+        description: r.description,
+        time: String(r.totalTime || r.cookTime || 30),
+        cookTime: String(r.cookTime || r.totalTime || 30),
+        price: `$${(r.estimatedCostPerServing || 5).toFixed(2)}`,
+        cost: `$${(r.estimatedCostPerServing || 5).toFixed(2)}`,
+        calories: r.nutritionInfo?.calories || 0,
+        rating: 4.5,
+        tags: r.dietaryTags || [],
+        category: r.mealType || 'Dinner',
+        recipe: {
+          ingredients: (r as any).ingredients ? (r as any).ingredients.map((i: any) => i.name || '') : [],
+          instructions: (r as any).instructions ? (r as any).instructions.map((ins: any) => ins.instruction || '') : [],
+          nutrition: {
+            protein: r.nutritionInfo?.protein || 0,
+            carbs: r.nutritionInfo?.carbs || 0,
+            fat: r.nutritionInfo?.fat || 0,
+            fiber: 0,
+          }
+        }
+      }))
+      setRecipesFromApi(mapped)
+    } catch (err) {
+      console.error('Recipe search failed', err)
+      setRecipesFromApi([])
+      setSearchError('Failed to load recipes')
+    } finally {
+      // no-op
+    }
   }
 
   const handleCategoryChange = (category: string) => {
@@ -406,6 +480,9 @@ function MealContent() {
     })
   }
 
+  // Choose API results when available, otherwise fall back to demoMeals (which may have images)
+  const dataToShow: any[] = recipesFromApi !== null ? recipesFromApi : filteredMeals
+
   return (
     <div>
       <h2 className={styles.greeting}>Meal Recommendations</h2>
@@ -417,7 +494,12 @@ function MealContent() {
           value={searchQuery}
           onChange={setSearchQuery}
           onFilterClick={handleFilterClick}
+          onSubmit={handleSearch}
         />
+
+        {searchError && (
+          <div style={{ color: '#dc2626', marginLeft: '12px' }}>{searchError}</div>
+        )}
 
         {showFilters && (
           <div className={styles.filterDropdown}>
@@ -493,19 +575,28 @@ function MealContent() {
         )}
       </div>
 
-      <div className={styles.mealScrollContainer}>
-        {filteredMeals.map((meal, index) => (
+  <div className={styles.mealScrollContainer}>
+            {dataToShow.map((meal, index) => (
           <MealContentCard
             key={index}
+            recipeId={meal.id.toString()}
             imageUrl={meal.imageUrl}
             title={meal.title}
             description={meal.description}
-            time={meal.time}
-            price={meal.price}
-            calories={meal.calories}
-            rating={meal.rating}
-            tags={meal.tags}
+            totalTime={parseInt(meal.time)} // Convert "25 min" to just the number
+            estimatedCostPerServing={parseFloat(meal.price.replace('$', ''))}
+            nutritionInfo={{
+              calories: meal.calories,
+              protein: meal.recipe.nutrition.protein,
+              carbs: meal.recipe.nutrition.carbs,
+              fat: meal.recipe.nutrition.fat
+            }}
+            dietaryTags={meal.tags}
             onViewRecipe={() => handleViewRecipe(meal)}
+            onAddToPlan={(recipeId) => {
+              console.log('Add to plan:', recipeId);
+              // TODO: Implement add to plan functionality
+            }}
           />
         ))}
       </div>
@@ -524,12 +615,12 @@ function MealContent() {
   )
 }
 
-function PlannerContent({ 
-  selectedDay, 
-  setSelectedDay, 
-  weeklyMealPlan, 
-  setWeeklyMealPlan 
-}: { 
+function PlannerContent({
+  selectedDay,
+  setSelectedDay,
+  weeklyMealPlan,
+  setWeeklyMealPlan
+}: {
   selectedDay: keyof WeeklyMealPlan
   setSelectedDay: React.Dispatch<React.SetStateAction<keyof WeeklyMealPlan>>
   weeklyMealPlan: WeeklyMealPlan
@@ -688,7 +779,7 @@ function NutritionContent({ selectedDay, weeklyMealPlan }: { selectedDay: keyof 
   // Calculate nutrition data based on the selected day's meals
   const calculateNutritionData = () => {
     const dayPlan = weeklyMealPlan[selectedDay];
-    
+
     let totalCalories = 0;
     let totalProtein = 0;
     let totalCarbs = 0;
@@ -697,7 +788,7 @@ function NutritionContent({ selectedDay, weeklyMealPlan }: { selectedDay: keyof 
 
     // Sum up nutrition from all meals in the day
     const mealTypes: (keyof DayMealPlan)[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
-    
+
     mealTypes.forEach(mealType => {
       dayPlan[mealType].forEach(meal => {
         totalCalories += meal.calories;
@@ -1037,7 +1128,7 @@ function DashboardContentSwitcher() {
       <div className={styles.tabContent}>
         {activeTab === "meals" && <MealContent />}
         {activeTab === "planner" && (
-          <PlannerContent 
+          <PlannerContent
             selectedDay={selectedDay}
             setSelectedDay={setSelectedDay}
             weeklyMealPlan={weeklyMealPlan}
@@ -1045,9 +1136,9 @@ function DashboardContentSwitcher() {
           />
         )}
         {activeTab === "nutrition" && (
-          <NutritionContent 
-            selectedDay={selectedDay} 
-            weeklyMealPlan={weeklyMealPlan} 
+          <NutritionContent
+            selectedDay={selectedDay}
+            weeklyMealPlan={weeklyMealPlan}
           />
         )}
         {activeTab === "ai-assistant" && <AIAssistantContent />}
@@ -1115,9 +1206,12 @@ const Dashboard: FC<DashboardProps> = () => {
 
   return (
     <div className={styles.Dashboard}>
+      {/* Top Navigation Bar */}
+      <TopNavBar userEmail="Linda.Mukundwa1@marist.edu" />
+
       {/* Header/Greeting Section */}
       <div className={styles.header}>
-        <h1 className={styles.greeting}>Good morning, Jessica! 👋</h1>
+        <h1 className={styles.greeting}>Good morning, Linda! 👋</h1>
         <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
       </div>
 

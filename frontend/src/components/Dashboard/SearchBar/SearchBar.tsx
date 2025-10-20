@@ -9,9 +9,10 @@ interface SearchBarProps {
   value: string
   onChange: (value: string) => void
   onFilterClick?: () => void
+  onSubmit?: () => void
 }
 
-const SearchBar: FC<SearchBarProps> = ({ placeholder = "Search for Recipes", value, onChange, onFilterClick }) => {
+const SearchBar: FC<SearchBarProps> = ({ placeholder = "Search for Recipes", value, onChange, onFilterClick, onSubmit }) => {
   return (
     <div className={styles.searchBarContainer}>
       <div className={styles.searchInputWrapper}>
@@ -46,11 +47,21 @@ const SearchBar: FC<SearchBarProps> = ({ placeholder = "Search for Recipes", val
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              onSubmit && onSubmit()
+            }
+          }}
         />
       </div>
+      <div className={styles.rightControls}>
+        <button className={styles.searchButton} onClick={() => onSubmit && onSubmit()} aria-label="Search">
+          Search
+        </button>
 
-      {/* Filter Button */}
-      <button className={styles.filterButton} onClick={onFilterClick} aria-label="Open filters">
+        {/* Filter Button */}
+        <button className={styles.filterButton} onClick={onFilterClick} aria-label="Open filters">
         <svg
           className={styles.filterIcon}
           width="16"
@@ -69,6 +80,7 @@ const SearchBar: FC<SearchBarProps> = ({ placeholder = "Search for Recipes", val
         </svg>
         <span>Filters</span>
       </button>
+  </div>
     </div>
   )
 }

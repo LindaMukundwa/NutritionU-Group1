@@ -1,10 +1,23 @@
 import { Router } from 'express';
+import { 
+  searchRecipes, 
+  getRecipeById, 
+  searchFoods, 
+  getFoodById,
+  //generateRecipeFromOpenAI 
+} from '../controllers/RecipeController';
 
-import { generateRecipeFromOpenAI } from '../controllers/RecipeController.ts';
+const router = Router();
 
-const router = Router()
+// FatSecret recipe routes
+router.get('/search', searchRecipes);
+router.get('/:id', getRecipeById);
 
-// Route to get recipe from open AI
-router.post('/generate-recipe', generateRecipeFromOpenAI);
+// FatSecret food/ingredient routes
+router.get('/foods/search', searchFoods);
+router.get('/foods/:id', getFoodById);
+
+// OpenAI route (keeping for future)
+//router.post('/generate-recipe', generateRecipeFromOpenAI);
 
 export default router;

@@ -58,7 +58,7 @@ const Signup = () => {
         {/* Logo - Replace with your actual NutritionU logo */}
         <img
           className="nutritionU-logo"
-          src="/logoLight.png"
+          src="/2.png"
           alt="NutritionU"
         />
         
