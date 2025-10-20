@@ -117,7 +117,12 @@ const AssistantContent: React.FC = () => {
                                 className={`${styles.message} ${message.isUser ? styles["user-message"] : styles["ai-message"]}`}
                             >
                                 <div className={styles["message-content"]}>
-                                    {message.text}
+                                    {message.text.split('\n').map((line, index) => (
+                                        <React.Fragment key={index}>
+                                            {line}
+                                            {index < message.text.split('\n').length - 1 && <br />}
+                                        </React.Fragment>
+                                    ))}
                                 </div>
                                 <div className={styles["message-timestamp"]}>
                                     {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -153,6 +158,7 @@ const AssistantContent: React.FC = () => {
                         onClick={handleSendMessage}
                         className={styles["send-button"]}
                         disabled={isLoading || !inputText.trim()}
+                        aria-label="Send message"
                     >
                         Send
                     </button>
