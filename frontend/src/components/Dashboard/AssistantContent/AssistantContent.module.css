@@ -192,3 +192,24 @@
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+/* Thinking indicator */
+.thinkingIndicator {
+    font-style: bold;
+    color: #5c6bcc; /* Fallback for older browsers */
+    background: linear-gradient(90deg, #5c6bcc, #888, #00796b);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
