@@ -3,27 +3,23 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
     padding: 20px;
-    background-color: #f9fafb;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Chat header */
 .chat-header {
     display: flex;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid #e5e7eb;
-    margin-bottom: 16px;
 }
 
 .chat-header h2 {
     font-size: 1.5rem;
     color: #333;
+    font-size: 36px;
 }
 
 /* Chat container */
@@ -36,8 +32,9 @@
 
 /* Welcome section */
 .welcome-section {
-    text-align: center;
+    text-align: left;
     color: #555;
+    padding-bottom: 2%;
 }
 
 .welcome-section h3 {
@@ -48,8 +45,9 @@
 .example-prompts {
     display: flex;
     flex-wrap: wrap;
+    padding-top: 1%;
     gap: 10px;
-    justify-content: center;
+    justify-content: left;
 }
 
 .example-prompt {
@@ -88,13 +86,34 @@
 
 .user-message {
     align-self: flex-end;
-    background-color: #ffffff;
-    color: black;
+    background: linear-gradient(135deg, #00796b, #004d40);
+    color: #ffffff;
+    padding: 12px;
+    border-radius: 12px 12px 0 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-message:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .ai-message {
     align-self: flex-start;
-    color: black;
+    background: linear-gradient(135deg, #e0f7fa, #b2dfdb);
+    color: #004d40;
+    padding: 12px;
+    border-radius: 12px 12px 12px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-message:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .message-content {

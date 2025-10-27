@@ -14,11 +14,8 @@ const AssistantContent: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const examplePrompts = [
-        "What are some healthy breakfast options?",
-        "How many calories should I eat per day?",
-        "Can you suggest a meal plan for weight loss?",
-        "What foods are high in protein?",
-        "How can I increase my daily fiber intake?"
+        "What are some high protein meals?",
+        "How many calories should I be eating per day?",
     ];
 
     const handleSendMessage = async () => {
@@ -106,17 +103,6 @@ const AssistantContent: React.FC = () => {
             {messages.length === 0 ? (
                 <div className={styles["welcome-section"]}>
                     <h3>Ask me anything about nutrition, meal planning, or dietary advice.</h3>
-                    <div className={styles["example-prompts"]}>
-                        {examplePrompts.map((prompt) => (
-                            <button 
-                                key={prompt} 
-                                onClick={() => handleExampleClick(prompt)}
-                                className={styles["example-prompt"]}
-                            >
-                                {prompt}
-                            </button>
-                        ))}
-                    </div>
                 </div>
             ) : (
                 <div className={styles["chat-container"]}>
@@ -129,7 +115,13 @@ const AssistantContent: React.FC = () => {
                                 <div className={styles["message-content"]}>
                                     {message.text.split('\n').map((line, index) => (
                                         <React.Fragment key={index}>
-                                            {line}
+                                            {line.split('**').map((part, partIndex) => 
+                                                partIndex % 2 === 1 ? (
+                                                    <strong key={partIndex}>{part}</strong>
+                                                ) : (
+                                                    <React.Fragment key={partIndex}>{part}</React.Fragment>
+                                                )
+                                            )}
                                             {index < message.text.split('\n').length - 1 && <br />}
                                         </React.Fragment>
                                     ))}
@@ -171,6 +163,19 @@ const AssistantContent: React.FC = () => {
                     >
                         Send
                     </button>
+                </div>
+            </div>
+            <div className={styles["additional-prompts"]}>
+                <div className={styles["example-prompts"]}>
+                    {examplePrompts.map((prompt) => (
+                        <button 
+                            key={prompt} 
+                            onClick={() => handleExampleClick(prompt)}
+                            className={styles["example-prompt"]}
+                        >
+                            {prompt}
+                        </button>
+                    ))}
                 </div>
             </div>
         </div>
