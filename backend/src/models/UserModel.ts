@@ -1,5 +1,5 @@
 // Blueprint for out user documents in MOngoDB
-import type { User } from '../../../shared/types/user';
+import type { User } from '../../../shared/types/user.ts';
 import { Schema, model } from 'mongoose';
 
 export interface UserDocument extends User, Document {}

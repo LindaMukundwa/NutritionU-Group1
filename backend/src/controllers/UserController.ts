@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import { default as User } from '../models/UserModel.ts';
+import User from '../models/UserModel.ts';
 // ...existing imports
-import { default as Recipe } from '../models/RecipeModel.ts';
+import Recipe from '../models/RecipeModel.ts';
 
 
 // Create a new user

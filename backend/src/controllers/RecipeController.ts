@@ -102,9 +102,9 @@ import Recipe from '../models/RecipeModel';
         res.status(500).json({ message: 'Failed to generate recipe', error });
     }
 } */
-import { Request, Response } from 'express';
-import fatSecretService from '../services/fatSecretService';
-import Recipe from '../models/RecipeModel';
+import type { Request, Response } from 'express';
+import fatSecretService from '../services/fatSecretService.ts';
+import Recipe from '../models/RecipeModel.ts';
 
 /**
  * Search recipes from FatSecret API
