@@ -1,4 +1,4 @@
-import type { Recipe } from '../../../shared/types/recipe';
+import type { Recipe } from '../../../shared/types/recipe.ts';
 import { Schema, model } from 'mongoose';
 
 export interface RecipeDocument extends Recipe, Document {}

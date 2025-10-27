@@ -5,7 +5,7 @@ import {
   searchFoods, 
   getFoodById,
   //generateRecipeFromOpenAI 
-} from '../controllers/RecipeController';
+} from '../controllers/RecipeController.ts';
 
 const router = Router();
 

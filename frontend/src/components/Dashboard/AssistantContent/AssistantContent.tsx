@@ -41,21 +41,31 @@ const AssistantContent: React.FC = () => {
         setIsLoading(true);
         
         try {
+            const conversationHistory = messages.map(message => ({
+                role: message.isUser ? 'user' : 'assistant',
+                content: message.text
+            }));
+
+            conversationHistory.push({
+                role: 'user',
+                content: userMessage.text
+            });
+
             // Call backend API
             const response = await fetch('http://localhost:3001/api/chatbot/generate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: userMessage.text })
+                body: JSON.stringify({ message: conversationHistory })
             });
             
             if (!response.ok) {
                 throw new Error('Failed to get response from the server');
             }
-            
-            const data = await response.json();
-            
+
+            const data = await response.json() as { reply: string };
+
             // Add assistant response to chat
             const assistantMessage: Message = {
                 id: Date.now().toString(),
@@ -132,10 +142,8 @@ const AssistantContent: React.FC = () => {
                         {isLoading && (
                             <div className={`${styles.message} ${styles["ai-message"]}`}>
                                 <div className={styles["message-content"]}>
-                                    <div className={styles["typing-indicator"]}>
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
+                                    <div className={styles.thinkingIndicator}>
+                                        Thinking...
                                     </div>
                                 </div>
                             </div>
@@ -143,13 +151,14 @@ const AssistantContent: React.FC = () => {
                     </div>
                 </div>
             )}
-            
+
             <div className={styles["chat-input-container"]}>
                 <div className={styles["input-group"]}>
                     <input
                         type="text"
                         value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
+                        onChange={(e) => setInputText(
+                            e.target.value)} 
                         placeholder="Type a message..."
                         className={styles["chat-input"]}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}

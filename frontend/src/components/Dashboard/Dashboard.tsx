@@ -1,9 +1,10 @@
 import React, { type FC, useState } from "react"
+import { TopNavBar } from "../NavigationBar/TopNavBar"
 import styles from "./Dashboard.module.css"
 import AssistantContent from "./AssistantContent/AssistantContent"
 import MealContentCard from "./MealContentCard/MealContentCard"
 import SearchBar from "./SearchBar/SearchBar"
-import { recipeService } from '../../../services/recipeService'
+import { recipeService } from '../../../services/recipeService';
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
 
 interface SummaryCardData {
@@ -12,43 +13,43 @@ interface SummaryCardData {
   subtext: string;
   icon: string;
   progressBar?: {
-    current: number
-    total: number
-  }
+    current: number;
+    total: number;
+  };
 }
 
 interface Meal {
-  name: string
-  calories: number
-  time: string
-  cost: string
+  name: string;
+  calories: number;
+  time: string;
+  cost: string;
   recipe: {
-    ingredients: string[]
-    instructions: string[]
+    ingredients: string[];
+    instructions: string[];
     nutrition: {
-      protein: number
-      carbs: number
-      fat: number
-      fiber: number
-    }
-  }
+      protein: number;
+      carbs: number;
+      fat: number;
+      fiber: number;
+    };
+  };
 }
 
 interface DayMealPlan {
-  breakfast: Meal[]
-  lunch: Meal[]
-  dinner: Meal[]
-  snacks: Meal[]
+  breakfast: Meal[];
+  lunch: Meal[];
+  dinner: Meal[];
+  snacks: Meal[];
 }
 
 interface WeeklyMealPlan {
-  Monday: DayMealPlan
-  Tuesday: DayMealPlan
-  Wednesday: DayMealPlan
-  Thursday: DayMealPlan
-  Friday: DayMealPlan
-  Saturday: DayMealPlan
-  Sunday: DayMealPlan
+  Monday: DayMealPlan;
+  Tuesday: DayMealPlan;
+  Wednesday: DayMealPlan;
+  Thursday: DayMealPlan;
+  Friday: DayMealPlan;
+  Saturday: DayMealPlan;
+  Sunday: DayMealPlan;
 }
 
 type DashboardProps = {}
@@ -358,7 +359,35 @@ function MealContent() {
     },
   ]
 
-  const filteredMeals = sampleMeals.filter((meal) => {
+  // Use a local state copy of sample meals so we can populate images from the API on mount
+  const [demoMeals, setDemoMeals] = React.useState<any[]>(sampleMeals)
+
+  // On mount, fetch a small set of recipes and apply their images to the demo meals
+  React.useEffect(() => {
+    let mounted = true
+    const loadDemoImages = async () => {
+      try {
+        // Fetch one recipe per sample meal title so images correspond to the meal name
+        const promises = sampleMeals.map((m) => recipeService.searchRecipes(m.title, 1))
+        const resultsArr = await Promise.all(promises)
+
+        const updated = sampleMeals.map((m, i) => ({
+          ...m,
+          imageUrl: resultsArr[i] && resultsArr[i].length ? resultsArr[i][0].imageUrl : m.imageUrl,
+        }))
+
+        if (mounted) setDemoMeals(updated)
+      } catch (err) {
+        // Fail silently for demo purposes
+        console.warn('Failed to load demo images for sample meals', err)
+      }
+    }
+
+    loadDemoImages()
+    return () => { mounted = false }
+  }, [])
+
+  const filteredMeals = demoMeals.filter((meal) => {
     const matchesSearch = meal.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedFilters.category === "All" || meal.category === selectedFilters.category
     const matchesTime =
@@ -451,7 +480,7 @@ function MealContent() {
     })
   }
 
-  // Choose API results when available, otherwise fall back to static sampleMeals filtered list
+  // Choose API results when available, otherwise fall back to demoMeals (which may have images)
   const dataToShow: any[] = recipesFromApi !== null ? recipesFromApi : filteredMeals
 
   return (
@@ -1177,9 +1206,12 @@ const Dashboard: FC<DashboardProps> = () => {
 
   return (
     <div className={styles.Dashboard}>
+      {/* Top Navigation Bar */}
+      <TopNavBar userEmail="Linda.Mukundwa1@marist.edu" />
+
       {/* Header/Greeting Section */}
       <div className={styles.header}>
-        <h1 className={styles.greeting}>Good morning, Jessica! 👋</h1>
+        <h1 className={styles.greeting}>Good morning, Linda! 👋</h1>
         <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
       </div>
 
