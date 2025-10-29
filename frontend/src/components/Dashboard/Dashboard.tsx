@@ -6,6 +6,7 @@ import MealContentCard from "./MealContentCard/MealContentCard"
 import SearchBar from "./SearchBar/SearchBar"
 import { recipeService } from '../../../services/recipeService';
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
+import type { Recipe } from '../../../../shared/types/recipe';
 
 interface SummaryCardData {
   title: string;
@@ -18,20 +19,41 @@ interface SummaryCardData {
   };
 }
 
+// Simplified Meal type for the planner (compatible with Recipe schema)
 interface Meal {
-  name: string;
-  calories: number;
-  time: string;
-  cost: string;
+  name: string;  // Maps to Recipe.title
+  calories: number;  // Maps to Recipe.nutritionInfo.calories
+  time: string;  // Maps to Recipe.totalTime
+  cost: string;  // Maps to Recipe.estimatedCostPerServing
   recipe: {
-    ingredients: string[];
-    instructions: string[];
+    ingredients: string[];  // Simplified from Recipe.ingredients (just names)
+    instructions: string[];  // Simplified from Recipe.instructions (just text)
     nutrition: {
       protein: number;
       carbs: number;
       fat: number;
       fiber: number;
     };
+  };
+}
+
+// Helper function to convert Recipe to Meal
+function recipeToMeal(recipe: Recipe): Meal {
+  return {
+    name: recipe.title,
+    calories: recipe.nutritionInfo.calories,
+    time: `${recipe.totalTime} min`,
+    cost: `$${recipe.estimatedCostPerServing.toFixed(2)}`,
+    recipe: {
+      ingredients: recipe.ingredients.map(ing => `${ing.amount} ${ing.unit.value} ${ing.name}`),
+      instructions: recipe.instructions.map(step => step.instruction),
+      nutrition: {
+        protein: recipe.nutritionInfo.protein,
+        carbs: recipe.nutritionInfo.carbs,
+        fat: recipe.nutritionInfo.fat,
+        fiber: recipe.nutritionInfo.fiber,
+      },
+    },
   };
 }
 
