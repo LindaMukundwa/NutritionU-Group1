@@ -29,6 +29,8 @@ function App() {
           <Route path="/onboarding" element={<OnboardingPage />} />
           {/* Protected dashboard (after onboarding completes, may route here instead) */}
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          {/* TEMPORARY: Direct dashboard access for development */}
+          <Route path="/dashboard-preview" element={<Dashboard />} />
           {/* Fallback: redirect unknown routes to auth */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
