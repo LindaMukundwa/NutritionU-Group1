@@ -28,13 +28,6 @@ app.use(cors({
   credentials: true,
 }));
 
-// Explicitly respond to preflight OPTIONS for all routes (helps some environments)
-app.options('*', cors({
-  origin: FRONTEND_ORIGIN,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
 app.use(express.json());
 
 // Connect to MongoDB
