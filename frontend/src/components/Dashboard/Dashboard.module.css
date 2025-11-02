@@ -1,6 +1,6 @@
 /* General Layout and Reset */
 .Dashboard {
-  /*padding: 20px;*/
+  padding: 20px;
   font-family: Arial, sans-serif;
 }
 
@@ -10,8 +10,8 @@
 }
 
 .block {
-  background-color: #333;
-  color: white;
+  background-color: var(--text);
+  color: var(--bg-light);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -23,7 +23,7 @@
 .greeting {
   font-size: 2rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text);
   margin-top: 8px;
   margin-bottom: 5px;
   display: flex;
@@ -32,7 +32,7 @@
 
 .prompt {
   font-size: 1rem;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 0;
   text-align: left;
 }
@@ -48,17 +48,17 @@
 .summaryCard {
   flex: 1;
   min-width: 280px;
-  background-color: white;
+  background-color: var(--bg-light);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .cardHeader {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 10px;
@@ -74,7 +74,7 @@
 .cardValue {
   font-size: 2rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text);
 }
 
 .iconBackground {
@@ -89,29 +89,29 @@
 }
 
 .summaryCard:nth-child(1) .iconBackground {
-  background-color: #e0e0f0;
-  color: #5d5dff;
+  background-color: var(--bg-dark);
+  color: var(--text);
 }
 
 .summaryCard:nth-child(2) .iconBackground {
-  background-color: #e0f0e0;
-  color: #5d8e5d;
+  background-color: var(--bg-dark);
+  color: var(--text);
 }
 
 .summaryCard:nth-child(3) .iconBackground {
-  background-color: #f0f0f0;
-  color: #666;
+  background-color: var(--bg-dark);
+  color: var(--text-muted);
 }
 
 .cardSubtext {
   font-size: 0.85rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 /* Progress Bar Styling */
 .progressBarContainer {
   height: 8px;
-  background-color: #e0e0e0;
+  background-color: var(--bg-dark);
   border-radius: 4px;
   overflow: hidden;
   margin-top: 15px;
@@ -120,7 +120,7 @@
 .progressBarFill {
   height: 100%;
   border-radius: 4px;
-  background-color: #5d5dff;
+  background-color: var(--primary);
   transition: width 0.3s ease-in-out;
 }
 
@@ -133,7 +133,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0px;
-  background-color: #f1f5f9;
+  background-color: var(--bg-dark);
   padding: 4px;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -144,7 +144,7 @@
   border-radius: 6px;
   font-weight: 500;
   font-size: 0.95rem;
-  color: #6b7280;
+  color: var(--text-muted);
   background: transparent;
   border: none;
   outline: none;
@@ -155,13 +155,13 @@
 }
 
 .tabButton:hover {
-  color: #555555;
-  background-color: rgba(255, 255, 255, 0.5);
+  color: var(--text);
+  background-color: var(--bg);
 }
 
 .tabButton.active {
-  background-color: #ffffff;
-  color: #555555;
+  background-color: var(--bg-light);
+  color: var(--text);
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   font-weight: 600;
 }
@@ -172,10 +172,10 @@
 }
 
 .tabContent {
-  background: #ffffff;
+  background: var(--bg-light);
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
   min-height: 400px;
 }
 
@@ -190,9 +190,9 @@
 .filterChip {
   padding: 8px 16px;
   border-radius: 20px;
-  border: 1px solid #e5e7eb;
-  background-color: #ffffff;
-  color: #6b7280;
+  border: 1px solid var(--border);
+  background-color: var(--bg-light);
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -201,20 +201,20 @@
 }
 
 .filterChip:hover {
-  border-color: #5c6bcc;
-  color: #5c6bcc;
-  background-color: #f8f9ff;
+  border-color: var(--primary);
+  color: var(--text);
+  background-color: var(--bg);
 }
 
 .filterChipActive {
-  background-color: #5c6bcc;
-  color: #ffffff;
-  border-color: #5c6bcc;
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
 }
 
 .filterChipActive:hover {
-  background-color: #4a5ab8;
-  border-color: #4a5ab8;
+  background-color: var(--info);
+  border-color: var(--info);
 }
 
 .filterChip:focus,
@@ -257,14 +257,14 @@
   width: 320px;
   max-height: 400px;
   overflow-y: auto;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   z-index: 100;
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
+  scrollbar-color: var(--border-muted) var(--bg-dark);
 }
 
 .filterDropdown::-webkit-scrollbar {
@@ -272,17 +272,17 @@
 }
 
 .filterDropdown::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--bg-dark);
   border-radius: 3px;
 }
 
 .filterDropdown::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-muted);
   border-radius: 3px;
 }
 
 .filterDropdown::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--text-muted);
 }
 
 .filterHeader {
@@ -291,20 +291,20 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .filterTitle {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #555555;
+  color: var(--text);
   margin: 0;
 }
 
 .clearButton {
   background: none;
   border: none;
-  color: #5c6bcc;
+  color: var(--text);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -314,7 +314,7 @@
 }
 
 .clearButton:hover {
-  background-color: #f8f9ff;
+  background-color: var(--bg);
 }
 
 .filterSection {
@@ -329,7 +329,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555555;
+  color: var(--text);
   margin-bottom: 10px;
 }
 
@@ -342,9 +342,9 @@
 .filterOption {
   padding: 8px 16px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background-color: #ffffff;
-  color: #6b7280;
+  border: 1px solid var(--border);
+  background-color: var(--bg-light);
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -353,20 +353,20 @@
 }
 
 .filterOption:hover {
-  border-color: #5c6bcc;
-  color: #5c6bcc;
-  background-color: #f8f9ff;
+  border-color: var(--primary);
+  color: var(--text);
+  background-color: var(--bg);
 }
 
 .filterOptionActive {
-  background-color: #5c6bcc;
-  color: #ffffff;
-  border-color: #5c6bcc;
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
 }
 
 .filterOptionActive:hover {
-  background-color: #4a5ab8;
-  border-color: #4a5ab8;
+  background-color: var(--info);
+  border-color: var(--info);
 }
 
 .filterCheckboxes {
@@ -380,7 +380,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.875rem;
-  color: #555555;
+  color: var(--text);
   cursor: pointer;
 }
 
@@ -388,14 +388,14 @@
   width: 18px;
   height: 18px;
   border-radius: 4px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--border-muted);
   cursor: pointer;
-  accent-color: #5c6bcc;
+  accent-color: var(--primary);
 }
 
 .checkbox:checked {
-  background-color: #5c6bcc;
-  border-color: #5c6bcc;
+  background-color: var(--primary);
+  border-color: var(--primary);
 }
 
 /* ===== PLANNER STYLES ===== */
@@ -411,7 +411,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background-color: #f8fafc;
+  background-color: var(--bg);
   padding: 8px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -427,7 +427,7 @@
   border-radius: 8px;
   background-color: transparent;
   border: none;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 500;
   font-size: 0.875rem;
   cursor: pointer;
@@ -437,20 +437,20 @@
 }
 
 .dayButton:hover {
-  background-color: #e2e8f0;
-  color: #475569;
+  background-color: var(--border);
+  color: var(--text);
 }
 
 .dayButtonActive {
-  background-color: #5c6bcc;
-  color: white;
+  background-color: var(--primary);
+  color: var(--bg-light);
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(92, 107, 204, 0.2);
 }
 
 .navButton {
-  background-color: white;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
   border-radius: 8px;
   width: 36px;
   height: 36px;
@@ -458,15 +458,15 @@
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
-  color: #64748b;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
 
 .navButton:hover {
-  background-color: #f8fafc;
-  border-color: #cbd5e1;
-  color: #475569;
+  background-color: var(--bg);
+  border-color: var(--border-muted);
+  color: var(--text);
 }
 
 .plannerContent {
@@ -476,10 +476,11 @@
 }
 
 .mealSection {
-  background-color: #f8fafc;
+  background-color: var(--bg);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
 }
 
 .mealSectionHeader {
@@ -495,7 +496,7 @@
   gap: 10px;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0;
 }
 
@@ -511,10 +512,10 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background-color: white;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -522,9 +523,9 @@
 }
 
 .addMealButton:hover {
-  background-color: #5c6bcc;
-  border-color: #5c6bcc;
-  color: white;
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--bg-light);
 }
 
 .plusIcon {
@@ -539,17 +540,18 @@
 }
 
 .mealCard {
-  background-color: white;
+  background-color: var(--bg-light);
   border: 1px solid;
   border-radius: 10px;
   padding: 14px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
 }
 
 .mealCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.35), 0px 16px 16px rgba(0, 0, 0, 0.2);
 }
 
 .mealCardContent {
@@ -567,7 +569,7 @@
 .mealCardTitle {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0 0 8px 0;
   line-height: 1.3;
   overflow: hidden;
@@ -582,7 +584,7 @@
   flex-wrap: wrap;
   gap: 10px;
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .mealCardMeta span {
@@ -607,15 +609,16 @@
 }
 
 .emptyMealCard {
-  background-color: white;
-  border: 2px dashed #cbd5e1;
+  background-color: var(--bg-light);
+  border: 2px dashed var(--border-muted);
   border-radius: 10px;
   padding: 2rem;
   text-align: center;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
 }
 
 .emptyMealText {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -625,17 +628,18 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  background-color: #f8fafc;
+  background-color: var(--bg);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   margin-top: 1rem;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
 }
 
 .dailyTotals {
   display: flex;
   gap: 2rem;
   font-size: 0.9375rem;
-  color: #475569;
+  color: var(--text);
 }
 
 .totalItem {
@@ -645,14 +649,14 @@
 }
 
 .totalItem strong {
-  color: #1e293b;
+  color: var(--text);
   font-weight: 600;
 }
 
 .primaryButton {
   padding: 10px 20px;
-  background-color: #5c6bcc;
-  color: white;
+  background-color: var(--primary);
+  color: var(--bg-light);
   border: none;
   border-radius: 8px;
   font-weight: 500;
@@ -665,15 +669,15 @@
 }
 
 .primaryButton:hover {
-  background-color: #4a5ab8;
+  background-color: var(--info);
   box-shadow: 0 4px 12px rgba(92, 107, 204, 0.3);
 }
 
 .secondaryButton {
   padding: 10px 20px;
-  background-color: white;
-  color: #5c6bcc;
-  border: 1px solid #5c6bcc;
+  background-color: var(--bg-light);
+  color: var(--primary);
+  border: 1px solid var(--primary);
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.9375rem;
@@ -685,9 +689,9 @@
 }
 
 .secondaryButton:hover {
-  background-color: #f8f9ff;
-  border-color: #4a5ab8;
-  color: #4a5ab8;
+  background-color: var(--bg);
+  border-color: var(--info);
+  color: var(--info);
 }
 
 /* Nutrition Tracker Styles */
@@ -699,10 +703,11 @@
 }
 
 .nutritionItem {
-  background-color: #f8fafc;
+  background-color: var(--bg);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
 }
 
 .nutritionHeader {
@@ -718,7 +723,7 @@
   gap: 8px;
   font-size: 1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
 }
 
 .nutritionIcon {
@@ -728,7 +733,7 @@
 .nutritionValue {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 /* Modal Styles */
@@ -747,13 +752,13 @@
 }
 
 .modalContent {
-  background-color: white;
+  background-color: var(--bg-light);
   border-radius: 16px;
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
 }
 
 .modalHeader {
@@ -761,17 +766,17 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 2rem 2rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background-color: white;
+  background-color: var(--bg-light);
   z-index: 10;
 }
 
 .modalTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text);
   margin: 0 0 8px 0;
 }
 
@@ -779,14 +784,14 @@
   display: flex;
   gap: 16px;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .modalCloseButton {
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -799,8 +804,8 @@
 }
 
 .modalCloseButton:hover {
-  background-color: #f1f5f9;
-  color: #64748b;
+  background-color: var(--bg-dark);
+  color: var(--text-muted);
 }
 
 .modalBody {
@@ -818,7 +823,7 @@
 .sectionTitle {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0 0 1rem 0;
 }
 
@@ -836,12 +841,12 @@
   gap: 10px;
   padding: 8px 0;
   font-size: 0.9375rem;
-  color: #475569;
+  color: var(--text);
   line-height: 1.5;
 }
 
 .bullet {
-  color: #5c6bcc;
+  color: var(--text-muted);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -858,7 +863,7 @@
   display: flex;
   gap: 12px;
   font-size: 0.9375rem;
-  color: #475569;
+  color: var(--text);
   line-height: 1.6;
 }
 
@@ -868,8 +873,8 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  background-color: #5c6bcc;
-  color: white;
+  background-color: var(--primary);
+  color: var(--bg-light);
   border-radius: 50%;
   font-weight: 600;
   font-size: 0.875rem;
@@ -882,7 +887,7 @@
   gap: 12px;
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
 }
 
 .modalActions .primaryButton,

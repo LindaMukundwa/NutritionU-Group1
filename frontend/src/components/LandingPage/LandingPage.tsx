@@ -13,10 +13,6 @@ const LandingPage: React.FC<LandingPageProps> = () => {
     // signup page or open a modal
   };
 
-  const handleSeeHowItWorks = (): void => {
-    console.log('See How It Works clicked');
-    // features section or open a tutorial
-  };
 
   const navigate = useNavigate();
 
@@ -36,11 +32,6 @@ const LandingPage: React.FC<LandingPageProps> = () => {
         <div className="logo">
           <h2>NutritionU</h2>
         </div>
-        <ul className="nav-links">
-          <li><a href="#features">Features</a></li>
-          <li><a href="#how-it-works">How It Works</a></li>
-          <li><a href="#pricing">Pricing</a></li>
-        </ul>
         <div className="auth-buttons">
           <button 
             className="sign-in-btn" 
@@ -79,13 +70,6 @@ const LandingPage: React.FC<LandingPageProps> = () => {
             aria-label="Start planning meals now"
           >
             Start Planning Meals
-          </button>
-          <button 
-            className="secondary-btn" 
-            onClick={handleSeeHowItWorks}
-            aria-label="Learn more about how it works"
-          >
-            See How It Works
           </button>
         </div>
       </section>
