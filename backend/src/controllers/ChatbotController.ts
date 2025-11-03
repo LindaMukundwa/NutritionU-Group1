@@ -54,7 +54,11 @@ export const generateChatbotPrompts = async (req: Request, res: Response) => {
                     
           Guidelines:
                     
-          Generate 3 prompts under 10 words. It should be from the point of view of the user asking the chatbot. Don't include numbered bullets.
+          Generate 3 prompts (questions to ask) under 10 words based on the history of the conversation denoted in message. 
+          
+          It should be from the point of view of the user asking the chatbot. Don't include numbered bullets.
+          
+          Remove list indicators (number indicators) and quotes surrounding the question.
           `
         },
         ...message,
