@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './AddMealModal.module.css';
 import { recipeService } from '../../../../services/recipeService';
 import MealContentCard from '../MealContentCard/MealContentCard';
+import SearchBar from '../SearchBar/SearchBar';
 
 interface AddMealModalProps {
   isOpen: boolean;
@@ -83,12 +84,6 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
   const handleAddMealClick = (meal: any) => {
     // Convert meal format to planner format
     const plannerMeal = {
@@ -104,9 +99,22 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Filter available meals based on search query (like the Meals page does)
+  const filteredAvailableMeals = availableMeals.filter(meal =>
+    meal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    meal.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Filter favorites based on search query
+  const filteredFavorites = favoriteMeals.filter(meal =>
+    meal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    meal.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Determine which meals to display
   const displayMeals = activeTab === 'search' 
-    ? (searchResults.length > 0 ? searchResults : availableMeals)
-    : favoriteMeals;
+    ? (searchResults.length > 0 ? searchResults : filteredAvailableMeals)
+    : filteredFavorites;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -135,47 +143,18 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
           </button>
         </div>
 
-        {/* Search Bar (only visible in search tab) */}
-        {activeTab === 'search' && (
-          <div className={styles.searchContainer}>
-            <div className={styles.searchBar}>
-              <svg
-                className={styles.searchIcon}
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Search for meals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-              />
-              <button
-                className={styles.searchButton}
-                onClick={handleSearch}
-                disabled={isSearching}
-              >
-                {isSearching ? 'Searching...' : 'Search'}
-              </button>
-            </div>
-            {searchError && (
-              <div className={styles.errorMessage}>{searchError}</div>
-            )}
-          </div>
-        )}
+        {/* Search Bar (visible in both tabs) */}
+        <div className={styles.searchContainer}>
+          <SearchBar
+            placeholder={activeTab === 'search' ? 'Search for meals...' : 'Search favorites...'}
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onSubmit={activeTab === 'search' ? handleSearch : undefined}
+          />
+          {searchError && activeTab === 'search' && (
+            <div className={styles.errorMessage}>{searchError}</div>
+          )}
+        </div>
 
         {/* Meals Grid */}
         <div className={styles.mealsContainer}>
