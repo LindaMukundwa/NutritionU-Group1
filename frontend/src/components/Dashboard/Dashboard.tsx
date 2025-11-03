@@ -7,6 +7,7 @@ import SearchBar from "./SearchBar/SearchBar"
 import { recipeService } from '../../../services/recipeService';
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
 import AddMealModal from "./AddMealModal/AddMealModal"
+import AddToPlanModal from "./AddToPlanModal/AddToPlanModal"
 import type { Recipe } from '../../../../shared/types/recipe';
 
 interface SummaryCardData {
@@ -180,13 +181,21 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
   )
 }
 
-function MealContent() {
+function MealContent({
+  weeklyMealPlan,
+  setWeeklyMealPlan,
+}: {
+  weeklyMealPlan: WeeklyMealPlan;
+  setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>;
+}) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [recipesFromApi, setRecipesFromApi] = React.useState<any[] | null>(null)
   const [searchError, setSearchError] = React.useState<string | null>(null)
   const [showFilters, setShowFilters] = React.useState(false)
   const [selectedRecipe, setSelectedRecipe] = React.useState(null)
   const [showRecipeModal, setShowRecipeModal] = React.useState(false)
+  const [showAddToPlanModal, setShowAddToPlanModal] = React.useState(false)
+  const [mealToAdd, setMealToAdd] = React.useState<any>(null)
   const [selectedFilters, setSelectedFilters] = React.useState({
     category: "All",
     maxTime: "Any",
@@ -616,9 +625,9 @@ function MealContent() {
             }}
             dietaryTags={meal.tags}
             onViewRecipe={() => handleViewRecipe(meal)}
-            onAddToPlan={(recipeId) => {
-              console.log('Add to plan:', recipeId);
-              // TODO: Implement add to plan functionality
+            onAddToPlan={() => {
+              setMealToAdd(meal);
+              setShowAddToPlanModal(true);
             }}
           />
         ))}
@@ -633,6 +642,34 @@ function MealContent() {
 
       {showRecipeModal && selectedRecipe && (
         <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
+      )}
+
+      {showAddToPlanModal && mealToAdd && (
+        <AddToPlanModal
+          isOpen={showAddToPlanModal}
+          onClose={() => setShowAddToPlanModal(false)}
+          onAddToPlan={(day, mealType) => {
+            const plannerMeal: Meal = {
+              name: mealToAdd.name || mealToAdd.title,
+              calories: mealToAdd.calories,
+              time: typeof mealToAdd.time === 'string' ? mealToAdd.time : `${mealToAdd.time} min`,
+              cost: mealToAdd.cost || mealToAdd.price,
+              recipe: mealToAdd.recipe,
+            };
+            
+            const dayKey = day as keyof WeeklyMealPlan;
+            const mealTypeKey = mealType as keyof DayMealPlan;
+            
+            setWeeklyMealPlan((prev) => ({
+              ...prev,
+              [dayKey]: {
+                ...prev[dayKey],
+                [mealTypeKey]: [...prev[dayKey][mealTypeKey], plannerMeal],
+              },
+            }));
+          }}
+          mealTitle={mealToAdd.title || mealToAdd.name}
+        />
       )}
     </div>
   )
@@ -1364,7 +1401,12 @@ function DashboardContentSwitcher() {
 
       {/* Tab Content */}
       <div className={styles.tabContent}>
-        {activeTab === "meals" && <MealContent />}
+        {activeTab === "meals" && (
+          <MealContent
+            weeklyMealPlan={weeklyMealPlan}
+            setWeeklyMealPlan={setWeeklyMealPlan}
+          />
+        )}
         {activeTab === "planner" && (
           <PlannerContent
             selectedDay={selectedDay}
