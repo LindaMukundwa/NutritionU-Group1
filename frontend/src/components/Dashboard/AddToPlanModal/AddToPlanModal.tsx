@@ -4,8 +4,24 @@ import styles from './AddToPlanModal.module.css';
 interface AddToPlanModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddToPlan: (day: string, mealType: string) => void;
+  onAddToPlan: (dateString: string, mealType: string) => void;
   mealTitle: string;
+}
+
+// Helper function to get date string in YYYY-MM-DD format
+function getDateString(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+// Helper function to format date for display
+function formatDateDisplay(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00');
+  const options: Intl.DateTimeFormatOptions = { 
+    weekday: 'short', 
+    month: 'short', 
+    day: 'numeric' 
+  };
+  return date.toLocaleDateString('en-US', options);
 }
 
 const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
@@ -14,10 +30,22 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
   onAddToPlan,
   mealTitle,
 }) => {
-  const [selectedDay, setSelectedDay] = useState('Monday');
+  // Generate next 7 days starting from today
+  const generateNext7Days = () => {
+    const dates: string[] = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() + i);
+      dates.push(getDateString(date));
+    }
+    return dates;
+  };
+
+  const availableDates = generateNext7Days();
+  const [selectedDay, setSelectedDay] = useState(availableDates[0]);
   const [selectedMealType, setSelectedMealType] = useState('breakfast');
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const mealTypes = [
     { value: 'breakfast', label: 'Breakfast', color: '#f97316' },
     { value: 'lunch', label: 'Lunch', color: '#22c55e' },
@@ -49,13 +77,14 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
           <div className={styles.section}>
             <label className={styles.sectionLabel}>Select Day</label>
             <div className={styles.dayGrid}>
-              {days.map((day) => (
+              {availableDates.map((dateString) => (
                 <button
-                  key={day}
-                  className={`${styles.dayButton} ${selectedDay === day ? styles.dayButtonActive : ''}`}
-                  onClick={() => setSelectedDay(day)}
+                  key={dateString}
+                  className={`${styles.dayButton} ${selectedDay === dateString ? styles.dayButtonActive : ''}`}
+                  onClick={() => setSelectedDay(dateString)}
+                  title={formatDateDisplay(dateString)}
                 >
-                  {day.slice(0, 3)}
+                  {formatDateDisplay(dateString)}
                 </button>
               ))}
             </div>
@@ -94,7 +123,7 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
             Cancel
           </button>
           <button className={styles.addButton} onClick={handleAdd}>
-            Add to {selectedDay}
+            Add to Plan
           </button>
         </div>
       </div>

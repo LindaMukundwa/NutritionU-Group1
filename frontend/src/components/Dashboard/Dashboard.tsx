@@ -66,14 +66,93 @@ interface DayMealPlan {
   snacks: Meal[];
 }
 
+// Use a Map-like structure with date strings as keys (YYYY-MM-DD format)
 interface WeeklyMealPlan {
-  Monday: DayMealPlan;
-  Tuesday: DayMealPlan;
-  Wednesday: DayMealPlan;
-  Thursday: DayMealPlan;
-  Friday: DayMealPlan;
-  Saturday: DayMealPlan;
-  Sunday: DayMealPlan;
+  [dateString: string]: DayMealPlan;
+}
+
+// Helper function to get date string in YYYY-MM-DD format
+function getDateString(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+// Helper function to format date for display
+function formatDisplayDate(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00');
+  const options: Intl.DateTimeFormatOptions = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  };
+  return date.toLocaleDateString('en-US', options);
+}
+
+// Helper function to get day name
+function getDayName(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00');
+  return date.toLocaleDateString('en-US', { weekday: 'long' });
+}
+
+// Helper to get or create empty day plan
+function getOrCreateDayPlan(plan: WeeklyMealPlan, dateString: string): DayMealPlan {
+  if (!plan[dateString]) {
+    return {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snacks: [],
+    };
+  }
+  return plan[dateString];
+}
+
+// Reusable DateNavigation Component
+function DateNavigation({
+  selectedDay,
+  setSelectedDay,
+}: {
+  selectedDay: string;
+  setSelectedDay: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  const goToPreviousDay = () => {
+    const currentDate = new Date(selectedDay + 'T00:00:00');
+    currentDate.setDate(currentDate.getDate() - 1);
+    setSelectedDay(getDateString(currentDate));
+  };
+
+  const goToNextDay = () => {
+    const currentDate = new Date(selectedDay + 'T00:00:00');
+    currentDate.setDate(currentDate.getDate() + 1);
+    setSelectedDay(getDateString(currentDate));
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      setSelectedDay(e.target.value);
+    }
+  };
+
+  return (
+    <div className={styles.dateNavigation}>
+      <button className={styles.navButton} onClick={goToPreviousDay} title="Previous day">
+        ‹
+      </button>
+      <div className={styles.dateDisplay}>
+        <span className={styles.dateText}>{formatDisplayDate(selectedDay)}</span>
+        <input
+          type="date"
+          value={selectedDay}
+          onChange={handleDateChange}
+          className={styles.datePicker}
+          title="Select a date"
+        />
+      </div>
+      <button className={styles.navButton} onClick={goToNextDay} title="Next day">
+        ›
+      </button>
+    </div>
+  );
 }
 
 type DashboardProps = {}
@@ -648,7 +727,7 @@ function MealContent({
         <AddToPlanModal
           isOpen={showAddToPlanModal}
           onClose={() => setShowAddToPlanModal(false)}
-          onAddToPlan={(day, mealType) => {
+          onAddToPlan={(dateString, mealType) => {
             const plannerMeal: Meal = {
               name: mealToAdd.name || mealToAdd.title,
               calories: mealToAdd.calories,
@@ -657,16 +736,18 @@ function MealContent({
               recipe: mealToAdd.recipe,
             };
             
-            const dayKey = day as keyof WeeklyMealPlan;
             const mealTypeKey = mealType as keyof DayMealPlan;
             
-            setWeeklyMealPlan((prev) => ({
-              ...prev,
-              [dayKey]: {
-                ...prev[dayKey],
-                [mealTypeKey]: [...prev[dayKey][mealTypeKey], plannerMeal],
-              },
-            }));
+            setWeeklyMealPlan((prev) => {
+              const dayPlan = getOrCreateDayPlan(prev, dateString);
+              return {
+                ...prev,
+                [dateString]: {
+                  ...dayPlan,
+                  [mealTypeKey]: [...dayPlan[mealTypeKey], plannerMeal],
+                },
+              };
+            });
           }}
           mealTitle={mealToAdd.title || mealToAdd.name}
         />
@@ -682,8 +763,8 @@ function PlannerContent({
   setWeeklyMealPlan,
   availableMeals
 }: {
-  selectedDay: keyof WeeklyMealPlan
-  setSelectedDay: React.Dispatch<React.SetStateAction<keyof WeeklyMealPlan>>
+  selectedDay: string
+  setSelectedDay: React.Dispatch<React.SetStateAction<string>>
   weeklyMealPlan: WeeklyMealPlan
   setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>
   availableMeals: any[]
@@ -700,16 +781,18 @@ function PlannerContent({
     }
   }
 
-  const handleDeleteMeal = (day: string, mealType: string, mealIndex: number) => {
-    const dayKey = day as keyof WeeklyMealPlan
+  const handleDeleteMeal = (dateString: string, mealType: string, mealIndex: number) => {
     const mealTypeKey = mealType as keyof DayMealPlan
-    setWeeklyMealPlan((prev) => ({
-      ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        [mealTypeKey]: prev[dayKey][mealTypeKey].filter((_: Meal, index: number) => index !== mealIndex),
-      },
-    }))
+    setWeeklyMealPlan((prev) => {
+      const dayPlan = getOrCreateDayPlan(prev, dateString)
+      return {
+        ...prev,
+        [dateString]: {
+          ...dayPlan,
+          [mealTypeKey]: dayPlan[mealTypeKey].filter((_: Meal, index: number) => index !== mealIndex),
+        },
+      }
+    })
   }
 
   const handleAddMeal = (mealType: string) => {
@@ -719,30 +802,50 @@ function PlannerContent({
 
   const handleAddMealToPlanner = (meal: Meal) => {
     const mealTypeKey = addMealType as keyof DayMealPlan
-    setWeeklyMealPlan((prev) => ({
-      ...prev,
-      [selectedDay]: {
-        ...prev[selectedDay],
-        [mealTypeKey]: [...prev[selectedDay][mealTypeKey], meal],
-      },
-    }))
+    setWeeklyMealPlan((prev) => {
+      const dayPlan = getOrCreateDayPlan(prev, selectedDay)
+      return {
+        ...prev,
+        [selectedDay]: {
+          ...dayPlan,
+          [mealTypeKey]: [...dayPlan[mealTypeKey], meal],
+        },
+      }
+    })
   }
 
-  const days = Object.keys(weeklyMealPlan) as Array<keyof WeeklyMealPlan>
-  const currentDayIndex = days.indexOf(selectedDay)
+  // Generate dates for navigation (show 7 days starting from current week)
+  const generateWeekDates = () => {
+    const selectedDate = new Date(selectedDay + 'T00:00:00')
+    const currentDayOfWeek = selectedDate.getDay() // 0 = Sunday, 6 = Saturday
+    const startOfWeek = new Date(selectedDate)
+    startOfWeek.setDate(startOfWeek.getDate() - currentDayOfWeek) // Go to Sunday
+    
+    const dates: string[] = []
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek)
+      date.setDate(date.getDate() + i)
+      dates.push(getDateString(date))
+    }
+    return dates
+  }
+
+  const weekDates = generateWeekDates()
 
   const goToPreviousDay = () => {
-    const prevIndex = currentDayIndex > 0 ? currentDayIndex - 1 : days.length - 1
-    setSelectedDay(days[prevIndex])
+    const currentDate = new Date(selectedDay + 'T00:00:00')
+    currentDate.setDate(currentDate.getDate() - 1)
+    setSelectedDay(getDateString(currentDate))
   }
 
   const goToNextDay = () => {
-    const nextIndex = currentDayIndex < days.length - 1 ? currentDayIndex + 1 : 0
-    setSelectedDay(days[nextIndex])
+    const currentDate = new Date(selectedDay + 'T00:00:00')
+    currentDate.setDate(currentDate.getDate() + 1)
+    setSelectedDay(getDateString(currentDate))
   }
 
   const calculateDailyTotals = () => {
-    const dayPlan = weeklyMealPlan[selectedDay]
+    const dayPlan = getOrCreateDayPlan(weeklyMealPlan, selectedDay)
     const totalCalories =
       dayPlan.breakfast.reduce((sum, meal) => sum + meal.calories, 0) +
       dayPlan.lunch.reduce((sum, meal) => sum + meal.calories, 0) +
@@ -759,39 +862,21 @@ function PlannerContent({
   }
 
   const { totalCalories, totalCost } = calculateDailyTotals()
+  const currentDayPlan = getOrCreateDayPlan(weeklyMealPlan, selectedDay)
 
   return (
     <div>
       <div className={styles.plannerHeader}>
         <div>
           <h2 className={styles.greeting}>Daily Meal Planner</h2>
-          <p className={styles.prompt}>Click on any meal to view the full recipe</p>
         </div>
-        <div className={styles.dayNavigation}>
-          <button className={styles.navButton} onClick={goToPreviousDay}>
-            ‹
-          </button>
-          <div className={styles.dayButtons}>
-            {days.map((day) => (
-              <button
-                key={day}
-                className={`${styles.dayButton} ${selectedDay === day ? styles.dayButtonActive : ""}`}
-                onClick={() => setSelectedDay(day)}
-              >
-                {day.slice(0, 3)}
-              </button>
-            ))}
-          </div>
-          <button className={styles.navButton} onClick={goToNextDay}>
-            ›
-          </button>
-        </div>
+        <DateNavigation selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
       </div>
 
       <div className={styles.plannerContent}>
         <PlannerMealCard
           mealType="breakfast"
-          meals={weeklyMealPlan[selectedDay].breakfast}
+          meals={currentDayPlan.breakfast}
           color="#f97316"
           label="Breakfast"
           selectedDay={selectedDay}
@@ -801,7 +886,7 @@ function PlannerContent({
         />
         <PlannerMealCard
           mealType="lunch"
-          meals={weeklyMealPlan[selectedDay].lunch}
+          meals={currentDayPlan.lunch}
           color="#22c55e"
           label="Lunch"
           selectedDay={selectedDay}
@@ -811,7 +896,7 @@ function PlannerContent({
         />
         <PlannerMealCard
           mealType="dinner"
-          meals={weeklyMealPlan[selectedDay].dinner}
+          meals={currentDayPlan.dinner}
           color="#3b82f6"
           label="Dinner"
           selectedDay={selectedDay}
@@ -821,7 +906,7 @@ function PlannerContent({
         />
         <PlannerMealCard
           mealType="snacks"
-          meals={weeklyMealPlan[selectedDay].snacks}
+          meals={currentDayPlan.snacks}
           color="#a855f7"
           label="Snacks"
           selectedDay={selectedDay}
@@ -860,10 +945,18 @@ function PlannerContent({
   )
 }
 
-function NutritionContent({ selectedDay, weeklyMealPlan }: { selectedDay: keyof WeeklyMealPlan; weeklyMealPlan: WeeklyMealPlan }) {
+function NutritionContent({ 
+  selectedDay, 
+  setSelectedDay, 
+  weeklyMealPlan 
+}: { 
+  selectedDay: string; 
+  setSelectedDay: React.Dispatch<React.SetStateAction<string>>;
+  weeklyMealPlan: WeeklyMealPlan;
+}) {
   // Calculate nutrition data based on the selected day's meals
   const calculateNutritionData = () => {
-    const dayPlan = weeklyMealPlan[selectedDay];
+    const dayPlan = getOrCreateDayPlan(weeklyMealPlan, selectedDay);
 
     let totalCalories = 0;
     let totalProtein = 0;
@@ -915,8 +1008,12 @@ function NutritionContent({ selectedDay, weeklyMealPlan }: { selectedDay: keyof 
 
   return (
     <div>
-      <h2 className={styles.greeting}>Today's Nutrition - {selectedDay}</h2>
-      <p className={styles.prompt}>Nutrition data based on your {selectedDay.toLowerCase()} meal plan</p>
+      <div className={styles.plannerHeader}>
+        <div>
+          <h2 className={styles.greeting}>Today's Nutrition</h2>
+        </div>
+        <DateNavigation selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
+      </div>
 
       <div className={styles.nutritionTracker}>
         <div className={styles.nutritionItem}>
@@ -998,7 +1095,8 @@ function AIAssistantContent() {
 
 function DashboardContentSwitcher() {
   const [activeTab, setActiveTab] = useState("meals");
-  const [selectedDay, setSelectedDay] = useState<keyof WeeklyMealPlan>("Monday");
+  // Initialize to today's date
+  const [selectedDay, setSelectedDay] = useState<string>(getDateString(new Date()));
   
   // Shared sample meals for both Meals tab and Planner modal
   const sampleMeals = [
@@ -1189,8 +1287,16 @@ function DashboardContentSwitcher() {
     },
   ];
   
+  // Initialize meal plan with sample data using today's date and tomorrow's date
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  const todayString = getDateString(today);
+  const tomorrowString = getDateString(tomorrow);
+  
   const [weeklyMealPlan, setWeeklyMealPlan] = useState<WeeklyMealPlan>({
-    Monday: {
+    [todayString]: {
       breakfast: [
         {
           name: "Greek Yogurt Bowl",
@@ -1286,7 +1392,7 @@ function DashboardContentSwitcher() {
         },
       ],
     },
-    Tuesday: {
+    [tomorrowString]: {
       breakfast: [
         {
           name: "Overnight Oats",
@@ -1345,36 +1451,6 @@ function DashboardContentSwitcher() {
         },
       ],
     },
-    Wednesday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-    Thursday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-    Friday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-    Saturday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-    Sunday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
   });
 
   const tabs = [
@@ -1419,6 +1495,7 @@ function DashboardContentSwitcher() {
         {activeTab === "nutrition" && (
           <NutritionContent
             selectedDay={selectedDay}
+            setSelectedDay={setSelectedDay}
             weeklyMealPlan={weeklyMealPlan}
           />
         )}
