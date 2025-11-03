@@ -16,12 +16,17 @@ const AssistantContent: React.FC = () => {
     React.useEffect(() => {
         const fetchExamplePrompts = async () => {
             try {
+                const conversationHistory = messages.map(message => ({
+                    role: message.isUser ? 'user' : 'assistant',
+                    content: message.text
+                }));
+
                 const response = await fetch('http://localhost:3001/api/chatbot/prompts', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ message: messages })
+                    body: JSON.stringify({ message: conversationHistory })
                 });
                 if (!response.ok) {
                     throw new Error('Failed to fetch example prompts');
@@ -34,7 +39,11 @@ const AssistantContent: React.FC = () => {
         };
 
         fetchExamplePrompts();
-    }, []);
+
+        if (messages.length > 0 && messages[messages.length - 1].isUser) {
+            fetchExamplePrompts();
+        }
+    }, [messages]);
 
     const [examplePrompts, setExamplePrompts] = useState<string[]>([]);
 
