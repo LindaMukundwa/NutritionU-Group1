@@ -6,6 +6,7 @@ import MealContentCard from "./MealContentCard/MealContentCard"
 import SearchBar from "./SearchBar/SearchBar"
 import { recipeService } from '../../../services/recipeService';
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
+import AddMealModal from "./AddMealModal/AddMealModal"
 import type { Recipe } from '../../../../shared/types/recipe';
 
 interface SummaryCardData {
@@ -641,15 +642,19 @@ function PlannerContent({
   selectedDay,
   setSelectedDay,
   weeklyMealPlan,
-  setWeeklyMealPlan
+  setWeeklyMealPlan,
+  availableMeals
 }: {
   selectedDay: keyof WeeklyMealPlan
   setSelectedDay: React.Dispatch<React.SetStateAction<keyof WeeklyMealPlan>>
   weeklyMealPlan: WeeklyMealPlan
   setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>
+  availableMeals: any[]
 }) {
   const [selectedRecipe, setSelectedRecipe] = useState<Meal | null>(null)
   const [showRecipeModal, setShowRecipeModal] = useState(false)
+  const [showAddMealModal, setShowAddMealModal] = useState(false)
+  const [addMealType, setAddMealType] = useState<string>('')
 
   const handleMealClick = (meal: any) => {
     if (meal && meal.recipe) {
@@ -671,8 +676,19 @@ function PlannerContent({
   }
 
   const handleAddMeal = (mealType: string) => {
-    console.log(`Add meal to ${mealType}`)
-    // You can implement a modal or form to add meals here
+    setAddMealType(mealType)
+    setShowAddMealModal(true)
+  }
+
+  const handleAddMealToPlanner = (meal: Meal) => {
+    const mealTypeKey = addMealType as keyof DayMealPlan
+    setWeeklyMealPlan((prev) => ({
+      ...prev,
+      [selectedDay]: {
+        ...prev[selectedDay],
+        [mealTypeKey]: [...prev[selectedDay][mealTypeKey], meal],
+      },
+    }))
   }
 
   const days = Object.keys(weeklyMealPlan) as Array<keyof WeeklyMealPlan>
@@ -792,6 +808,16 @@ function PlannerContent({
 
       {showRecipeModal && selectedRecipe && (
         <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
+      )}
+
+      {showAddMealModal && (
+        <AddMealModal
+          isOpen={showAddMealModal}
+          onClose={() => setShowAddMealModal(false)}
+          onAddMeal={handleAddMealToPlanner}
+          mealType={addMealType}
+          availableMeals={availableMeals}
+        />
       )}
     </div>
   )
@@ -936,6 +962,196 @@ function AIAssistantContent() {
 function DashboardContentSwitcher() {
   const [activeTab, setActiveTab] = useState("meals");
   const [selectedDay, setSelectedDay] = useState<keyof WeeklyMealPlan>("Monday");
+  
+  // Shared sample meals for both Meals tab and Planner modal
+  const sampleMeals = [
+    {
+      id: 1,
+      imageUrl: undefined,
+      title: "Mediterranean Chickpea Bowl",
+      name: "Mediterranean Chickpea Bowl",
+      description: "A nutritious bowl packed with chickpeas, fresh vegetables, and tahini dressing",
+      time: "25 min",
+      cookTime: "25 min",
+      price: "$4.50",
+      cost: "$4.50",
+      calories: 420,
+      rating: 4.5,
+      tags: ["High Protein", "Budget-Friendly", "Vegetarian"],
+      category: "Lunch",
+      recipe: {
+        ingredients: [
+          "1 cup chickpeas",
+          "1 cup mixed greens",
+          "1/2 cup cherry tomatoes",
+          "1/4 cup cucumber",
+          "2 tbsp tahini dressing",
+          "1/4 cup feta cheese",
+        ],
+        instructions: [
+          "Drain and rinse chickpeas",
+          "Chop vegetables into bite-sized pieces",
+          "Combine all ingredients in a bowl",
+          "Drizzle with tahini dressing",
+          "Top with feta cheese",
+        ],
+        nutrition: { protein: 18, carbs: 52, fat: 14, fiber: 12 },
+      },
+    },
+    {
+      id: 2,
+      imageUrl: undefined,
+      title: "Avocado Toast with Eggs",
+      name: "Avocado Toast with Eggs",
+      description: "Crispy whole grain bread topped with mashed avocado and sunny-side-up eggs",
+      time: "15 min",
+      cookTime: "15 min",
+      price: "$3.20",
+      cost: "$3.20",
+      calories: 350,
+      rating: 4.2,
+      tags: ["Quick", "High Fiber", "Vegetarian"],
+      category: "Breakfast",
+      recipe: {
+        ingredients: [
+          "2 slices whole grain bread",
+          "1 avocado",
+          "2 eggs",
+          "Salt and pepper",
+          "Red pepper flakes (optional)",
+        ],
+        instructions: [
+          "Toast bread until golden brown",
+          "Mash avocado with salt and pepper",
+          "Fry eggs sunny-side up",
+          "Spread avocado on toast",
+          "Top with eggs and red pepper flakes",
+        ],
+        nutrition: { protein: 16, carbs: 38, fat: 18, fiber: 10 },
+      },
+    },
+    {
+      id: 3,
+      imageUrl: undefined,
+      title: "Teriyaki Chicken Bowl",
+      name: "Teriyaki Chicken Bowl",
+      description: "Grilled chicken with teriyaki sauce served over rice with steamed vegetables",
+      time: "30 min",
+      cookTime: "30 min",
+      price: "$5.80",
+      cost: "$5.80",
+      calories: 520,
+      rating: 4.7,
+      tags: ["High Protein"],
+      category: "Dinner",
+      recipe: {
+        ingredients: [
+          "6 oz chicken breast",
+          "1 cup cooked rice",
+          "2 cups mixed vegetables",
+          "3 tbsp teriyaki sauce",
+          "1 tbsp sesame seeds",
+        ],
+        instructions: [
+          "Cook rice according to package directions",
+          "Cut chicken into bite-sized pieces",
+          "Cook chicken in a pan until golden",
+          "Add teriyaki sauce and vegetables",
+          "Serve over rice and garnish with sesame seeds",
+        ],
+        nutrition: { protein: 38, carbs: 62, fat: 12, fiber: 4 },
+      },
+    },
+    {
+      id: 4,
+      imageUrl: undefined,
+      title: "Greek Yogurt Parfait",
+      name: "Greek Yogurt Parfait",
+      description: "Creamy yogurt layered with granola, fresh berries, and honey",
+      time: "10 min",
+      cookTime: "10 min",
+      price: "$2.80",
+      cost: "$2.80",
+      calories: 280,
+      rating: 4.6,
+      tags: ["Quick", "High Protein", "Vegetarian"],
+      category: "Breakfast",
+      recipe: {
+        ingredients: ["1 cup Greek yogurt", "1/2 cup granola", "1/2 cup mixed berries", "1 tbsp honey"],
+        instructions: [
+          "Add Greek yogurt to a bowl or glass",
+          "Layer with granola",
+          "Top with mixed berries",
+          "Drizzle with honey",
+        ],
+        nutrition: { protein: 20, carbs: 45, fat: 8, fiber: 6 },
+      },
+    },
+    {
+      id: 5,
+      imageUrl: undefined,
+      title: "Veggie Wrap",
+      name: "Veggie Wrap",
+      description: "Whole wheat wrap filled with hummus, fresh vegetables, and feta cheese",
+      time: "12 min",
+      cookTime: "12 min",
+      price: "$3.50",
+      cost: "$3.50",
+      calories: 320,
+      rating: 4.3,
+      tags: ["Quick", "Vegetarian", "Budget-Friendly"],
+      category: "Lunch",
+      recipe: {
+        ingredients: [
+          "1 whole wheat tortilla",
+          "3 tbsp hummus",
+          "Mixed greens",
+          "Sliced cucumber",
+          "Sliced tomatoes",
+          "Feta cheese",
+        ],
+        instructions: [
+          "Spread hummus on tortilla",
+          "Layer with greens and vegetables",
+          "Sprinkle with feta cheese",
+          "Roll tightly and slice in half",
+        ],
+        nutrition: { protein: 12, carbs: 42, fat: 10, fiber: 8 },
+      },
+    },
+    {
+      id: 6,
+      imageUrl: undefined,
+      title: "Trail Mix Energy Bites",
+      name: "Trail Mix Energy Bites",
+      description: "No-bake energy balls with oats, peanut butter, and dark chocolate chips",
+      time: "5 min",
+      cookTime: "5 min",
+      price: "$1.50",
+      cost: "$1.50",
+      calories: 180,
+      rating: 4.8,
+      tags: ["Quick", "Budget-Friendly"],
+      category: "Snacks",
+      recipe: {
+        ingredients: [
+          "1 cup rolled oats",
+          "1/2 cup peanut butter",
+          "1/3 cup honey",
+          "1/2 cup dark chocolate chips",
+          "1/4 cup ground flaxseed",
+        ],
+        instructions: [
+          "Mix all ingredients in a bowl",
+          "Refrigerate for 30 minutes",
+          "Roll into 1-inch balls",
+          "Store in refrigerator",
+        ],
+        nutrition: { protein: 6, carbs: 24, fat: 9, fiber: 4 },
+      },
+    },
+  ];
+  
   const [weeklyMealPlan, setWeeklyMealPlan] = useState<WeeklyMealPlan>({
     Monday: {
       breakfast: [
@@ -1155,6 +1371,7 @@ function DashboardContentSwitcher() {
             setSelectedDay={setSelectedDay}
             weeklyMealPlan={weeklyMealPlan}
             setWeeklyMealPlan={setWeeklyMealPlan}
+            availableMeals={sampleMeals}
           />
         )}
         {activeTab === "nutrition" && (
