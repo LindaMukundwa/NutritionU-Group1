@@ -1,8 +1,34 @@
-import type { Request, Response } from 'express';
+import { response, type Request, type Response } from 'express';
 import openai from '../openai.ts'
+
+// Define tools that can be used by open ai
+const tools =  {
+    "type": "function",
+    "function": {
+      "name": "searchRecipes",
+      "description": "Searches the internal recipe database for meals based on a food query, like ingredients or dish names. Use this when the user asks for recipes, meal ideas, or cooking instructions.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The food string or ingredient to search for (e.g., 'chicken', 'low carb desserts', 'steak'). This parameter is required."
+          },
+          "maxResults": {
+            "type": "integer",
+            "description": "The maximum number of recipes to return. Defaults to 20 if not specified by the user."
+          }
+        },
+        "required": ["query"]
+      }
+  }
+} 
 
 // Generate a response for chatbot
 export const generateChatbotResponse = async (req: Request, res: Response) => {
+
+  console.log(tools);
+
   try {
     const { message } = req.body;
 
@@ -23,12 +49,13 @@ export const generateChatbotResponse = async (req: Request, res: Response) => {
             "Use bold tagging for important and/or header information"
         },
         ...message,
+        tools
       ],
     });
 
-    res.json({
-      reply: completion.choices[0].message.content
-    });
+    console.log(response);
+    console.log(completion);
+    
   } catch (error) {
     console.error('OpenAI API error:', error);
     res.status(500).json({ error: 'Failed to get response from assistant' });
