@@ -92,6 +92,8 @@ const AssistantContent: React.FC = () => {
 
             const data = await response.json() as { reply: string };
 
+            console.log(data);
+
             // Add assistant response to chat
             const assistantMessage: Message = {
                 id: Date.now().toString(),
