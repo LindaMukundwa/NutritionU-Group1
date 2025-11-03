@@ -8,6 +8,7 @@ import { recipeService } from '../../../services/recipeService';
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
 import AddMealModal from "./AddMealModal/AddMealModal"
 import AddToPlanModal from "./AddToPlanModal/AddToPlanModal"
+import GroceryList from "./GroceryList/GroceryList"
 import type { Recipe } from '../../../../shared/types/recipe';
 
 interface SummaryCardData {
@@ -761,13 +762,15 @@ function PlannerContent({
   setSelectedDay,
   weeklyMealPlan,
   setWeeklyMealPlan,
-  availableMeals
+  availableMeals,
+  onOpenGroceryList
 }: {
   selectedDay: string
   setSelectedDay: React.Dispatch<React.SetStateAction<string>>
   weeklyMealPlan: WeeklyMealPlan
   setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>
   availableMeals: any[]
+  onOpenGroceryList: () => void
 }) {
   const [selectedRecipe, setSelectedRecipe] = useState<Meal | null>(null)
   const [showRecipeModal, setShowRecipeModal] = useState(false)
@@ -925,7 +928,7 @@ function PlannerContent({
             <strong>${totalCost}</strong> daily cost
           </span>
         </div>
-        <button className={styles.primaryButton}>🛒 Add to Grocery List</button>
+        <button className={styles.primaryButton} onClick={onOpenGroceryList}>🛒 Add to Grocery List</button>
       </div>
 
       {showRecipeModal && selectedRecipe && (
@@ -1097,6 +1100,7 @@ function DashboardContentSwitcher() {
   const [activeTab, setActiveTab] = useState("meals");
   // Initialize to today's date
   const [selectedDay, setSelectedDay] = useState<string>(getDateString(new Date()));
+  const [showGroceryList, setShowGroceryList] = useState(false);
   
   // Shared sample meals for both Meals tab and Planner modal
   const sampleMeals = [
@@ -1490,6 +1494,7 @@ function DashboardContentSwitcher() {
             weeklyMealPlan={weeklyMealPlan}
             setWeeklyMealPlan={setWeeklyMealPlan}
             availableMeals={sampleMeals}
+            onOpenGroceryList={() => setShowGroceryList(true)}
           />
         )}
         {activeTab === "nutrition" && (
@@ -1501,6 +1506,13 @@ function DashboardContentSwitcher() {
         )}
         {activeTab === "ai-assistant" && <AIAssistantContent />}
       </div>
+
+      {/* Grocery List Modal */}
+      <GroceryList
+        weeklyMealPlan={weeklyMealPlan}
+        isOpen={showGroceryList}
+        onClose={() => setShowGroceryList(false)}
+      />
     </div>
   );
 }

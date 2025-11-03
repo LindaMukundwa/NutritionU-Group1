@@ -13,15 +13,32 @@ function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-// Helper function to format date for display
-function formatDateDisplay(dateString: string): string {
+// Helper function to format date for full display
+function formatFullDate(dateString: string): string {
   const date = new Date(dateString + 'T00:00:00');
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  const todayString = getDateString(today);
+  const tomorrowString = getDateString(tomorrow);
+  
   const options: Intl.DateTimeFormatOptions = { 
-    weekday: 'short', 
-    month: 'short', 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
     day: 'numeric' 
   };
-  return date.toLocaleDateString('en-US', options);
+  const fullDate = date.toLocaleDateString('en-US', options);
+  
+  // Show "Today" or "Tomorrow" with the date in parentheses
+  if (dateString === todayString) {
+    return `Today (${fullDate})`;
+  } else if (dateString === tomorrowString) {
+    return `Tomorrow (${fullDate})`;
+  }
+  
+  return fullDate;
 }
 
 const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
@@ -30,21 +47,28 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
   onAddToPlan,
   mealTitle,
 }) => {
-  // Generate next 7 days starting from today
-  const generateNext7Days = () => {
-    const dates: string[] = [];
-    const today = new Date();
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() + i);
-      dates.push(getDateString(date));
-    }
-    return dates;
+  // Initialize with today's date
+  const [selectedDay, setSelectedDay] = useState(getDateString(new Date()));
+  const [selectedMealType, setSelectedMealType] = useState('breakfast');
+
+  // Navigation functions
+  const goToPreviousDay = () => {
+    const currentDate = new Date(selectedDay + 'T00:00:00');
+    currentDate.setDate(currentDate.getDate() - 1);
+    setSelectedDay(getDateString(currentDate));
   };
 
-  const availableDates = generateNext7Days();
-  const [selectedDay, setSelectedDay] = useState(availableDates[0]);
-  const [selectedMealType, setSelectedMealType] = useState('breakfast');
+  const goToNextDay = () => {
+    const currentDate = new Date(selectedDay + 'T00:00:00');
+    currentDate.setDate(currentDate.getDate() + 1);
+    setSelectedDay(getDateString(currentDate));
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      setSelectedDay(e.target.value);
+    }
+  };
 
   const mealTypes = [
     { value: 'breakfast', label: 'Breakfast', color: '#f97316' },
@@ -73,20 +97,26 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
         <div className={styles.modalBody}>
           <p className={styles.mealTitle}>{mealTitle}</p>
 
-          {/* Day Selection */}
+          {/* Day Selection with Date Navigation */}
           <div className={styles.section}>
             <label className={styles.sectionLabel}>Select Day</label>
-            <div className={styles.dayGrid}>
-              {availableDates.map((dateString) => (
-                <button
-                  key={dateString}
-                  className={`${styles.dayButton} ${selectedDay === dateString ? styles.dayButtonActive : ''}`}
-                  onClick={() => setSelectedDay(dateString)}
-                  title={formatDateDisplay(dateString)}
-                >
-                  {formatDateDisplay(dateString)}
-                </button>
-              ))}
+            <div className={styles.dateNavigation}>
+              <button className={styles.navButton} onClick={goToPreviousDay} title="Previous day">
+                ‹
+              </button>
+              <div className={styles.dateDisplay}>
+                <span className={styles.dateText}>{formatFullDate(selectedDay)}</span>
+                <input
+                  type="date"
+                  value={selectedDay}
+                  onChange={handleDateChange}
+                  className={styles.datePicker}
+                  title="Select a date"
+                />
+              </div>
+              <button className={styles.navButton} onClick={goToNextDay} title="Next day">
+                ›
+              </button>
             </div>
           </div>
 
