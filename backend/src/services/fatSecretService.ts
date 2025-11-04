@@ -59,7 +59,7 @@ interface FatSecretRecipe {
       direction_description: string;
     }>;
   };
-  nutritional_info?: {
+  recipe_nutrition?: {
     calories: string;
     carbohydrate: string;
     protein: string;
@@ -324,14 +324,14 @@ const FatSecretService = new class FatSecretService {
         instruction: dir.direction_description || '',
         equipment: []
       })),
-      nutritionInfo: fatSecretRecipe.nutritional_info ? {
-        calories: safeParseFloat(fatSecretRecipe.nutritional_info.calories, 0),
-        protein: safeParseFloat(fatSecretRecipe.nutritional_info.protein, 0),
-        carbs: safeParseFloat(fatSecretRecipe.nutritional_info.carbohydrate, 0),
-        fat: safeParseFloat(fatSecretRecipe.nutritional_info.fat, 0),
-        fiber: safeParseFloat(fatSecretRecipe.nutritional_info.fiber, 0),
-        sugar: safeParseFloat(fatSecretRecipe.nutritional_info.sugar, 0),
-        sodium: safeParseFloat(fatSecretRecipe.nutritional_info.sodium, 0)
+      nutritionInfo: fatSecretRecipe.recipe_nutrition ? {
+        calories: safeParseFloat(fatSecretRecipe.recipe_nutrition.calories, 0),
+        protein: safeParseFloat(fatSecretRecipe.recipe_nutrition.protein, 0),
+        carbs: safeParseFloat(fatSecretRecipe.recipe_nutrition.carbohydrate, 0),
+        fat: safeParseFloat(fatSecretRecipe.recipe_nutrition.fat, 0),
+        fiber: safeParseFloat(fatSecretRecipe.recipe_nutrition.fiber, 0),
+        sugar: safeParseFloat(fatSecretRecipe.recipe_nutrition.sugar, 0),
+        sodium: safeParseFloat(fatSecretRecipe.recipe_nutrition.sodium, 0)
       } : {
         calories: 0,
         protein: 0,
