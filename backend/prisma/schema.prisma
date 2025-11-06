@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  firebaseUid String?   @unique
+  email       String?   @unique
+  profile     Profile?
+  favorites   Favorite[]
+  mealPlans   MealPlan[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Profile {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @unique
+  user      User    @relation(fields: [userId], references: [id])
+  onboardingCompleted Boolean @default(false)
+  units     String  @default("metric")
+  extra     Json?
+}
+
+model Recipe {
+  id                      Int       @id @default(autoincrement())
+  externalId              String?   @unique
+  title                   String
+  description             String?
+  imageUrl                String?
+  mealType                String?
+  totalTime               Int?
+  estimatedCostPerServing Float?
+  nutritionInfo           Json?
+  ingredients             Json?     // simple stored array for demo; normalize later if desired
+  instructions            Json?
+  dietaryTags             String[]  @default([])
+  favorites               Favorite[]
+  mealPlanItems           MealPlanItem[]
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+model Favorite {
+  userId    Int
+  recipeId  Int
+  user      User   @relation(fields: [userId], references: [id])
+  recipe    Recipe @relation(fields: [recipeId], references: [id])
+  createdAt DateTime @default(now())
+  @@id([userId, recipeId])
+}
+
+model MealPlan {
+  id        Int            @id @default(autoincrement())
+  userId    Int
+  user      User          @relation(fields: [userId], references: [id])
+  items     MealPlanItem[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model MealPlanItem {
+  id          Int       @id @default(autoincrement())
+  mealPlanId  Int
+  recipeId    Int
+  mealPlan    MealPlan  @relation(fields: [mealPlanId], references: [id])
+  recipe      Recipe    @relation(fields: [recipeId], references: [id])
+  dayOfWeek   Int
+  mealType    String
+}

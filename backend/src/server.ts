@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import { connectDB } from './db.ts';
 import userRoutes from './routes/UserRoutes.ts';
 import recipeRoutes from './routes/RecipeRoutes.ts';
 import chatbotRoutes from './routes/ChatbotRoutes.ts';
@@ -33,7 +32,6 @@ app.use('/api/chatbot', chatbotRoutes); // Open AI chat communcations
 // Start the server
 const startServer = async () => {
   try {
-    await connectDB(); // Connect to MongoDB
     app.listen(PORT, () => {
       console.log(`✅ Server is running on http://localhost:${PORT}`);
     });
