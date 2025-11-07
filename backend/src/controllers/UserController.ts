@@ -433,8 +433,6 @@ export const patchUserGoals = async (req: Request, res: Response) => {
         const { id } = req.params;
         const { nutritionGoals } = req.body;
 
-        console.log(req.body);
-
         if (!nutritionGoals) {
             return res.status(400).json({ message: 'Goals are required' });
         }
@@ -474,26 +472,28 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                     { id: parseInt(id, 10) || undefined },
                     { firebaseUid: id }
                 ]
+            },
+            include: {
+                profile: true
             }
         });
 
-        if (user) {
-            // Update existing user's profile
+        if (user && user.profile) {
+            // Merge existing extra data with new profile data
+            const mergedExtra = {
+                ...(typeof user.profile.extra === 'object' && user.profile.extra !== null ? user.profile.extra : {}),  // Ensure it's an object
+                ...profile              // Override with new data
+            };
+
+
             const updatedUser = await prisma.user.update({
                 where: { id: user.id },
                 data: {
                     profile: {
-                        upsert: {
-                            create: {
-                                onboardingCompleted: true,
-                                units: profile.units || 'metric',
-                                extra: profile
-                            },
-                            update: {
-                                onboardingCompleted: true,
-                                units: profile.units || 'metric',
-                                extra: profile
-                            }
+                        update: {
+                            onboardingCompleted: true,
+                            units: profile.units || user.profile.units,
+                            extra: mergedExtra
                         }
                     }
                 },
@@ -501,6 +501,7 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                     profile: true
                 }
             });
+
             return res.status(200).json(updatedUser);
         }
 

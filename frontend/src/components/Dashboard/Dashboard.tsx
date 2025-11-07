@@ -1174,9 +1174,10 @@ const Dashboard: FC<DashboardProps> = () => {
 
   // Destructure the authentication object to get user
   const { user } = useAuth();
+  console.log(user);
 
   // Get the user identifiers
-  const displayName: string | undefined = user?.displayName || '';
+  const displayName: string | undefined = user?.profile.extra.displayName || '';
   const userEmail: string | undefined = user?.email || '';
   console.log(user);
 
