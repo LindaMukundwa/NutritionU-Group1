@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import User from '../models/UserModel.ts';
-import prisma from '../lib/prisma';
+import prisma from '../lib/prisma.ts';
 import Recipe from '../models/RecipeModel.ts';
 
 
