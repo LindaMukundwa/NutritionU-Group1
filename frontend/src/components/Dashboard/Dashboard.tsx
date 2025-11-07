@@ -7,6 +7,7 @@ import SearchBar from "./SearchBar/SearchBar"
 import { recipeService } from '../../../services/recipeService';
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
 import type { Recipe } from '../../../../shared/types/recipe';
+import { useAuth } from '../../contexts/AuthContext'; 
 
 interface SummaryCardData {
   title: string;
@@ -1170,6 +1171,15 @@ function DashboardContentSwitcher() {
 }
 
 const Dashboard: FC<DashboardProps> = () => {
+
+  // Destructure the authentication object to get user
+  const { user } = useAuth();
+
+  // Get the user identifiers
+  const displayName: string | undefined = user?.displayName || '';
+  const userEmail: string | undefined = user?.email || '';
+  console.log(user);
+
   const dashboardSummary: SummaryCardData[] = [
     {
       title: "Weekly Budget",
@@ -1229,11 +1239,11 @@ const Dashboard: FC<DashboardProps> = () => {
   return (
     <div className={styles.Dashboard}>
       {/* Top Navigation Bar */}
-      <TopNavBar userEmail="Linda.Mukundwa1@marist.edu" />
+      <TopNavBar userEmail={userEmail}/>
 
       {/* Header/Greeting Section */}
       <div className={styles.header}>
-        <h1 className={styles.greeting}>Good morning, Linda! 👋</h1>
+        <h1 className={styles.greeting}>Good morning, {displayName} 👋</h1>
         <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
       </div>
 
