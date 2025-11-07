@@ -122,7 +122,8 @@ export const getUser = async (req: Request, res: Response) => {
                     include: {
                         recipe: true
                     }
-                }
+                },
+                mealPlans: true
             }
         });
 

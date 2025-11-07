@@ -1174,33 +1174,31 @@ const Dashboard: FC<DashboardProps> = () => {
 
   // Destructure the authentication object to get user
   const { user } = useAuth();
-  console.log(user);
 
   // Get the user identifiers
-  const displayName: string | undefined = user?.profile.extra.displayName || '';
+  const displayName: string | undefined = user?.profile.extra.displayName?.split(' ')[0] || '';
   const userEmail: string | undefined = user?.email || '';
-  console.log(user);
 
   const dashboardSummary: SummaryCardData[] = [
     {
       title: "Weekly Budget",
-      value: "$65/100",
+      value: user?.profile.extra.budget,
       subtext: "",
       icon: "$",
       progressBar: {
-        current: 65,
-        total: 100,
+        current: 50,
+        total: user?.profile.extra.budget,
       },
     },
     {
       title: "Meals Planned",
-      value: 12,
+      value: user?.mealPlans?.length ?? 0,
       subtext: "This week",
       icon: "🍴",
     },
     {
       title: "Avg. Calories",
-      value: 1850,
+      value: user?.profile.extra.nutritionGoals.calories,
       subtext: "",
       icon: "👨‍👧‍👦",
       progressBar: {

@@ -1,3 +1,5 @@
+import { Recipe } from "./recipe";
+
 /**
  * Definining shared user types and interfaces to be used thhroughut application
  */
@@ -27,6 +29,7 @@ export interface User {
   lastLogin: Date;
   planGenerationCount: number;
   favoriteRecipes?: string[]; // string of recipe ids
+  mealPlans?: Recipe[];
   createdAt: Date;
   updatedAt: Date;
 
