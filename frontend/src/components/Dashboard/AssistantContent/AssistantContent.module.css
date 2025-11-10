@@ -3,8 +3,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
     padding: 20px;
     background-color: var(--bg);
     border-radius: 8px;
@@ -14,7 +14,7 @@
 /* Chat header */
 .chat-header {
     display: flex;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
@@ -48,8 +48,9 @@
 .example-prompts {
     display: flex;
     flex-wrap: wrap;
+    padding-top: 1%;
     gap: 10px;
-    justify-content: center;
+    justify-content: left;
 }
 
 .example-prompt {

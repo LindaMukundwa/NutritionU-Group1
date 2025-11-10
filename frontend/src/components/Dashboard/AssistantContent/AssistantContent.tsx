@@ -13,13 +13,39 @@ const AssistantContent: React.FC = () => {
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const examplePrompts = [
-        "What are some healthy breakfast options?",
-        "How many calories should I eat per day?",
-        "Can you suggest a meal plan for weight loss?",
-        "What foods are high in protein?",
-        "How can I increase my daily fiber intake?"
-    ];
+    React.useEffect(() => {
+        const fetchExamplePrompts = async () => {
+            try {
+                const conversationHistory = messages.map(message => ({
+                    role: message.isUser ? 'user' : 'assistant',
+                    content: message.text
+                }));
+
+                const response = await fetch('http://localhost:3001/api/chatbot/prompts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: conversationHistory })
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch example prompts');
+                }
+                const data = await response.json() as { reply: string[] };
+                setExamplePrompts(data.reply);
+            } catch (error) {
+                console.error('Error fetching example prompts:', error);
+            }
+        };
+
+        fetchExamplePrompts();
+
+        if (messages.length > 0 && messages[messages.length - 1].isUser) {
+            fetchExamplePrompts();
+        }
+    }, [messages]);
+
+    const [examplePrompts, setExamplePrompts] = useState<string[]>([]);
 
     const handleSendMessage = async () => {
         if (!inputText.trim()) return;
@@ -66,6 +92,8 @@ const AssistantContent: React.FC = () => {
 
             const data = await response.json() as { reply: string };
 
+            console.log(data);
+
             // Add assistant response to chat
             const assistantMessage: Message = {
                 id: Date.now().toString(),
@@ -106,17 +134,6 @@ const AssistantContent: React.FC = () => {
             {messages.length === 0 ? (
                 <div className={styles["welcome-section"]}>
                     <h3>Ask me anything about nutrition, meal planning, or dietary advice.</h3>
-                    <div className={styles["example-prompts"]}>
-                        {examplePrompts.map((prompt) => (
-                            <button
-                                key={prompt}
-                                onClick={() => handleExampleClick(prompt)}
-                                className={styles["example-prompt"]}
-                            >
-                                {prompt}
-                            </button>
-                        ))}
-                    </div>
                 </div>
             ) : (
                 <div className={styles["chat-container"]}>
@@ -127,16 +144,18 @@ const AssistantContent: React.FC = () => {
                                 className={`${styles.message} ${message.isUser ? styles["user-message"] : styles["ai-message"]}`}
                             >
                                 <div className={styles["message-content"]}>
-                                    {message.isUser ? (
-                                        message.text
-                                    ) : (
-                                        message.text.split('\n').map((line, i) => (
-                                            <React.Fragment key={i}>
-                                                {line}
-                                                {i < message.text.split('\n').length - 1 && <br />}
-                                            </React.Fragment>
-                                        ))
-                                    )}
+                                    {message.text.split('\n').map((line, index) => (
+                                        <React.Fragment key={index}>
+                                            {line.split('**').map((part, partIndex) =>
+                                                partIndex % 2 === 1 ? (
+                                                    <strong key={partIndex}>{part}</strong>
+                                                ) : (
+                                                    <React.Fragment key={partIndex}>{part}</React.Fragment>
+                                                )
+                                            )}
+                                            {index < message.text.split('\n').length - 1 && <br />}
+                                        </React.Fragment>
+                                    ))}
                                 </div>
                                 <div className={styles["message-timestamp"]}>
                                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -155,14 +174,14 @@ const AssistantContent: React.FC = () => {
                     </div>
                 </div>
             )}
-            
+
             <div className={styles["chat-input-container"]}>
                 <div className={styles["input-group"]}>
                     <input
                         type="text"
                         value={inputText}
                         onChange={(e) => setInputText(
-                            e.target.value)} 
+                            e.target.value)}
                         placeholder="Type a message..."
                         className={styles["chat-input"]}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -171,9 +190,23 @@ const AssistantContent: React.FC = () => {
                         onClick={handleSendMessage}
                         className={styles["send-button"]}
                         disabled={isLoading || !inputText.trim()}
+                        aria-label="Send message"
                     >
                         Send
                     </button>
+                </div>
+            </div>
+            <div className={styles["additional-prompts"]}>
+                <div className={styles["example-prompts"]}>
+                    {Array.isArray(examplePrompts) && examplePrompts.map((prompt) => (
+                        <button
+                            key={prompt}
+                            onClick={() => handleExampleClick(prompt)}
+                            className={styles["example-prompt"]}
+                        >
+                            {prompt}
+                        </button>
+                    ))}
                 </div>
             </div>
         </div>

@@ -111,7 +111,7 @@ import Recipe from '../models/RecipeModel.ts';
  */
 export const searchRecipes = async (req: Request, res: Response) => {
   try {
-    const { query, maxResults = 20 } = req.query;
+    const { query, maxResults = 1 } = req.query;
 
     if (!query || typeof query !== 'string') {
       return res.status(400).json({ 
@@ -128,6 +128,7 @@ export const searchRecipes = async (req: Request, res: Response) => {
     const convertedRecipes: any[] = [];
     for (const r of recipes) {
       try {
+        console.log(r);
         const converted = fatSecretService.convertToRecipeModel(r);
         if (converted) convertedRecipes.push(converted);
       } catch (convErr) {
