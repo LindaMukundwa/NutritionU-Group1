@@ -50,37 +50,81 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
   const [manualEntry, setManualEntry] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showAddForm, setShowAddForm] = useState(false);
+  
+  // Date range selection state
+  const [startDate, setStartDate] = useState<string>(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState<string>(() => {
+    const today = new Date();
+    const weekLater = new Date(today);
+    weekLater.setDate(weekLater.getDate() + 6);
+    return weekLater.toISOString().split('T')[0];
+  });
+  const [showDateRangePicker, setShowDateRangePicker] = useState(false);
 
   const categories = ['all', 'produce', 'protein', 'dairy', 'grains', 'pantry', 'other'];
 
-  // Generate grocery list from planned meals
+  // Auto-update grocery list when meal plan changes
+  useEffect(() => {
+    // Only auto-regenerate if there are already planned items
+    const hasPlannedItems = groceryItems.some((item) => item.source === 'planned');
+    if (hasPlannedItems && isOpen) {
+      generateFromPlannedMeals();
+    }
+  }, [weeklyMealPlan, startDate, endDate]);
+
+  // Helper function to format date for display
+  const formatDateRange = () => {
+    const start = new Date(startDate + 'T00:00:00');
+    const end = new Date(endDate + 'T00:00:00');
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
+  };
+
+  // Quick date range presets
+  const setDateRangePreset = (days: number) => {
+    const today = new Date();
+    const futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + days - 1);
+    setStartDate(today.toISOString().split('T')[0]);
+    setEndDate(futureDate.toISOString().split('T')[0]);
+    setShowDateRangePicker(false);
+  };
+
+  // Generate grocery list from planned meals within the selected date range
   const generateFromPlannedMeals = () => {
     const ingredientMap = new Map<string, { quantity: string; meals: Set<string> }>();
 
+    // Filter meal plan entries by date range
     Object.entries(weeklyMealPlan).forEach(([date, dayPlan]) => {
-      const mealTypes: (keyof DayMealPlan)[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
+      // Check if date is within the selected range
+      if (date >= startDate && date <= endDate) {
+        const mealTypes: (keyof DayMealPlan)[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
 
-      mealTypes.forEach((mealType) => {
-        dayPlan[mealType].forEach((meal) => {
-          meal.recipe.ingredients.forEach((ingredient) => {
-            // Parse ingredient to separate quantity and name
-            const parts = ingredient.trim().split(' ');
-            const quantity = parts.slice(0, 2).join(' '); // e.g., "1 cup"
-            const name = parts.slice(2).join(' '); // e.g., "chickpeas"
+        mealTypes.forEach((mealType) => {
+          dayPlan[mealType].forEach((meal) => {
+            meal.recipe.ingredients.forEach((ingredient) => {
+              // Parse ingredient to separate quantity and name
+              const parts = ingredient.trim().split(' ');
+              const quantity = parts.slice(0, 2).join(' '); // e.g., "1 cup"
+              const name = parts.slice(2).join(' '); // e.g., "chickpeas"
 
-            const key = name.toLowerCase();
-            if (ingredientMap.has(key)) {
-              const existing = ingredientMap.get(key)!;
-              existing.meals.add(meal.name);
-            } else {
-              ingredientMap.set(key, {
-                quantity,
-                meals: new Set([meal.name]),
-              });
-            }
+              const key = name.toLowerCase();
+              if (ingredientMap.has(key)) {
+                const existing = ingredientMap.get(key)!;
+                existing.meals.add(meal.name);
+              } else {
+                ingredientMap.set(key, {
+                  quantity,
+                  meals: new Set([meal.name]),
+                });
+              }
+            });
           });
         });
-      });
+      }
     });
 
     // Convert to grocery items
@@ -232,20 +276,74 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
         <div className={styles.groceryList}>
       <div className={styles.header}>
         <div>
-          <h2 className={styles.title}>Grocery List</h2>
+          <p>
+            
+          </p>
           <p className={styles.subtitle}>
             {checkedItems} of {totalItems} items checked • {plannedItems} from meal plan
           </p>
         </div>
         <div className={styles.headerActions}>
+          <button 
+            className={styles.dateRangeButton} 
+            onClick={() => setShowDateRangePicker(!showDateRangePicker)}
+          >
+            📅 {formatDateRange()}
+          </button>
           <button className={styles.generateButton} onClick={generateFromPlannedMeals}>
-            🔄 Generate from Meal Plan
+            🔄 Generate
           </button>
           <button className={styles.addButton} onClick={() => setShowAddForm(!showAddForm)}>
             ➕ Add Item
           </button>
         </div>
       </div>
+
+      {showDateRangePicker && (
+        <div className={styles.dateRangePicker}>
+          <div className={styles.dateRangeHeader}>
+            <h3>Select Date Range for Grocery List</h3>
+            <button onClick={() => setShowDateRangePicker(false)} className={styles.closePicker}>✕</button>
+          </div>
+          <div className={styles.dateRangePresets}>
+            <button onClick={() => setDateRangePreset(7)} className={styles.presetButton}>
+              This Week (7 days)
+            </button>
+            <button onClick={() => setDateRangePreset(14)} className={styles.presetButton}>
+              2 Weeks
+            </button>
+            <button onClick={() => setDateRangePreset(30)} className={styles.presetButton}>
+              This Month
+            </button>
+          </div>
+          <div className={styles.dateRangeInputs}>
+            <div className={styles.dateInputGroup}>
+              <label>Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className={styles.dateInput}
+              />
+            </div>
+            <div className={styles.dateInputGroup}>
+              <label>End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate}
+                className={styles.dateInput}
+              />
+            </div>
+          </div>
+          <div className={styles.dateRangeActions}>
+            <button onClick={() => setShowDateRangePicker(false)} className={styles.applyButton}>
+              Apply & Generate
+            </button>
+          </div>
+        </div>
+      )}
 
       {showAddForm && (
         <div className={styles.addForm}>

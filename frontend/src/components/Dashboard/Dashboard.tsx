@@ -1096,11 +1096,16 @@ function AIAssistantContent() {
   )
 }
 
-function DashboardContentSwitcher() {
+function DashboardContentSwitcher({
+  showGroceryList,
+  setShowGroceryList
+}: {
+  showGroceryList: boolean;
+  setShowGroceryList: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [activeTab, setActiveTab] = useState("meals");
   // Initialize to today's date
   const [selectedDay, setSelectedDay] = useState<string>(getDateString(new Date()));
-  const [showGroceryList, setShowGroceryList] = useState(false);
   
   // Shared sample meals for both Meals tab and Planner modal
   const sampleMeals = [
@@ -1518,6 +1523,8 @@ function DashboardContentSwitcher() {
 }
 
 const Dashboard: FC<DashboardProps> = () => {
+  const [showGroceryList, setShowGroceryList] = useState(false);
+  
   const dashboardSummary: SummaryCardData[] = [
     {
       title: "Weekly Budget",
@@ -1577,7 +1584,10 @@ const Dashboard: FC<DashboardProps> = () => {
   return (
     <div className={styles.Dashboard}>
       {/* Top Navigation Bar */}
-      <TopNavBar userEmail="Linda.Mukundwa1@marist.edu" />
+      <TopNavBar 
+        userEmail="Linda.Mukundwa1@marist.edu"
+        onOpenGroceryList={() => setShowGroceryList(true)}
+      />
 
       {/* Header/Greeting Section */}
       <div className={styles.header}>
@@ -1589,7 +1599,10 @@ const Dashboard: FC<DashboardProps> = () => {
       <div className={styles.summaryGrid}>{dashboardSummary.map(renderSummaryCard)}</div>
 
       {/* Dashboard Content Switcher Section */}
-      <DashboardContentSwitcher />
+      <DashboardContentSwitcher 
+        showGroceryList={showGroceryList}
+        setShowGroceryList={setShowGroceryList}
+      />
     </div>
   )
 }
