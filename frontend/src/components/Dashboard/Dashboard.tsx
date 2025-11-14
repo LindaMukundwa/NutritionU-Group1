@@ -1547,7 +1547,7 @@ const Dashboard: FC<DashboardProps> = () => {
       title: "Avg. Calories",
       value: 1850,
       subtext: "",
-      icon: "👨‍👧‍👦",
+      icon: "⚡",
       progressBar: {
         current: 75,
         total: 100,
