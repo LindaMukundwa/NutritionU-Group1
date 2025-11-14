@@ -62,11 +62,11 @@ const SearchBar: FC<SearchBarProps> = ({ placeholder = "Search for Recipes", val
 
         {/* Filter Button - only show if onFilterClick is provided */}
         {onFilterClick && (
-          <button className={styles.filterButton} onClick={onFilterClick} aria-label="Open filters">
+          <button className={styles.filterButton} onClick={onFilterClick} aria-label="Open filters" title="Filters">
             <svg
               className={styles.filterIcon}
-              width="16"
-              height="16"
+              width="18"
+              height="18"
               viewBox="0 0 16 16"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +79,6 @@ const SearchBar: FC<SearchBarProps> = ({ placeholder = "Search for Recipes", val
                 strokeLinejoin="round"
               />
             </svg>
-            <span>Filters</span>
           </button>
         )}
   </div>

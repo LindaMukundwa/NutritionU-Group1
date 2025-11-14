@@ -278,8 +278,8 @@ function MealContent({
   const [mealToAdd, setMealToAdd] = React.useState<any>(null)
   const [selectedFilters, setSelectedFilters] = React.useState({
     category: "All",
-    maxTime: "Any",
-    maxPrice: "Any",
+    maxTime: 60,
+    maxPrice: 10,
     dietary: [] as string[],
   })
 
@@ -502,13 +502,10 @@ function MealContent({
   const filteredMeals = demoMeals.filter((meal) => {
     const matchesSearch = meal.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedFilters.category === "All" || meal.category === selectedFilters.category
-    const matchesTime =
-      selectedFilters.maxTime === "Any" || Number.parseInt(meal.time) <= Number.parseInt(selectedFilters.maxTime)
-    const matchesPrice =
-      selectedFilters.maxPrice === "Any" ||
-      Number.parseFloat(meal.price.replace("$", "")) <= Number.parseFloat(selectedFilters.maxPrice)
+    const matchesTime = Number.parseInt(meal.time) <= selectedFilters.maxTime
+    const matchesPrice = Number.parseFloat(meal.price.replace("$", "")) <= selectedFilters.maxPrice
     const matchesDietary =
-      selectedFilters.dietary.length === 0 || selectedFilters.dietary.every((diet) => meal.tags.includes(diet))
+      selectedFilters.dietary.length === 0 || selectedFilters.dietary.some((diet) => meal.tags.includes(diet))
 
     return matchesSearch && matchesCategory && matchesTime && matchesPrice && matchesDietary
   })
@@ -568,11 +565,11 @@ function MealContent({
     setSelectedFilters({ ...selectedFilters, category })
   }
 
-  const handleTimeChange = (maxTime: string) => {
+  const handleTimeChange = (maxTime: number) => {
     setSelectedFilters({ ...selectedFilters, maxTime })
   }
 
-  const handlePriceChange = (maxPrice: string) => {
+  const handlePriceChange = (maxPrice: number) => {
     setSelectedFilters({ ...selectedFilters, maxPrice })
   }
 
@@ -586,8 +583,8 @@ function MealContent({
   const handleClearFilters = () => {
     setSelectedFilters({
       category: "All",
-      maxTime: "Any",
-      maxPrice: "Any",
+      maxTime: 60,
+      maxPrice: 10,
       dietary: [],
     })
   }
@@ -638,39 +635,43 @@ function MealContent({
             </div>
 
             <div className={styles.filterSection}>
-              <label className={styles.filterLabel}>Max Cooking Time</label>
-              <div className={styles.filterOptions}>
-                {["Any", "15", "30", "45"].map((time) => (
-                  <button
-                    key={time}
-                    onClick={() => handleTimeChange(time)}
-                    className={`${styles.filterOption} ${selectedFilters.maxTime === time ? styles.filterOptionActive : ""}`}
-                  >
-                    {time === "Any" ? "Any" : `${time} min`}
-                  </button>
-                ))}
+              <label className={styles.filterLabel}>Max Cooking Time: {selectedFilters.maxTime} min</label>
+              <input
+                type="range"
+                min="5"
+                max="120"
+                step="5"
+                value={selectedFilters.maxTime}
+                onChange={(e) => handleTimeChange(Number.parseInt(e.target.value))}
+                className={styles.slider}
+              />
+              <div className={styles.sliderLabels}>
+                <span>5 min</span>
+                <span>120 min</span>
               </div>
             </div>
 
             <div className={styles.filterSection}>
-              <label className={styles.filterLabel}>Max Price</label>
-              <div className={styles.filterOptions}>
-                {["Any", "3", "5", "7"].map((price) => (
-                  <button
-                    key={price}
-                    onClick={() => handlePriceChange(price)}
-                    className={`${styles.filterOption} ${selectedFilters.maxPrice === price ? styles.filterOptionActive : ""}`}
-                  >
-                    {price === "Any" ? "Any" : `$${price}`}
-                  </button>
-                ))}
+              <label className={styles.filterLabel}>Max Price: ${selectedFilters.maxPrice}</label>
+              <input
+                type="range"
+                min="1"
+                max="20"
+                step="1"
+                value={selectedFilters.maxPrice}
+                onChange={(e) => handlePriceChange(Number.parseInt(e.target.value))}
+                className={styles.slider}
+              />
+              <div className={styles.sliderLabels}>
+                <span>$1</span>
+                <span>$20</span>
               </div>
             </div>
 
             <div className={styles.filterSection}>
               <label className={styles.filterLabel}>Dietary Preferences</label>
               <div className={styles.filterCheckboxes}>
-                {["Vegetarian", "High Protein", "Quick", "Budget-Friendly"].map((dietary) => (
+                {["Vegetarian", "Vegan", "Pescatarian", "Mediterranean", "Paleo", "Keto", "Gluten-Free", "Dairy-Free", "High Protein"].map((dietary) => (
                   <label key={dietary} className={styles.checkboxLabel}>
                     <input
                       type="checkbox"
