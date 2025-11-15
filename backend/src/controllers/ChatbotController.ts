@@ -74,8 +74,8 @@ export const generateChatbotResponse = async (req: Request, res: Response) => {
 
         // Create recipe string for chatbot
         var recipeString: string = "**Here are some options** \n";
-        for (const recipe of formattedRecipes){
-            const currentRecipe = `
+        for (const recipe of formattedRecipes) {
+          const currentRecipe = `
               **Name:** ${recipe.title}
               **Description:** ${recipe.description}\n
               **Calories:** ${recipe.nutritionInfo.calories}
@@ -86,7 +86,7 @@ export const generateChatbotResponse = async (req: Request, res: Response) => {
             `;
           recipeString += currentRecipe;
         }
-        
+
         res.status(200).json({ reply: recipeString });
       } else {
         res.status(200).json({ reply: responseMessage.content });
@@ -137,5 +137,112 @@ export const generateChatbotPrompts = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('OpenAI API error:', error);
     res.status(500).json({ error: 'Failed to get response from assistant' });
+  }
+}
+
+export const generateMacros = async (req: Request, res: Response) => {
+  try {
+    console.log("[CHATBOT] generateMacros(): open ai request beginning to generate macros... ")
+    // May need to modify based on how data is passed in
+    const preferences = req.body;
+    const preferencesString = JSON.stringify(preferences);
+
+    // Build the prompt for OpenAI
+    const prompt = `
+      Generate a personalized macronutrient (calories, fats, carbs, protein) breakdown based on supplied user preferences and attributes from a JSON request body.
+
+      Consider the following required user inputs:
+      - age
+      - height
+      - weight
+      - units (e.g. "imperial" or "metric")
+      - activityLevel (e.g. "very_active", "inactive")
+      - budget (daily food budget in USD)
+      - cookingLevel (e.g. "beginner", "intermediate", "expert")
+      - lifestyleDiets (array: special dietary focuses, e.g. ["high_protein"])
+      - medicalRestrictions (array: e.g. ["diabetes"], can be empty)
+      - culturalDiets (array: e.g. ["kosher"], can be empty)
+      - goals (array: e.g. ["muscle_gain", "athletic_performance"])
+      - mealPrep (frequency, e.g. "daily", "weekly")
+
+      Reason step by step through the following before producing your answer:
+      1. Interpret all user attributes, goals, and restrictions, combining insights from activity level, age, and goals. Adjust for lifestyle or cultural diet flags, medical restrictions, and budgetary/cooking constraints only if relevant.
+      2. Determine an appropriate total daily calorie target.
+      3. Calculate evidence-based recommendations for daily macronutrient targets (grams and/or % of calories) for protein, fats, and carbohydrates, based on user profile and goals.
+      4. Ensure macronutrient ratios make sense for all stated goals, prioritizing muscle gain, athletic performance, and high protein per the example.
+      5. Only after finalizing your calculations, present the conclusion in a well-structured JSON object.
+
+      Output format:
+      Return your answer as a well-formatted JSON object in the following structure:
+      {
+        "calories": [daily target, integer, kcal],
+        "protein": {
+          "grams": [integer, g/day],
+          "percent": [float, % of daily calories]
+        },
+        "carbs": {
+          "grams": [integer, g/day],
+          "percent": [float, % of daily calories]
+        },
+        "fats": {
+          "grams": [integer, g/day],
+          "percent": [float, % of daily calories]
+        },
+        "rationale": "[Short explanation of the calculations and macronutrient distribution chosen based on provided preferences.]"
+      }
+
+      Examples:
+      USE THIS INPUT ONLY to make decisions are generating macro nutrient breakdown in the REQUIRED structure
+      ${preferencesString}
+
+      Corresponding output:
+      {
+        "calories": 3200,
+        "protein": {
+          "grams": 228,
+          "percent": 28.5
+        },
+        "carbs": {
+          "grams": 380,
+          "percent": 47.5
+        },
+        "fats": {
+          "grams": 95,
+          "percent": 24
+        },
+        "rationale": "The user profile targets muscle gain and athletic performance with high activity and a high protein focus. Estimated TDEE is increased for 'very_active' status (+10% for muscle gain). Protein set at 1.2g/lb due to high-protein and muscle goals; fats kept moderate; carbs fill remainder to support performance and recovery."
+      }
+
+      (Real output should have rationales appropriately detailed for each user input; placeholder numbers above.)
+
+      Important: Proceed stepwise—interpret user data and perform calculations before finalizing the output. Output only the specified JSON object format and rationale. Do not add explanations or outputs outside the JSON object.
+
+      —
+
+      Reminder: Always reason through user data and macronutrient calculation steps before finalizing and presenting the result in JSON format with rationale.`
+
+    // Query OpenAI
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional nutritionist and meal planning expert."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    });
+
+    const responseMessage = completion.choices[0].message?.content;
+    // Parse and return the response
+    const macros = JSON.parse(responseMessage || '{}');
+    console.log("[CHATBOT] generateMacros(): macro nutrient generation successful");
+    res.status(200).json(macros);
+  } catch (error) {
+    console.error('OpenAI API error:', error);
+    res.status(500).json({ error: 'Failed to generate macronutrient breakdown' });
   }
 }
