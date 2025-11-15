@@ -25,15 +25,14 @@ export default function OnboardingPage() {
     culturalDiets: [] as string[],
     goals: [] as string[],
     mealPrep: '',
+    macros: {
+      calories: 2000,
+      fats: 65,
+      carbs: 250,
+      protein: 150
+    }
   });
 
-  // Add to state section (around line 20-30)
-  const [macros, setMacros] = useState({
-    calories: 2000,
-    fats: 65,
-    carbs: 250,
-    protein: 150
-  });
 
   const totalSteps = 6;
   const progress = (step / totalSteps) * 100;
@@ -125,12 +124,15 @@ export default function OnboardingPage() {
         // setMacros(data);
 
         // Placeholder data
-        setMacros({
+        const macrosData = {
           calories: 2000,
           fats: 65,
           carbs: 250,
           protein: 150
-        });
+        };
+
+        // Set formadata with calculated macros from backend AI API
+        setFormData(prev => ({ ...prev, macros: macrosData }));
       } catch (error) {
         console.error('Error fetching macros:', error);
       }
@@ -139,14 +141,27 @@ export default function OnboardingPage() {
     fetchMacros();
   }, []);
 
-  // Add handler functions after other handlers
-  const handleMacroChange = (key: keyof typeof macros, value: string) => {
+  // Modify formdata when a user decides to changes their macros
+  const handleMacroChange = (key: keyof typeof formData.macros, value: string) => {
     const numValue = parseInt(value) || 0;
-    setMacros(prev => ({ ...prev, [key]: Math.max(0, numValue) }));
+    setFormData(prev => ({
+      ...prev,
+      macros: {
+        ...prev.macros,
+        [key]: Math.max(0, numValue)
+      }
+    }));
   };
 
-  const incrementMacro = (key: keyof typeof macros, amount: number) => {
-    setMacros(prev => ({ ...prev, [key]: Math.max(0, prev[key] + amount) }));
+  // 
+  const incrementMacro = (key: keyof typeof formData.macros, amount: number) => {
+    setFormData(prev => ({
+      ...prev,
+      macros: {
+        ...prev.macros,
+        [key]: Math.max(0, (prev.macros[key] || 0) + amount)
+      }
+    }));
   };
 
   return (
@@ -459,7 +474,7 @@ export default function OnboardingPage() {
                       </button>
                       <input
                         type="number"
-                        value={macros.calories}
+                        value={formData.macros.calories}
                         onChange={(e) => handleMacroChange('calories', e.target.value)}
                         className={styles.macroInput}
                         min="0"
@@ -488,7 +503,7 @@ export default function OnboardingPage() {
                       </button>
                       <input
                         type="number"
-                        value={macros.fats}
+                        value={formData.macros.fats}
                         onChange={(e) => handleMacroChange('fats', e.target.value)}
                         className={styles.macroInput}
                         min="0"
@@ -517,7 +532,7 @@ export default function OnboardingPage() {
                       </button>
                       <input
                         type="number"
-                        value={macros.carbs}
+                        value={formData.macros.carbs}
                         onChange={(e) => handleMacroChange('carbs', e.target.value)}
                         className={styles.macroInput}
                         min="0"
@@ -546,7 +561,7 @@ export default function OnboardingPage() {
                       </button>
                       <input
                         type="number"
-                        value={macros.protein}
+                        value={formData.macros.protein}
                         onChange={(e) => handleMacroChange('protein', e.target.value)}
                         className={styles.macroInput}
                         min="0"
