@@ -37,6 +37,10 @@ export default function OnboardingPage() {
   const totalSteps = 6;
   const progress = (step / totalSteps) * 100;
 
+  // Add loading state for macro population on onboarding card 6
+  const [isLoadingMacros, setIsLoadingMacros] = useState(false);
+  const [macroSuggestions, setMacroSuggestions] = useState<Record<string, any> | null>(null);
+
   const activityLevels = [
     { value: 'sedentary', label: 'Sedentary - Little to no exercise' },
     { value: 'lightly_active', label: 'Lightly Active - excercise 1-3 days/week' },
@@ -102,6 +106,84 @@ export default function OnboardingPage() {
     }
   };
 
+  // Method to dynamically add functionality between card when onboarding
+  const handleNext = async () => {
+    if (step === 5) {
+      setIsLoadingMacros(true);
+      try {
+        const suggestions = await getMacroSuggestions(formData);
+        console.log('API suggestions received:', suggestions);
+
+        setMacroSuggestions(suggestions);
+
+        // Update formData with the macro values from API response
+        setFormData(prev => ({
+          ...prev,
+          macros: {
+            calories: suggestions.calories || prev.macros.calories,
+            fats: suggestions.fats?.grams || prev.macros.fats,
+            carbs: suggestions.carbs?.grams || prev.macros.carbs,
+            protein: suggestions.protein?.grams || prev.macros.protein
+          }
+        }));
+
+        console.log('Updated formData.macros:', formData.macros);
+
+        setStep(step + 1);
+      } catch (error) {
+        console.error('Error fetching macros:', error);
+      } finally {
+        setIsLoadingMacros(false);
+      }
+    } else {
+      setStep(step + 1);
+    }
+  };
+
+  // Get macro suggestions for onboarding card 6
+  const getMacroSuggestions = async (formData: any): Promise<Record<string, any>> => {
+    try {
+      const payload = {
+        age: formData.age,
+        height: formData.height,
+        weight: formData.weight,
+        units: formData.units,
+        activityLevel: formData.activityLevel,
+        budget: formData.budget,
+        cookingLevel: formData.cookingLevel,
+        lifestyleDiets: formData.lifestyleDiets,
+        medicalRestrictions: formData.medicalRestrictions,
+        culturalDiets: formData.culturalDiets,
+        goals: formData.goals,
+        mealPrep: formData.mealPrep
+      };
+
+      console.log('Sending payload to API:', payload);
+      console.log('API URL:', `${API_BASE}/api/chatbot/macros`);
+
+      const response = await fetch(`${API_BASE}/api/chatbot/macros`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log('Response status:', response.status);
+      const responseText = await response.text();
+      console.log('Response body:', responseText);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch macro suggestions: ${response.status} - ${responseText}`);
+      }
+
+      return JSON.parse(responseText);
+    } catch (error) {
+      console.error('Full error:', error);
+      throw error;
+    }
+  };
+
   const toggleArrayItem = (array: string[], item: string, setter: (items: string[]) => void) => {
     if (array.includes(item)) {
       setter(array.filter((i) => i !== item));
@@ -115,31 +197,19 @@ export default function OnboardingPage() {
   };
 
   useEffect(() => {
-    // Placeholder API fetch for initial macro values
     const fetchMacros = async () => {
       try {
-        // TODO: Replace with actual API endpoint
-        // const response = await fetch('/api/user/macros');
-        // const data = await response.json();
-        // setMacros(data);
-
-        // Placeholder data
-        const macrosData = {
-          calories: 2000,
-          fats: 65,
-          carbs: 250,
-          protein: 150
-        };
-
-        // Set formadata with calculated macros from backend AI API
-        setFormData(prev => ({ ...prev, macros: macrosData }));
+        // Check if we have macroSuggestions from the API call
+        if (macroSuggestions && macroSuggestions.macros) {
+          setFormData(prev => ({ ...prev, macros: macroSuggestions.macros }));
+        }
       } catch (error) {
-        console.error('Error fetching macros:', error);
+        console.error('Error setting macros:', error);
       }
     };
 
     fetchMacros();
-  }, []);
+  }, [macroSuggestions]); // Run when macroSuggestions changes
 
   // Modify formdata when a user decides to changes their macros
   const handleMacroChange = (key: keyof typeof formData.macros, value: string) => {
@@ -165,7 +235,18 @@ export default function OnboardingPage() {
   };
 
   return (
+
     <div className={styles.container}>
+
+      {isLoadingMacros && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner}></div>
+            <p className={styles.loadingText}>Calculating your personalized macros...</p>
+          </div>
+        </div>
+      )}
+
       <div className={styles.content}>
         {/* Header */}
         <div className={styles.header}>
@@ -460,131 +541,140 @@ export default function OnboardingPage() {
                   <p className={styles.subtitle}>Customize your daily nutritional targets</p>
                 </div>
 
-                <div className={styles.macrosGrid}>
-                  {/* Calories */}
-                  <div className={styles.macroCard}>
-                    <label className={styles.macroLabel}>Calories</label>
-                    <div className={styles.macroInputGroup}>
-                      <button
-                        type="button"
-                        className={styles.macroButton}
-                        onClick={() => incrementMacro('calories', -50)}
-                      >
-                        ↓
-                      </button>
-                      <input
-                        type="number"
-                        value={formData.macros.calories}
-                        onChange={(e) => handleMacroChange('calories', e.target.value)}
-                        className={styles.macroInput}
-                        min="0"
-                      />
-                      <button
-                        type="button"
-                        className={styles.macroButton}
-                        onClick={() => incrementMacro('calories', 50)}
-                      >
-                        ↑
-                      </button>
-                    </div>
-                    <span className={styles.macroUnit}>kcal</span>
+                {isLoadingMacros ? (
+                  <div className={styles.loadingContainer}>
+                    <div className={styles.spinner}></div>
+                    <p className={styles.loadingText}>Calculating your personalized macros...</p>
                   </div>
+                ) : (
+                  <>
+                    <div className={styles.macrosGrid}>
+                      {/* Calories */}
+                      <div className={styles.macroCard}>
+                        <label className={styles.macroLabel}>Calories</label>
+                        <div className={styles.macroInputGroup}>
+                          <button
+                            type="button"
+                            className={styles.macroButton}
+                            onClick={() => incrementMacro('calories', -50)}
+                          >
+                            ↓
+                          </button>
+                          <input
+                            type="number"
+                            value={formData.macros.calories}
+                            onChange={(e) => handleMacroChange('calories', e.target.value)}
+                            className={styles.macroInput}
+                            min="0"
+                          />
+                          <button
+                            type="button"
+                            className={styles.macroButton}
+                            onClick={() => incrementMacro('calories', 50)}
+                          >
+                            ↑
+                          </button>
+                        </div>
+                        <span className={styles.macroUnit}>kcal</span>
+                      </div>
 
-                  {/* Fats */}
-                  <div className={styles.macroCard}>
-                    <label className={styles.macroLabel}>Fats</label>
-                    <div className={styles.macroInputGroup}>
-                      <button
-                        type="button"
-                        className={styles.macroButton}
-                        onClick={() => incrementMacro('fats', -5)}
-                      >
-                        ↓
-                      </button>
-                      <input
-                        type="number"
-                        value={formData.macros.fats}
-                        onChange={(e) => handleMacroChange('fats', e.target.value)}
-                        className={styles.macroInput}
-                        min="0"
-                      />
-                      <button
-                        type="button"
-                        className={styles.macroButton}
-                        onClick={() => incrementMacro('fats', 5)}
-                      >
-                        ↑
-                      </button>
-                    </div>
-                    <span className={styles.macroUnit}>g</span>
-                  </div>
+                      {/* Fats */}
+                      <div className={styles.macroCard}>
+                        <label className={styles.macroLabel}>Fats</label>
+                        <div className={styles.macroInputGroup}>
+                          <button
+                            type="button"
+                            className={styles.macroButton}
+                            onClick={() => incrementMacro('fats', -5)}
+                          >
+                            ↓
+                          </button>
+                          <input
+                            type="number"
+                            value={formData.macros.fats}
+                            onChange={(e) => handleMacroChange('fats', e.target.value)}
+                            className={styles.macroInput}
+                            min="0"
+                          />
+                          <button
+                            type="button"
+                            className={styles.macroButton}
+                            onClick={() => incrementMacro('fats', 5)}
+                          >
+                            ↑
+                          </button>
+                        </div>
+                        <span className={styles.macroUnit}>g</span>
+                      </div>
 
-                  {/* Carbs */}
-                  <div className={styles.macroCard}>
-                    <label className={styles.macroLabel}>Carbs</label>
-                    <div className={styles.macroInputGroup}>
-                      <button
-                        type="button"
-                        className={styles.macroButton}
-                        onClick={() => incrementMacro('carbs', -10)}
-                      >
-                        ↓
-                      </button>
-                      <input
-                        type="number"
-                        value={formData.macros.carbs}
-                        onChange={(e) => handleMacroChange('carbs', e.target.value)}
-                        className={styles.macroInput}
-                        min="0"
-                      />
-                      <button
-                        type="button"
-                        className={styles.macroButton}
-                        onClick={() => incrementMacro('carbs', 10)}
-                      >
-                        ↑
-                      </button>
-                    </div>
-                    <span className={styles.macroUnit}>g</span>
-                  </div>
+                      {/* Carbs */}
+                      <div className={styles.macroCard}>
+                        <label className={styles.macroLabel}>Carbs</label>
+                        <div className={styles.macroInputGroup}>
+                          <button
+                            type="button"
+                            className={styles.macroButton}
+                            onClick={() => incrementMacro('carbs', -10)}
+                          >
+                            ↓
+                          </button>
+                          <input
+                            type="number"
+                            value={formData.macros.carbs}
+                            onChange={(e) => handleMacroChange('carbs', e.target.value)}
+                            className={styles.macroInput}
+                            min="0"
+                          />
+                          <button
+                            type="button"
+                            className={styles.macroButton}
+                            onClick={() => incrementMacro('carbs', 10)}
+                          >
+                            ↑
+                          </button>
+                        </div>
+                        <span className={styles.macroUnit}>g</span>
+                      </div>
 
-                  {/* Protein */}
-                  <div className={styles.macroCard}>
-                    <label className={styles.macroLabel}>Protein</label>
-                    <div className={styles.macroInputGroup}>
-                      <button
-                        type="button"
-                        className={styles.macroButton}
-                        onClick={() => incrementMacro('protein', -5)}
-                      >
-                        ↓
-                      </button>
-                      <input
-                        type="number"
-                        value={formData.macros.protein}
-                        onChange={(e) => handleMacroChange('protein', e.target.value)}
-                        className={styles.macroInput}
-                        min="0"
-                      />
-                      <button
-                        type="button"
-                        className={styles.macroButton}
-                        onClick={() => incrementMacro('protein', 5)}
-                      >
-                        ↑
-                      </button>
+                      {/* Protein */}
+                      <div className={styles.macroCard}>
+                        <label className={styles.macroLabel}>Protein</label>
+                        <div className={styles.macroInputGroup}>
+                          <button
+                            type="button"
+                            className={styles.macroButton}
+                            onClick={() => incrementMacro('protein', -5)}
+                          >
+                            ↓
+                          </button>
+                          <input
+                            type="number"
+                            value={formData.macros.protein}
+                            onChange={(e) => handleMacroChange('protein', e.target.value)}
+                            className={styles.macroInput}
+                            min="0"
+                          />
+                          <button
+                            type="button"
+                            className={styles.macroButton}
+                            onClick={() => incrementMacro('protein', 5)}
+                          >
+                            ↑
+                          </button>
+                        </div>
+                        <span className={styles.macroUnit}>g</span>
+                      </div>
                     </div>
-                    <span className={styles.macroUnit}>g</span>
-                  </div>
-                </div>
-                <Card className={styles.completionCard}>
-                    <CardContent className={styles.completionContent}>
-                      <h3 className={styles.completionTitle}>You're all set! 🎉</h3>
-                      <p className={styles.completionText}>
-                        We'll use this information to create personalized meal plans just for you.
-                      </p>
-                    </CardContent>
-                  </Card>
+                    <Card className={styles.completionCard}>
+                      <CardContent className={styles.completionContent}>
+                        <h3 className={styles.completionTitle}>You're all set! 🎉</h3>
+                        <p className={styles.completionText}>
+                          We'll use this information to create personalized meal plans just for you.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
             )}
             {/* Navigation */}
@@ -599,7 +689,7 @@ export default function OnboardingPage() {
               </Button>
 
               <Button
-                onClick={step === totalSteps ? handleComplete : nextStep}
+                onClick={step === totalSteps ? handleComplete : handleNext}
                 className={styles.nextButton}
                 disabled={submitting}
               >

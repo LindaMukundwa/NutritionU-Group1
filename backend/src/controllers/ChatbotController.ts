@@ -147,6 +147,8 @@ export const generateMacros = async (req: Request, res: Response) => {
     const preferences = req.body;
     const preferencesString = JSON.stringify(preferences);
 
+    console.log(preferencesString);
+
     // Build the prompt for OpenAI
     const prompt = `
       Generate a personalized macronutrient (calories, fats, carbs, protein) breakdown based on supplied user preferences and attributes from a JSON request body.
@@ -221,6 +223,7 @@ export const generateMacros = async (req: Request, res: Response) => {
 
       Reminder: Always reason through user data and macronutrient calculation steps before finalizing and presenting the result in JSON format with rationale.`
 
+      console.log(prompt);
     // Query OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
@@ -236,10 +239,12 @@ export const generateMacros = async (req: Request, res: Response) => {
       ]
     });
 
+    console.log(completion.choices);
+
     const responseMessage = completion.choices[0].message?.content;
     // Parse and return the response
     const macros = JSON.parse(responseMessage || '{}');
-    console.log("[CHATBOT] generateMacros(): macro nutrient generation successful");
+    console.log("[CHATBOT] generateMacros(): macro nutrient generation successful")
     res.status(200).json(macros);
   } catch (error) {
     console.error('OpenAI API error:', error);
