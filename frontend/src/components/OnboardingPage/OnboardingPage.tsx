@@ -196,20 +196,6 @@ export default function OnboardingPage() {
     setFormData({ ...formData, budget: parseInt(event.target.value) });
   };
 
-  useEffect(() => {
-    const fetchMacros = async () => {
-      try {
-        // Check if we have macroSuggestions from the API call
-        if (macroSuggestions && macroSuggestions.macros) {
-          setFormData(prev => ({ ...prev, macros: macroSuggestions.macros }));
-        }
-      } catch (error) {
-        console.error('Error setting macros:', error);
-      }
-    };
-
-    fetchMacros();
-  }, [macroSuggestions]); // Run when macroSuggestions changes
 
   // Modify formdata when a user decides to changes their macros
   const handleMacroChange = (key: keyof typeof formData.macros, value: string) => {
@@ -663,8 +649,18 @@ export default function OnboardingPage() {
                           </button>
                         </div>
                         <span className={styles.macroUnit}>g</span>
+                        
                       </div>
+
                     </div>
+                    {/* Add the rationale display here */}
+                    {macroSuggestions?.rationale && (
+                        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <h4 className="font-semibold text-blue-900 mb-2">AI Thought Process:</h4>
+                          <p className="text-sm text-blue-800 whitespace-pre-line">{macroSuggestions.rationale}</p>
+                        </div>
+                      )}
+
                     <Card className={styles.completionCard}>
                       <CardContent className={styles.completionContent}>
                         <h3 className={styles.completionTitle}>You're all set! 🎉</h3>
