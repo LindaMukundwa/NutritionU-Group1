@@ -40,6 +40,7 @@ export default function OnboardingPage() {
   // Add loading state for macro population on onboarding card 6
   const [isLoadingMacros, setIsLoadingMacros] = useState(false);
   const [macroSuggestions, setMacroSuggestions] = useState<Record<string, any> | null>(null);
+  const [macroError, setMacroError] = useState(false);
 
   const activityLevels = [
     { value: 'sedentary', label: 'Sedentary - Little to no exercise' },
@@ -108,7 +109,7 @@ export default function OnboardingPage() {
 
   // Method to dynamically add functionality between card when onboarding
   const handleNext = async () => {
-    if (step === 5) {
+    if (step === 5 && !macroError) {
       setIsLoadingMacros(true);
       try {
         const suggestions = await getMacroSuggestions(formData);
@@ -116,7 +117,6 @@ export default function OnboardingPage() {
 
         setMacroSuggestions(suggestions);
 
-        // Update formData with the macro values from API response
         setFormData(prev => ({
           ...prev,
           macros: {
@@ -132,17 +132,52 @@ export default function OnboardingPage() {
         setStep(step + 1);
       } catch (error) {
         console.error('Error fetching macros:', error);
+        return;
       } finally {
         setIsLoadingMacros(false);
       }
     } else {
+      // Reset error and advance to next step for manual entry
+      setMacroError(false);
       setStep(step + 1);
+    }
+  };
+
+  const handleRetryMacros = async () => {
+    setIsLoadingMacros(true);
+    try {
+      const suggestions = await getMacroSuggestions(formData);
+      console.log('API suggestions received:', suggestions);
+
+      setMacroSuggestions(suggestions);
+
+      setFormData(prev => ({
+        ...prev,
+        macros: {
+          calories: suggestions.calories || prev.macros.calories,
+          fats: suggestions.fats?.grams || prev.macros.fats,
+          carbs: suggestions.carbs?.grams || prev.macros.carbs,
+          protein: suggestions.protein?.grams || prev.macros.protein
+        }
+      }));
+
+      console.log('Updated formData.macros:', formData.macros);
+
+      // Only advance if successful
+      setStep(step + 1);
+    } catch (error) {
+      console.error('Error fetching macros:', error);
+      // Don't advance - stay on current step with error showing
+    } finally {
+      setIsLoadingMacros(false);
     }
   };
 
   // Get macro suggestions for onboarding card 6
   const getMacroSuggestions = async (formData: any): Promise<Record<string, any>> => {
     try {
+      setMacroError(false);
+
       const payload = {
         age: formData.age,
         height: formData.height,
@@ -174,12 +209,14 @@ export default function OnboardingPage() {
       console.log('Response body:', responseText);
 
       if (!response.ok) {
+        setMacroError(true);
         throw new Error(`Failed to fetch macro suggestions: ${response.status} - ${responseText}`);
       }
 
       return JSON.parse(responseText);
     } catch (error) {
       console.error('Full error:', error);
+      setMacroError(true);
       throw error;
     }
   };
@@ -649,17 +686,17 @@ export default function OnboardingPage() {
                           </button>
                         </div>
                         <span className={styles.macroUnit}>g</span>
-                        
+
                       </div>
 
                     </div>
                     {/* Add the rationale display here */}
                     {macroSuggestions?.rationale && (
-                        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <h4 className="font-semibold text-blue-900 mb-2">AI Thought Process:</h4>
-                          <p className="text-sm text-blue-800 whitespace-pre-line">{macroSuggestions.rationale}</p>
-                        </div>
-                      )}
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h4 className="font-semibold text-blue-900 mb-2">AI Thought Process:</h4>
+                        <p className="text-sm text-blue-800 whitespace-pre-line">{macroSuggestions.rationale}</p>
+                      </div>
+                    )}
 
                     <Card className={styles.completionCard}>
                       <CardContent className={styles.completionContent}>
@@ -673,6 +710,22 @@ export default function OnboardingPage() {
                 )}
               </div>
             )}
+
+            {macroError && (
+              <div className={styles.errorSection}>
+                <p className={styles.errorMessage}>Error generating macros.</p>
+                <div className={styles.errorActions}>
+                  <button
+                    onClick={handleRetryMacros}
+                    className={styles.retryButton}
+                  >
+                    Retry
+                  </button>
+                </div>
+                <p className={styles.errorHelp}>Or click Continue to enter macros manually</p>
+              </div>
+            )}
+
             {/* Navigation */}
             <div className={styles.navigation}>
               <Button

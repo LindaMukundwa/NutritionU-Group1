@@ -678,3 +678,45 @@ font-weight: 500;
   font-size: 1rem;
   font-weight: 500;
 }
+
+.errorSection {
+  padding: 20px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #dc2626;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.errorActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.retryButton,
+.manualButton {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.retryButton {
+  background-color: #2563eb;
+  color: white;
+}
+
+.manualButton {
+  background-color: #6b7280;
+  color: white;
+}
+
+.errorHelp {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
