@@ -223,7 +223,7 @@ export const generateMacros = async (req: Request, res: Response) => {
 
       Reminder: Always reason through user data and macronutrient calculation steps before finalizing and presenting the result in JSON format with rationale.`
 
-      console.log(prompt);
+    console.log(prompt);
     // Query OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
@@ -251,3 +251,92 @@ export const generateMacros = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to generate macronutrient breakdown' });
   }
 }
+
+// Generate instructions based on a recipe from fat secret
+export const generateInstructionsAndIngredients = async (req: Request, res: Response) => {
+  try {
+    const { query } = req.body;
+
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ error: 'Invalid or missing query parameter' });
+    }
+
+    // Build the prompt for OpenAI
+    const prompt = `
+        Generate a recipe ingredient list and step-by-step instructions based on a given recipe name and a macronutrient profile (e.g., calories, protein, carbs, fats). Before providing the ingredient list and instructions, use reasoning to explain how you selected the ingredients and designed the preparation steps to match the given macronutrient targets for the recipe.
+
+        This is the given recipe ${query}
+        
+        Think step by step to ensure that the ingredient choices and preparation methods fit the intended nutritional profile. Do not produce your conclusion (the ingredient list and recipe instructions) until after your reasoning section.
+
+        Persist in iterative planning to optimize the macronutrients as closely as possible to the targets before producing your final answer. Internally, verify that all recipe elements align with the goals specified.
+
+        Return your response as a JSON object with the following fields:
+
+        - "reasoning": An explanation of how the ingredients and steps were chosen to fit the given macronutrient targets and dish type (50-150 words).
+        - "ingredients": A list of ingredient names and their quantities, formatted as an array of strings (e.g., "2 eggs", "100g oats", "1 tsp salt").
+        - "instructions": An ordered array of recipe preparation steps (e.g., "Preheat oven...", "Mix eggs...").
+
+        ## Output format
+
+        Respond ONLY with a JSON object as described above (no code block formatting).
+
+        ## Example
+
+        ### Input  
+        Recipe name: Chicken Caesar Salad  
+        Macronutrients: 40g protein, 15g carbs, 20g fat
+
+        ### Output Example  
+        {
+          "reasoning": "To meet the high protein requirement, I used grilled chicken breast as the main protein source. The carb content is kept low by using primarily lettuce and a little whole-wheat crouton for some carbs, while the fat comes from olive oil and a light Caesar dressing. The ingredient amounts are selected to ensure the totals are as close as possible to the specified macronutrients.",
+          "ingredients": [
+            "150g grilled chicken breast",
+            "2 cups romaine lettuce",
+            "30g whole-wheat croutons",
+            "2 tbsp light Caesar dressing",
+            "1 tbsp grated parmesan cheese",
+            "1 tbsp olive oil"
+          ],
+          "instructions": [
+            "Grill the chicken breast until fully cooked and slice.",
+            "Wash and chop the romaine lettuce.",
+            "Toss lettuce with olive oil and Caesar dressing in a large bowl.",
+            "Add sliced chicken on top, sprinkle with parmesan and croutons.",
+            "Serve immediately."
+          ]
+        }
+
+        (Real examples should use accurate quantities to reach the specified macronutrient targets more closely; ingredient calculations may require placeholder values if not specified.)
+
+        ---
+
+        **Important:**
+        - Think step-by-step before listing ingredients or instructions.
+        - Respond only with the specified JSON format.
+      `;
+
+    // Query OpenAI
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional chef and recipe creator."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    });
+
+    const responseMessage = completion.choices[0].message?.content;
+    const recipe = JSON.parse(responseMessage || '{}');
+
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error('OpenAI API error:', error);
+    res.status(500).json({ error: 'Failed to generate recipe' });
+  }
+};
