@@ -291,7 +291,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
             📅 {formatDateRange()}
           </button>
           <button className={styles.generateButton} onClick={generateFromPlannedMeals}>
-            🔄 Generate
+            ✨ Generate
           </button>
           <button className={styles.addButton} onClick={() => setShowAddForm(!showAddForm)}>
             ➕ Add Item
@@ -302,7 +302,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
       {showDateRangePicker && (
         <div className={styles.dateRangePicker}>
           <div className={styles.dateRangeHeader}>
-            <h3>Select Date Range for Grocery List</h3>
+            <h3>Select Date Range</h3>
             <button onClick={() => setShowDateRangePicker(false)} className={styles.closePicker}>✕</button>
           </div>
           <div className={styles.dateRangePresets}>
@@ -339,7 +339,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
           </div>
           <div className={styles.dateRangeActions}>
             <button onClick={() => setShowDateRangePicker(false)} className={styles.applyButton}>
-              Apply & Generate
+              Apply
             </button>
           </div>
         </div>
