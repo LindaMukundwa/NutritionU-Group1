@@ -9,6 +9,7 @@ import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
 import AddMealModal from "./AddMealModal/AddMealModal"
 import AddToPlanModal from "./AddToPlanModal/AddToPlanModal"
 import GroceryList from "./GroceryList/GroceryList"
+import GenerateMealPlanModal from "./GenerateMealPlanModal/GenerateMealPlanModal"
 import type { Recipe } from '../../../../shared/types/recipe';
 
 interface SummaryCardData {
@@ -777,6 +778,7 @@ function PlannerContent({
   const [showRecipeModal, setShowRecipeModal] = useState(false)
   const [showAddMealModal, setShowAddMealModal] = useState(false)
   const [addMealType, setAddMealType] = useState<string>('')
+  const [showGenerateMealPlanModal, setShowGenerateMealPlanModal] = useState(false)
 
   const handleMealClick = (meal: any) => {
     if (meal && meal.recipe) {
@@ -816,6 +818,135 @@ function PlannerContent({
         },
       }
     })
+  }
+
+  const handleGenerateMealPlan = (startDate: string, endDate: string, preferences: any) => {
+    // This is a mock implementation - in production this would call an API
+    // that uses AI to generate optimal meals based on nutritional goals
+    
+    const start = new Date(startDate + 'T00:00:00')
+    const end = new Date(endDate + 'T00:00:00')
+    const newPlan: WeeklyMealPlan = { ...weeklyMealPlan }
+    
+    // Sample meals that match different nutritional profiles
+    const breakfastOptions: Meal[] = [
+      {
+        name: 'Greek Yogurt Parfait',
+        calories: 280,
+        time: '10 min',
+        cost: '$2.80',
+        recipe: {
+          ingredients: ['1 cup Greek yogurt', '1/2 cup granola', '1/2 cup mixed berries', '1 tbsp honey'],
+          instructions: ['Layer yogurt with granola', 'Top with berries', 'Drizzle with honey'],
+          nutrition: { protein: 20, carbs: 45, fat: 8, fiber: 6 },
+        },
+      },
+      {
+        name: 'Avocado Toast with Eggs',
+        calories: 350,
+        time: '15 min',
+        cost: '$3.20',
+        recipe: {
+          ingredients: ['2 slices whole grain bread', '1 avocado', '2 eggs', 'Salt and pepper'],
+          instructions: ['Toast bread', 'Mash avocado', 'Fry eggs', 'Assemble and season'],
+          nutrition: { protein: 16, carbs: 38, fat: 18, fiber: 10 },
+        },
+      },
+    ]
+    
+    const lunchOptions: Meal[] = [
+      {
+        name: 'Mediterranean Chickpea Bowl',
+        calories: 420,
+        time: '25 min',
+        cost: '$4.50',
+        recipe: {
+          ingredients: ['1 cup chickpeas', '1 cup mixed greens', '1/2 cup cherry tomatoes', '1/4 cup feta cheese'],
+          instructions: ['Rinse chickpeas', 'Chop vegetables', 'Combine ingredients', 'Add dressing'],
+          nutrition: { protein: 18, carbs: 52, fat: 14, fiber: 12 },
+        },
+      },
+      {
+        name: 'Veggie Wrap',
+        calories: 320,
+        time: '12 min',
+        cost: '$3.50',
+        recipe: {
+          ingredients: ['1 whole wheat tortilla', '3 tbsp hummus', 'Mixed greens', 'Sliced vegetables', 'Feta cheese'],
+          instructions: ['Spread hummus', 'Layer vegetables', 'Add cheese', 'Roll tightly'],
+          nutrition: { protein: 12, carbs: 42, fat: 10, fiber: 8 },
+        },
+      },
+    ]
+    
+    const dinnerOptions: Meal[] = [
+      {
+        name: 'Teriyaki Chicken Bowl',
+        calories: 520,
+        time: '30 min',
+        cost: '$5.80',
+        recipe: {
+          ingredients: ['6 oz chicken breast', '1 cup rice', '2 cups mixed vegetables', '3 tbsp teriyaki sauce'],
+          instructions: ['Cook rice', 'Cut chicken', 'Cook chicken', 'Add sauce and vegetables', 'Serve'],
+          nutrition: { protein: 38, carbs: 62, fat: 12, fiber: 4 },
+        },
+      },
+      {
+        name: 'Grilled Salmon with Vegetables',
+        calories: 380,
+        time: '25 min',
+        cost: '$8.50',
+        recipe: {
+          ingredients: ['6 oz salmon fillet', '2 cups roasted vegetables', 'Olive oil', 'Lemon', 'Herbs'],
+          instructions: ['Preheat grill', 'Season salmon', 'Grill salmon', 'Roast vegetables', 'Serve with lemon'],
+          nutrition: { protein: 34, carbs: 15, fat: 22, fiber: 5 },
+        },
+      },
+    ]
+    
+    const snackOptions: Meal[] = [
+      {
+        name: 'Trail Mix Energy Bites',
+        calories: 180,
+        time: '5 min',
+        cost: '$1.50',
+        recipe: {
+          ingredients: ['1 cup rolled oats', '1/2 cup peanut butter', '1/3 cup honey', '1/2 cup chocolate chips'],
+          instructions: ['Mix ingredients', 'Refrigerate', 'Roll into balls', 'Store in fridge'],
+          nutrition: { protein: 6, carbs: 24, fat: 9, fiber: 4 },
+        },
+      },
+    ]
+    
+    // Generate meals for each day in the range
+    let currentDate = new Date(start)
+    let breakfastIdx = 0
+    let lunchIdx = 0
+    let dinnerIdx = 0
+    
+    while (currentDate <= end) {
+      const dateString = getDateString(currentDate)
+      
+      // Rotate through available meals to provide variety
+      const dayPlan: DayMealPlan = {
+        breakfast: [breakfastOptions[breakfastIdx % breakfastOptions.length]],
+        lunch: [lunchOptions[lunchIdx % lunchOptions.length]],
+        dinner: [dinnerOptions[dinnerIdx % dinnerOptions.length]],
+        snacks: preferences.mealsPerDay === 4 ? [snackOptions[0]] : [],
+      }
+      
+      newPlan[dateString] = dayPlan
+      
+      // Increment indices for variety
+      breakfastIdx++
+      lunchIdx++
+      dinnerIdx++
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+    
+    setWeeklyMealPlan(newPlan)
   }
 
   // Generate dates for navigation (show 7 days starting from current week)
@@ -874,7 +1005,15 @@ function PlannerContent({
         <div>
           <h2 className={styles.greeting}>Daily Meal Planner</h2>
         </div>
-        <DateNavigation selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button
+            className={styles.primaryButton}
+            onClick={() => setShowGenerateMealPlanModal(true)}
+          >
+            ✨ Generate Meal Plan
+          </button>
+          <DateNavigation selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
+        </div>
       </div>
 
       <div className={styles.plannerContent}>
@@ -943,6 +1082,14 @@ function PlannerContent({
           onAddMeal={handleAddMealToPlanner}
           mealType={addMealType}
           availableMeals={availableMeals}
+        />
+      )}
+
+      {showGenerateMealPlanModal && (
+        <GenerateMealPlanModal
+          isOpen={showGenerateMealPlanModal}
+          onClose={() => setShowGenerateMealPlanModal(false)}
+          onGenerate={handleGenerateMealPlan}
         />
       )}
     </div>
