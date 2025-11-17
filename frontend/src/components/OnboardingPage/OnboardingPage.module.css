@@ -510,3 +510,213 @@ font-weight: 500;
   background: var(--info) !important;    
   color: var(--bg-light) !important;            
 }
+
+/* MACROS SECTION */
+
+/* Macros section container */
+.macrosSection {
+  margin-top: 0.5rem;
+}
+
+/* Grid layout for macro cards */
+.macrosGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Individual macro card */
+.macroCard {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+/* Macro card hover state */
+.macroCard:hover {
+  border-color: var(--primary);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Macro label */
+.macroLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Macro input group - contains buttons and input */
+.macroInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 200px;
+}
+
+/* Macro increment/decrement buttons */
+.macroButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-light);
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Macro button hover state */
+.macroButton:hover {
+  background: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
+}
+
+/* Macro button active state */
+.macroButton:active {
+  transform: scale(0.95);
+}
+
+/* Macro input field */
+.macroInput {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-light);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Macro input focus state */
+.macroInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Remove spinner arrows from number input */
+.macroInput::-webkit-outer-spin-button,
+.macroInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.macroInput[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Macro unit label */
+.macroUnit {
+  font-size: 0.875rem;
+  color: var(--text);
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: white;
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #f3f4f6;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  color: #1f2937;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.errorSection {
+  padding: 20px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #dc2626;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.errorActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.retryButton,
+.manualButton {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.retryButton {
+  background-color: #2563eb;
+  color: white;
+}
+
+.manualButton {
+  background-color: #6b7280;
+  color: white;
+}
+
+.errorHelp {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
