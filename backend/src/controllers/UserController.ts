@@ -437,11 +437,30 @@ export const patchUserProfile = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Profile data is required' });
         }
 
-        const updates = {
+        const updates: Record<string, unknown> = {
             profile,
             onboardingCompleted: true,
             updatedAt: new Date(),
         };
+
+        const topLevelFields = [
+            'displayName',
+            'age',
+            'height',
+            'weight',
+            'units',
+            'activityLevel',
+        ] as const;
+
+        topLevelFields.forEach((field) => {
+            if (profile[field] !== undefined) {
+                updates[field] = profile[field];
+            }
+        });
+
+        if (profile.budget !== undefined && typeof profile.budget === 'number') {
+            updates['budget'] = profile.budget;
+        }
 
         // Allow caller to pass either the Mongo _id or the firebaseUid
         const filter = { $or: [{ _id: id }, { firebaseUid: id }] } as any;
