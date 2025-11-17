@@ -113,7 +113,6 @@ export default function OnboardingPage() {
       setIsLoadingMacros(true);
       try {
         const suggestions = await getMacroSuggestions(formData);
-        console.log('API suggestions received:', suggestions);
 
         setMacroSuggestions(suggestions);
 
@@ -204,9 +203,7 @@ export default function OnboardingPage() {
         body: JSON.stringify(payload),
       });
 
-      console.log('Response status:', response.status);
       const responseText = await response.text();
-      console.log('Response body:', responseText);
 
       if (!response.ok) {
         setMacroError(true);
