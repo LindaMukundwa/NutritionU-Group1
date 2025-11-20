@@ -10,6 +10,7 @@ interface AddMealModalProps {
   onAddMeal: (meal: any) => void;
   mealType: string;
   availableMeals: any[]; // The demo meals from MealContent
+  isAddingMeal: boolean
 }
 
 const AddMealModal: React.FC<AddMealModalProps> = ({
@@ -18,12 +19,15 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
   onAddMeal,
   mealType,
   availableMeals,
+  isAddingMeal
 }) => {
   const [activeTab, setActiveTab] = useState<'search' | 'favorites'>('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+
+  console.log('isAddingMeal:', isAddingMeal);
 
   // Filter meals that are marked as favorites (liked)
   const favoriteMeals = availableMeals.filter(meal => meal.isLiked !== false);
@@ -94,7 +98,6 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
       recipe: meal.recipe,
     };
     onAddMeal(plannerMeal);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -112,13 +115,20 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
   );
 
   // Determine which meals to display
-  const displayMeals = activeTab === 'search' 
+  const displayMeals = activeTab === 'search'
     ? (searchResults.length > 0 ? searchResults : filteredAvailableMeals)
     : filteredFavorites;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        {isAddingMeal && (
+          <div className={styles.loadingOverlay}>
+            <div className={styles.spinner}>
+              Adding meal...
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Add {mealType}</h2>
@@ -164,8 +174,8 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
                 {activeTab === 'favorites'
                   ? 'No favorite meals yet. Like meals to add them to your favorites!'
                   : searchQuery
-                  ? 'No meals found. Try a different search term.'
-                  : 'Search for meals or browse your favorites.'}
+                    ? 'No meals found. Try a different search term.'
+                    : 'Search for meals or browse your favorites.'}
               </p>
             </div>
           ) : (

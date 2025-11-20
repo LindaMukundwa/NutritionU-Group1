@@ -1,5 +1,6 @@
 import { type FC, useState } from "react"
 import styles from "./MealContentCard.module.css"
+import React from 'react'
 
 interface MealContentCardProps {
   recipeId: string;

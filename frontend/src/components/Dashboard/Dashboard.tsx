@@ -779,6 +779,7 @@ function PlannerContent({
   const [showAddMealModal, setShowAddMealModal] = useState(false)
   const [addMealType, setAddMealType] = useState<string>('')
   const [showGenerateMealPlanModal, setShowGenerateMealPlanModal] = useState(false)
+  const [isAddingMeal, setIsAddingMeal] = useState(false);
 
   const handleMealClick = (meal: any) => {
     if (meal && meal.recipe) {
@@ -806,19 +807,74 @@ function PlannerContent({
     setShowAddMealModal(true)
   }
 
-  const handleAddMealToPlanner = (meal: Meal) => {
-    const mealTypeKey = addMealType as keyof DayMealPlan
-    setWeeklyMealPlan((prev) => {
-      const dayPlan = getOrCreateDayPlan(prev, selectedDay)
-      return {
-        ...prev,
-        [selectedDay]: {
-          ...dayPlan,
-          [mealTypeKey]: [...dayPlan[mealTypeKey], meal],
+  /**
+   * Handles adding a meal to the meal planner by generating instructions and ingredients via API.
+   * 
+   * This function performs the following steps:
+   * 1. Calls the chatbot API to generate cooking instructions and ingredients based on the meal's nutritional information
+   * 2. Updates the meal object with the generated data (or keeps existing data if generation fails)
+   * 3. Adds the updated meal to the appropriate meal type slot for the selected day in the weekly meal plan
+   * 4. Closes the add meal modal on success
+   * 
+   * @param meal - The meal object to be added to the planner, containing name, calories, and recipe information
+   * @throws Will log an error to console if the API call fails or returns a non-OK response
+   * 
+   * @remarks
+   * - Uses the `addMealType` state variable to determine which meal slot (breakfast, lunch, dinner, snack) to populate
+   * - Uses the `selectedDay` state variable to determine which day of the week to add the meal to
+   * - Automatically creates a day plan if one doesn't exist for the selected day
+   * - Does not throw errors to the caller; errors are caught and logged internally
+   */
+  const handleAddMealToPlanner = async (meal: Meal) => {
+    // Add loading state
+    setIsAddingMeal(true); // Use the state from component
+    
+    try {
+      const response = await fetch('http://localhost:3001/api/chatbot/instructions-ingredients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          query: `${meal.name} with approximately ${meal.calories} calories, ${meal.recipe.nutrition.protein}g protein, ${meal.recipe.nutrition.carbs}g carbs, and ${meal.recipe.nutrition.fat}g fat.`
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to generate instructions and ingredients');
       }
-    })
-  }
+  
+      const data = await response.json() as { ingredients?: string[]; instructions?: string[] };
+      
+      const updatedMeal = {
+        ...meal,
+        recipe: {
+          ingredients: data.ingredients || meal.recipe.ingredients,
+          instructions: data.instructions || meal.recipe.instructions,
+          nutrition: meal.recipe.nutrition,
+        },
+      };
+  
+      const mealTypeKey = addMealType as keyof DayMealPlan;
+      setWeeklyMealPlan((prev) => {
+        const dayPlan = getOrCreateDayPlan(prev, selectedDay);
+        return {
+          ...prev,
+          [selectedDay]: {
+            ...dayPlan,
+            [mealTypeKey]: [...dayPlan[mealTypeKey], updatedMeal],
+          },
+        };
+      });
+  
+      setShowAddMealModal(false);
+    } catch (error) {
+      console.error('Error generating instructions and ingredients:', error);
+      // Show error to user
+    } finally {
+      setIsAddingMeal(false);
+    }
+  };
 
   const handleGenerateMealPlan = (startDate: string, endDate: string, preferences: any) => {
     // This is a mock implementation - in production this would call an API
@@ -1082,6 +1138,7 @@ function PlannerContent({
           onAddMeal={handleAddMealToPlanner}
           mealType={addMealType}
           availableMeals={availableMeals}
+          isAddingMeal={isAddingMeal}
         />
       )}
 
