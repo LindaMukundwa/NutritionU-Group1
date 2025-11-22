@@ -5,9 +5,10 @@ import styles from "./TopNavBar.module.css";
 
 interface TopNavBarProps {
   userEmail?: string;
+  onOpenGroceryList?: () => void;
 }
 
-export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu" }: TopNavBarProps) {
+export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu", onOpenGroceryList }: TopNavBarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -44,9 +45,11 @@ export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu" }: TopNavBa
       {/* Right side - Grocery List and Hamburger Menu */}
       <div className={styles.rightSection} ref={menuRef}>
         {/* Grocery List Button */}
-        <button className={styles.groceryListButton}>
+        <button 
+          className={styles.groceryListButton}
+          onClick={onOpenGroceryList}
+        >
           🛒 Grocery List
-          <span className={styles.groceryCount}>(5)</span>
         </button>
 
         {/* Hamburger Menu */}

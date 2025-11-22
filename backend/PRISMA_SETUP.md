@@ -25,4 +25,3 @@ npx prisma studio
 Notes
 - The Prisma schema is at `backend/prisma/schema.prisma`.
 - A lightweight `src/lib/prisma.ts` client wrapper was added; import it with `import prisma from './lib/prisma'`.
-- After migrations, update your controllers to use `prisma` instead of mongoose models.

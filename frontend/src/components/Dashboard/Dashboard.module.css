@@ -369,10 +369,50 @@
   border-color: var(--info);
 }
 
-.filterCheckboxes {
+.slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #e5e7eb 0%, #5c6bcc 100%);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 12px 0;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #5c6bcc;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #5c6bcc;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sliderLabels {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.filterCheckboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
 }
 
 .checkboxLabel {
@@ -467,6 +507,67 @@
   background-color: var(--bg);
   border-color: var(--border-muted);
   color: var(--text);
+}
+
+/* Date Navigation Component Styles */
+.dateNavigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--bg);
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dateDisplay {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 280px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.dateDisplay:hover {
+  border-color: var(--primary);
+  background-color: var(--bg);
+}
+
+.dateText {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.datePicker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.datePicker::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
 }
 
 .plannerContent {

@@ -44,37 +44,54 @@
   color: var(--text-muted);
 }
 
-.filterButton {
+.rightControls {
   display: flex;
-  align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.95rem;
+}
+
+.searchButton {
+  padding: 10px 24px;
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
   font-weight: 500;
-  color: var(--text);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease-in-out;
   white-space: nowrap;
 }
 
-.filterButton:hover {
-  background: var(--bg-dark);
-  border-color: var(--border-muted);
+.searchButton:hover {
+  background-color: var(--info);
+  box-shadow: 0 4px 12px rgba(92, 107, 204, 0.3);
 }
 
-.filterButton:focus {
-  outline: none;
+.filterButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  color: var(--text-muted);
+  padding: 0;
+}
+
+.filterButton:hover {
+  background-color: var(--bg);
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(92, 107, 204, 0.1);
+  color: var(--primary);
 }
 
 .filterIcon {
-  width: 16px;
-  height: 16px;
-  color: var(--text);
+  width: 18px;
+  height: 18px;
+  color: currentColor;
 }
 
 /* Responsive */

@@ -6,8 +6,14 @@ import MealContentCard from "./MealContentCard/MealContentCard"
 import SearchBar from "./SearchBar/SearchBar"
 import { recipeService } from '../../../services/recipeService';
 import PlannerMealCard from "./PlannerContentCard/PlannerContentCard"
+import AddMealModal from "./AddMealModal/AddMealModal"
+import AddToPlanModal from "./AddToPlanModal/AddToPlanModal"
+import GroceryList from "./GroceryList/GroceryList"
 import type { Recipe } from '../../../../shared/types/recipe';
-import { useAuth } from '../../contexts/AuthContext'; 
+import { useAuth } from '../../contexts/AuthContext';
+
+// meal plan hook imports
+import { useMealPlan } from '../../hooks/useMealPlan';
 
 interface SummaryCardData {
   title: string;
@@ -65,14 +71,93 @@ interface DayMealPlan {
   snacks: Meal[];
 }
 
+// Use a Map-like structure with date strings as keys (YYYY-MM-DD format)
 interface WeeklyMealPlan {
-  Monday: DayMealPlan;
-  Tuesday: DayMealPlan;
-  Wednesday: DayMealPlan;
-  Thursday: DayMealPlan;
-  Friday: DayMealPlan;
-  Saturday: DayMealPlan;
-  Sunday: DayMealPlan;
+  [dateString: string]: DayMealPlan;
+}
+
+// Helper function to get date string in YYYY-MM-DD format
+function getDateString(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+// Helper function to format date for display
+function formatDisplayDate(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00');
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  };
+  return date.toLocaleDateString('en-US', options);
+}
+
+// Helper function to get day name
+function getDayName(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00');
+  return date.toLocaleDateString('en-US', { weekday: 'long' });
+}
+
+// Helper to get or create empty day plan
+function getOrCreateDayPlan(plan: WeeklyMealPlan, dateString: string): DayMealPlan {
+  if (!plan[dateString]) {
+    return {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snacks: [],
+    };
+  }
+  return plan[dateString];
+}
+
+// Reusable DateNavigation Component
+function DateNavigation({
+  selectedDay,
+  setSelectedDay,
+}: {
+  selectedDay: string;
+  setSelectedDay: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  const goToPreviousDay = () => {
+    const currentDate = new Date(selectedDay + 'T00:00:00');
+    currentDate.setDate(currentDate.getDate() - 1);
+    setSelectedDay(getDateString(currentDate));
+  };
+
+  const goToNextDay = () => {
+    const currentDate = new Date(selectedDay + 'T00:00:00');
+    currentDate.setDate(currentDate.getDate() + 1);
+    setSelectedDay(getDateString(currentDate));
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      setSelectedDay(e.target.value);
+    }
+  };
+
+  return (
+    <div className={styles.dateNavigation}>
+      <button className={styles.navButton} onClick={goToPreviousDay} title="Previous day">
+        ‹
+      </button>
+      <div className={styles.dateDisplay}>
+        <span className={styles.dateText}>{formatDisplayDate(selectedDay)}</span>
+        <input
+          type="date"
+          value={selectedDay}
+          onChange={handleDateChange}
+          className={styles.datePicker}
+          title="Select a date"
+        />
+      </div>
+      <button className={styles.navButton} onClick={goToNextDay} title="Next day">
+        ›
+      </button>
+    </div>
+  );
 }
 
 type DashboardProps = {}
@@ -180,17 +265,25 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
   )
 }
 
-function MealContent() {
+function MealContent({
+  weeklyMealPlan,
+  setWeeklyMealPlan,
+}: {
+  weeklyMealPlan: WeeklyMealPlan;
+  setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>;
+}) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [recipesFromApi, setRecipesFromApi] = React.useState<any[] | null>(null)
   const [searchError, setSearchError] = React.useState<string | null>(null)
   const [showFilters, setShowFilters] = React.useState(false)
   const [selectedRecipe, setSelectedRecipe] = React.useState(null)
   const [showRecipeModal, setShowRecipeModal] = React.useState(false)
+  const [showAddToPlanModal, setShowAddToPlanModal] = React.useState(false)
+  const [mealToAdd, setMealToAdd] = React.useState<any>(null)
   const [selectedFilters, setSelectedFilters] = React.useState({
     category: "All",
-    maxTime: "Any",
-    maxPrice: "Any",
+    maxTime: 60,
+    maxPrice: 10,
     dietary: [] as string[],
   })
 
@@ -413,13 +506,10 @@ function MealContent() {
   const filteredMeals = demoMeals.filter((meal) => {
     const matchesSearch = meal.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedFilters.category === "All" || meal.category === selectedFilters.category
-    const matchesTime =
-      selectedFilters.maxTime === "Any" || Number.parseInt(meal.time) <= Number.parseInt(selectedFilters.maxTime)
-    const matchesPrice =
-      selectedFilters.maxPrice === "Any" ||
-      Number.parseFloat(meal.price.replace("$", "")) <= Number.parseFloat(selectedFilters.maxPrice)
+    const matchesTime = Number.parseInt(meal.time) <= selectedFilters.maxTime
+    const matchesPrice = Number.parseFloat(meal.price.replace("$", "")) <= selectedFilters.maxPrice
     const matchesDietary =
-      selectedFilters.dietary.length === 0 || selectedFilters.dietary.every((diet) => meal.tags.includes(diet))
+      selectedFilters.dietary.length === 0 || selectedFilters.dietary.some((diet) => meal.tags.includes(diet))
 
     return matchesSearch && matchesCategory && matchesTime && matchesPrice && matchesDietary
   })
@@ -435,7 +525,7 @@ function MealContent() {
 
   const handleSearch = async () => {
     const q = searchQuery.trim()
-  if (!q) return
+    if (!q) return
     setSearchError(null)
     try {
       const results = await recipeService.searchRecipes(q)
@@ -479,11 +569,11 @@ function MealContent() {
     setSelectedFilters({ ...selectedFilters, category })
   }
 
-  const handleTimeChange = (maxTime: string) => {
+  const handleTimeChange = (maxTime: number) => {
     setSelectedFilters({ ...selectedFilters, maxTime })
   }
 
-  const handlePriceChange = (maxPrice: string) => {
+  const handlePriceChange = (maxPrice: number) => {
     setSelectedFilters({ ...selectedFilters, maxPrice })
   }
 
@@ -497,8 +587,8 @@ function MealContent() {
   const handleClearFilters = () => {
     setSelectedFilters({
       category: "All",
-      maxTime: "Any",
-      maxPrice: "Any",
+      maxTime: 60,
+      maxPrice: 10,
       dietary: [],
     })
   }
@@ -549,39 +639,43 @@ function MealContent() {
             </div>
 
             <div className={styles.filterSection}>
-              <label className={styles.filterLabel}>Max Cooking Time</label>
-              <div className={styles.filterOptions}>
-                {["Any", "15", "30", "45"].map((time) => (
-                  <button
-                    key={time}
-                    onClick={() => handleTimeChange(time)}
-                    className={`${styles.filterOption} ${selectedFilters.maxTime === time ? styles.filterOptionActive : ""}`}
-                  >
-                    {time === "Any" ? "Any" : `${time} min`}
-                  </button>
-                ))}
+              <label className={styles.filterLabel}>Max Cooking Time: {selectedFilters.maxTime} min</label>
+              <input
+                type="range"
+                min="5"
+                max="120"
+                step="5"
+                value={selectedFilters.maxTime}
+                onChange={(e) => handleTimeChange(Number.parseInt(e.target.value))}
+                className={styles.slider}
+              />
+              <div className={styles.sliderLabels}>
+                <span>5 min</span>
+                <span>120 min</span>
               </div>
             </div>
 
             <div className={styles.filterSection}>
-              <label className={styles.filterLabel}>Max Price</label>
-              <div className={styles.filterOptions}>
-                {["Any", "3", "5", "7"].map((price) => (
-                  <button
-                    key={price}
-                    onClick={() => handlePriceChange(price)}
-                    className={`${styles.filterOption} ${selectedFilters.maxPrice === price ? styles.filterOptionActive : ""}`}
-                  >
-                    {price === "Any" ? "Any" : `$${price}`}
-                  </button>
-                ))}
+              <label className={styles.filterLabel}>Max Price: ${selectedFilters.maxPrice}</label>
+              <input
+                type="range"
+                min="1"
+                max="20"
+                step="1"
+                value={selectedFilters.maxPrice}
+                onChange={(e) => handlePriceChange(Number.parseInt(e.target.value))}
+                className={styles.slider}
+              />
+              <div className={styles.sliderLabels}>
+                <span>$1</span>
+                <span>$20</span>
               </div>
             </div>
 
             <div className={styles.filterSection}>
               <label className={styles.filterLabel}>Dietary Preferences</label>
               <div className={styles.filterCheckboxes}>
-                {["Vegetarian", "High Protein", "Quick", "Budget-Friendly"].map((dietary) => (
+                {["Vegetarian", "Vegan", "Pescatarian", "Mediterranean", "Paleo", "Keto", "Gluten-Free", "Dairy-Free", "High Protein"].map((dietary) => (
                   <label key={dietary} className={styles.checkboxLabel}>
                     <input
                       type="checkbox"
@@ -598,8 +692,8 @@ function MealContent() {
         )}
       </div>
 
-  <div className={styles.mealScrollContainer}>
-            {dataToShow.map((meal, index) => (
+      <div className={styles.mealScrollContainer}>
+        {dataToShow.map((meal, index) => (
           <MealContentCard
             key={index}
             recipeId={meal.id.toString()}
@@ -616,9 +710,9 @@ function MealContent() {
             }}
             dietaryTags={meal.tags}
             onViewRecipe={() => handleViewRecipe(meal)}
-            onAddToPlan={(recipeId) => {
-              console.log('Add to plan:', recipeId);
-              // TODO: Implement add to plan functionality
+            onAddToPlan={() => {
+              setMealToAdd(meal);
+              setShowAddToPlanModal(true);
             }}
           />
         ))}
@@ -634,6 +728,36 @@ function MealContent() {
       {showRecipeModal && selectedRecipe && (
         <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
       )}
+
+      {showAddToPlanModal && mealToAdd && (
+        <AddToPlanModal
+          isOpen={showAddToPlanModal}
+          onClose={() => setShowAddToPlanModal(false)}
+          onAddToPlan={(dateString, mealType) => {
+            const plannerMeal: Meal = {
+              name: mealToAdd.name || mealToAdd.title,
+              calories: mealToAdd.calories,
+              time: typeof mealToAdd.time === 'string' ? mealToAdd.time : `${mealToAdd.time} min`,
+              cost: mealToAdd.cost || mealToAdd.price,
+              recipe: mealToAdd.recipe,
+            };
+
+            const mealTypeKey = mealType as keyof DayMealPlan;
+
+            setWeeklyMealPlan((prev) => {
+              const dayPlan = getOrCreateDayPlan(prev, dateString);
+              return {
+                ...prev,
+                [dateString]: {
+                  ...dayPlan,
+                  [mealTypeKey]: [...dayPlan[mealTypeKey], plannerMeal],
+                },
+              };
+            });
+          }}
+          mealTitle={mealToAdd.title || mealToAdd.name}
+        />
+      )}
     </div>
   )
 }
@@ -642,15 +766,21 @@ function PlannerContent({
   selectedDay,
   setSelectedDay,
   weeklyMealPlan,
-  setWeeklyMealPlan
+  setWeeklyMealPlan,
+  availableMeals,
+  onOpenGroceryList
 }: {
-  selectedDay: keyof WeeklyMealPlan
-  setSelectedDay: React.Dispatch<React.SetStateAction<keyof WeeklyMealPlan>>
+  selectedDay: string
+  setSelectedDay: React.Dispatch<React.SetStateAction<string>>
   weeklyMealPlan: WeeklyMealPlan
   setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>
+  availableMeals: any[]
+  onOpenGroceryList: () => void
 }) {
   const [selectedRecipe, setSelectedRecipe] = useState<Meal | null>(null)
   const [showRecipeModal, setShowRecipeModal] = useState(false)
+  const [showAddMealModal, setShowAddMealModal] = useState(false)
+  const [addMealType, setAddMealType] = useState<string>('')
 
   const handleMealClick = (meal: any) => {
     if (meal && meal.recipe) {
@@ -659,38 +789,71 @@ function PlannerContent({
     }
   }
 
-  const handleDeleteMeal = (day: string, mealType: string, mealIndex: number) => {
-    const dayKey = day as keyof WeeklyMealPlan
+  const handleDeleteMeal = (dateString: string, mealType: string, mealIndex: number) => {
     const mealTypeKey = mealType as keyof DayMealPlan
-    setWeeklyMealPlan((prev) => ({
-      ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        [mealTypeKey]: prev[dayKey][mealTypeKey].filter((_: Meal, index: number) => index !== mealIndex),
-      },
-    }))
+    setWeeklyMealPlan((prev) => {
+      const dayPlan = getOrCreateDayPlan(prev, dateString)
+      return {
+        ...prev,
+        [dateString]: {
+          ...dayPlan,
+          [mealTypeKey]: dayPlan[mealTypeKey].filter((_: Meal, index: number) => index !== mealIndex),
+        },
+      }
+    })
   }
 
   const handleAddMeal = (mealType: string) => {
-    console.log(`Add meal to ${mealType}`)
-    // You can implement a modal or form to add meals here
+    setAddMealType(mealType)
+    setShowAddMealModal(true)
   }
 
-  const days = Object.keys(weeklyMealPlan) as Array<keyof WeeklyMealPlan>
-  const currentDayIndex = days.indexOf(selectedDay)
+  const handleAddMealToPlanner = (meal: Meal) => {
+    const mealTypeKey = addMealType as keyof DayMealPlan
+    setWeeklyMealPlan((prev) => {
+      const dayPlan = getOrCreateDayPlan(prev, selectedDay)
+      return {
+        ...prev,
+        [selectedDay]: {
+          ...dayPlan,
+          [mealTypeKey]: [...dayPlan[mealTypeKey], meal],
+        },
+      }
+    })
+  }
+
+  // Generate dates for navigation (show 7 days starting from current week)
+  const generateWeekDates = () => {
+    const selectedDate = new Date(selectedDay + 'T00:00:00')
+    const currentDayOfWeek = selectedDate.getDay() // 0 = Sunday, 6 = Saturday
+    const startOfWeek = new Date(selectedDate)
+    startOfWeek.setDate(startOfWeek.getDate() - currentDayOfWeek) // Go to Sunday
+
+    const dates: string[] = []
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek)
+      date.setDate(date.getDate() + i)
+      dates.push(getDateString(date))
+    }
+    return dates
+  }
+
+  const weekDates = generateWeekDates()
 
   const goToPreviousDay = () => {
-    const prevIndex = currentDayIndex > 0 ? currentDayIndex - 1 : days.length - 1
-    setSelectedDay(days[prevIndex])
+    const currentDate = new Date(selectedDay + 'T00:00:00')
+    currentDate.setDate(currentDate.getDate() - 1)
+    setSelectedDay(getDateString(currentDate))
   }
 
   const goToNextDay = () => {
-    const nextIndex = currentDayIndex < days.length - 1 ? currentDayIndex + 1 : 0
-    setSelectedDay(days[nextIndex])
+    const currentDate = new Date(selectedDay + 'T00:00:00')
+    currentDate.setDate(currentDate.getDate() + 1)
+    setSelectedDay(getDateString(currentDate))
   }
 
   const calculateDailyTotals = () => {
-    const dayPlan = weeklyMealPlan[selectedDay]
+    const dayPlan = getOrCreateDayPlan(weeklyMealPlan, selectedDay)
     const totalCalories =
       dayPlan.breakfast.reduce((sum, meal) => sum + meal.calories, 0) +
       dayPlan.lunch.reduce((sum, meal) => sum + meal.calories, 0) +
@@ -707,39 +870,21 @@ function PlannerContent({
   }
 
   const { totalCalories, totalCost } = calculateDailyTotals()
+  const currentDayPlan = getOrCreateDayPlan(weeklyMealPlan, selectedDay)
 
   return (
     <div>
       <div className={styles.plannerHeader}>
         <div>
           <h2 className={styles.greeting}>Daily Meal Planner</h2>
-          <p className={styles.prompt}>Click on any meal to view the full recipe</p>
         </div>
-        <div className={styles.dayNavigation}>
-          <button className={styles.navButton} onClick={goToPreviousDay}>
-            ‹
-          </button>
-          <div className={styles.dayButtons}>
-            {days.map((day) => (
-              <button
-                key={day}
-                className={`${styles.dayButton} ${selectedDay === day ? styles.dayButtonActive : ""}`}
-                onClick={() => setSelectedDay(day)}
-              >
-                {day.slice(0, 3)}
-              </button>
-            ))}
-          </div>
-          <button className={styles.navButton} onClick={goToNextDay}>
-            ›
-          </button>
-        </div>
+        <DateNavigation selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
       </div>
 
       <div className={styles.plannerContent}>
         <PlannerMealCard
           mealType="breakfast"
-          meals={weeklyMealPlan[selectedDay].breakfast}
+          meals={currentDayPlan.breakfast}
           color="#f97316"
           label="Breakfast"
           selectedDay={selectedDay}
@@ -749,7 +894,7 @@ function PlannerContent({
         />
         <PlannerMealCard
           mealType="lunch"
-          meals={weeklyMealPlan[selectedDay].lunch}
+          meals={currentDayPlan.lunch}
           color="#22c55e"
           label="Lunch"
           selectedDay={selectedDay}
@@ -759,7 +904,7 @@ function PlannerContent({
         />
         <PlannerMealCard
           mealType="dinner"
-          meals={weeklyMealPlan[selectedDay].dinner}
+          meals={currentDayPlan.dinner}
           color="#3b82f6"
           label="Dinner"
           selectedDay={selectedDay}
@@ -769,7 +914,7 @@ function PlannerContent({
         />
         <PlannerMealCard
           mealType="snacks"
-          meals={weeklyMealPlan[selectedDay].snacks}
+          meals={currentDayPlan.snacks}
           color="#a855f7"
           label="Snacks"
           selectedDay={selectedDay}
@@ -788,20 +933,38 @@ function PlannerContent({
             <strong>${totalCost}</strong> daily cost
           </span>
         </div>
-        <button className={styles.primaryButton}>🛒 Add to Grocery List</button>
+        <button className={styles.primaryButton} onClick={onOpenGroceryList}>🛒 Add to Grocery List</button>
       </div>
 
       {showRecipeModal && selectedRecipe && (
         <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
       )}
+
+      {showAddMealModal && (
+        <AddMealModal
+          isOpen={showAddMealModal}
+          onClose={() => setShowAddMealModal(false)}
+          onAddMeal={handleAddMealToPlanner}
+          mealType={addMealType}
+          availableMeals={availableMeals}
+        />
+      )}
     </div>
   )
 }
 
-function NutritionContent({ selectedDay, weeklyMealPlan }: { selectedDay: keyof WeeklyMealPlan; weeklyMealPlan: WeeklyMealPlan }) {
+function NutritionContent({
+  selectedDay,
+  setSelectedDay,
+  weeklyMealPlan
+}: {
+  selectedDay: string;
+  setSelectedDay: React.Dispatch<React.SetStateAction<string>>;
+  weeklyMealPlan: WeeklyMealPlan;
+}) {
   // Calculate nutrition data based on the selected day's meals
   const calculateNutritionData = () => {
-    const dayPlan = weeklyMealPlan[selectedDay];
+    const dayPlan = getOrCreateDayPlan(weeklyMealPlan, selectedDay);
 
     let totalCalories = 0;
     let totalProtein = 0;
@@ -853,8 +1016,12 @@ function NutritionContent({ selectedDay, weeklyMealPlan }: { selectedDay: keyof 
 
   return (
     <div>
-      <h2 className={styles.greeting}>Today's Nutrition - {selectedDay}</h2>
-      <p className={styles.prompt}>Nutrition data based on your {selectedDay.toLowerCase()} meal plan</p>
+      <div className={styles.plannerHeader}>
+        <div>
+          <h2 className={styles.greeting}>Today's Nutrition</h2>
+        </div>
+        <DateNavigation selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
+      </div>
 
       <div className={styles.nutritionTracker}>
         <div className={styles.nutritionItem}>
@@ -934,11 +1101,239 @@ function AIAssistantContent() {
   )
 }
 
-function DashboardContentSwitcher() {
+function DashboardContentSwitcher({
+  showGroceryList,
+  setShowGroceryList
+}: {
+  showGroceryList: boolean;
+  setShowGroceryList: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const { user } = useAuth(); // trying to implement user persistence
   const [activeTab, setActiveTab] = useState("meals");
-  const [selectedDay, setSelectedDay] = useState<keyof WeeklyMealPlan>("Monday");
-  const [weeklyMealPlan, setWeeklyMealPlan] = useState<WeeklyMealPlan>({
-    Monday: {
+  // Initialize to today's date
+  const [selectedDay, setSelectedDay] = useState<string>(getDateString(new Date()));
+
+  // Shared sample meals for both Meals tab and Planner modal
+  const sampleMeals = [
+    {
+      id: 1,
+      imageUrl: undefined,
+      title: "Mediterranean Chickpea Bowl",
+      name: "Mediterranean Chickpea Bowl",
+      description: "A nutritious bowl packed with chickpeas, fresh vegetables, and tahini dressing",
+      time: "25 min",
+      cookTime: "25 min",
+      price: "$4.50",
+      cost: "$4.50",
+      calories: 420,
+      rating: 4.5,
+      tags: ["High Protein", "Budget-Friendly", "Vegetarian"],
+      category: "Lunch",
+      recipe: {
+        ingredients: [
+          "1 cup chickpeas",
+          "1 cup mixed greens",
+          "1/2 cup cherry tomatoes",
+          "1/4 cup cucumber",
+          "2 tbsp tahini dressing",
+          "1/4 cup feta cheese",
+        ],
+        instructions: [
+          "Drain and rinse chickpeas",
+          "Chop vegetables into bite-sized pieces",
+          "Combine all ingredients in a bowl",
+          "Drizzle with tahini dressing",
+          "Top with feta cheese",
+        ],
+        nutrition: { protein: 18, carbs: 52, fat: 14, fiber: 12 },
+      },
+    },
+    {
+      id: 2,
+      imageUrl: undefined,
+      title: "Avocado Toast with Eggs",
+      name: "Avocado Toast with Eggs",
+      description: "Crispy whole grain bread topped with mashed avocado and sunny-side-up eggs",
+      time: "15 min",
+      cookTime: "15 min",
+      price: "$3.20",
+      cost: "$3.20",
+      calories: 350,
+      rating: 4.2,
+      tags: ["Quick", "High Fiber", "Vegetarian"],
+      category: "Breakfast",
+      recipe: {
+        ingredients: [
+          "2 slices whole grain bread",
+          "1 avocado",
+          "2 eggs",
+          "Salt and pepper",
+          "Red pepper flakes (optional)",
+        ],
+        instructions: [
+          "Toast bread until golden brown",
+          "Mash avocado with salt and pepper",
+          "Fry eggs sunny-side up",
+          "Spread avocado on toast",
+          "Top with eggs and red pepper flakes",
+        ],
+        nutrition: { protein: 16, carbs: 38, fat: 18, fiber: 10 },
+      },
+    },
+    {
+      id: 3,
+      imageUrl: undefined,
+      title: "Teriyaki Chicken Bowl",
+      name: "Teriyaki Chicken Bowl",
+      description: "Grilled chicken with teriyaki sauce served over rice with steamed vegetables",
+      time: "30 min",
+      cookTime: "30 min",
+      price: "$5.80",
+      cost: "$5.80",
+      calories: 520,
+      rating: 4.7,
+      tags: ["High Protein"],
+      category: "Dinner",
+      recipe: {
+        ingredients: [
+          "6 oz chicken breast",
+          "1 cup cooked rice",
+          "2 cups mixed vegetables",
+          "3 tbsp teriyaki sauce",
+          "1 tbsp sesame seeds",
+        ],
+        instructions: [
+          "Cook rice according to package directions",
+          "Cut chicken into bite-sized pieces",
+          "Cook chicken in a pan until golden",
+          "Add teriyaki sauce and vegetables",
+          "Serve over rice and garnish with sesame seeds",
+        ],
+        nutrition: { protein: 38, carbs: 62, fat: 12, fiber: 4 },
+      },
+    },
+    {
+      id: 4,
+      imageUrl: undefined,
+      title: "Greek Yogurt Parfait",
+      name: "Greek Yogurt Parfait",
+      description: "Creamy yogurt layered with granola, fresh berries, and honey",
+      time: "10 min",
+      cookTime: "10 min",
+      price: "$2.80",
+      cost: "$2.80",
+      calories: 280,
+      rating: 4.6,
+      tags: ["Quick", "High Protein", "Vegetarian"],
+      category: "Breakfast",
+      recipe: {
+        ingredients: ["1 cup Greek yogurt", "1/2 cup granola", "1/2 cup mixed berries", "1 tbsp honey"],
+        instructions: [
+          "Add Greek yogurt to a bowl or glass",
+          "Layer with granola",
+          "Top with mixed berries",
+          "Drizzle with honey",
+        ],
+        nutrition: { protein: 20, carbs: 45, fat: 8, fiber: 6 },
+      },
+    },
+    {
+      id: 5,
+      imageUrl: undefined,
+      title: "Veggie Wrap",
+      name: "Veggie Wrap",
+      description: "Whole wheat wrap filled with hummus, fresh vegetables, and feta cheese",
+      time: "12 min",
+      cookTime: "12 min",
+      price: "$3.50",
+      cost: "$3.50",
+      calories: 320,
+      rating: 4.3,
+      tags: ["Quick", "Vegetarian", "Budget-Friendly"],
+      category: "Lunch",
+      recipe: {
+        ingredients: [
+          "1 whole wheat tortilla",
+          "3 tbsp hummus",
+          "Mixed greens",
+          "Sliced cucumber",
+          "Sliced tomatoes",
+          "Feta cheese",
+        ],
+        instructions: [
+          "Spread hummus on tortilla",
+          "Layer with greens and vegetables",
+          "Sprinkle with feta cheese",
+          "Roll tightly and slice in half",
+        ],
+        nutrition: { protein: 12, carbs: 42, fat: 10, fiber: 8 },
+      },
+    },
+    {
+      id: 6,
+      imageUrl: undefined,
+      title: "Trail Mix Energy Bites",
+      name: "Trail Mix Energy Bites",
+      description: "No-bake energy balls with oats, peanut butter, and dark chocolate chips",
+      time: "5 min",
+      cookTime: "5 min",
+      price: "$1.50",
+      cost: "$1.50",
+      calories: 180,
+      rating: 4.8,
+      tags: ["Quick", "Budget-Friendly"],
+      category: "Snacks",
+      recipe: {
+        ingredients: [
+          "1 cup rolled oats",
+          "1/2 cup peanut butter",
+          "1/3 cup honey",
+          "1/2 cup dark chocolate chips",
+          "1/4 cup ground flaxseed",
+        ],
+        instructions: [
+          "Mix all ingredients in a bowl",
+          "Refrigerate for 30 minutes",
+          "Roll into 1-inch balls",
+          "Store in refrigerator",
+        ],
+        nutrition: { protein: 6, carbs: 24, fat: 9, fiber: 4 },
+      },
+    },
+  ];
+
+  // Initialize meal plan with sample data using today's date and tomorrow's date
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const todayString = getDateString(today);
+  const tomorrowString = getDateString(tomorrow);
+
+  const {
+    weeklyMealPlan,
+    setWeeklyMealPlan,
+    loading,
+    error,
+    saveMealPlan
+  } = useMealPlan(user?.firebaseUid);
+
+  // Show loading state while fetching data
+  if (loading) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <div>Loading your meal plan...</div>
+      </div>
+    );
+  }
+
+  // error message
+  if (error) {
+    console.error('Meal plan error:', error);
+  }
+
+  /* const [weeklyMealPlan, setWeeklyMealPlan] = useState<WeeklyMealPlan>({
+    [todayString]: {
       breakfast: [
         {
           name: "Greek Yogurt Bowl",
@@ -1034,7 +1429,7 @@ function DashboardContentSwitcher() {
         },
       ],
     },
-    Tuesday: {
+    [tomorrowString]: {
       breakfast: [
         {
           name: "Overnight Oats",
@@ -1093,37 +1488,7 @@ function DashboardContentSwitcher() {
         },
       ],
     },
-    Wednesday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-    Thursday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-    Friday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-    Saturday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-    Sunday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    },
-  });
+  }); */
 
   const tabs = [
     { id: "meals", label: "Meals" },
@@ -1147,47 +1512,78 @@ function DashboardContentSwitcher() {
         ))}
       </div>
 
+      {/* Error notification (optional) */}
+      {error && (
+        <div style={{ 
+          backgroundColor: '#fee', 
+          padding: '0.5rem', 
+          marginBottom: '1rem',
+          borderRadius: '4px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span>⚠️ Failed to sync meal plan. Changes are saved locally.</span>
+          <button onClick={saveMealPlan} style={{ padding: '0.25rem 0.5rem' }}>
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Tab Content */}
       <div className={styles.tabContent}>
-        {activeTab === "meals" && <MealContent />}
+        {activeTab === "meals" && (
+          <MealContent
+            weeklyMealPlan={weeklyMealPlan}
+            setWeeklyMealPlan={setWeeklyMealPlan}
+          />
+        )}
         {activeTab === "planner" && (
           <PlannerContent
             selectedDay={selectedDay}
             setSelectedDay={setSelectedDay}
             weeklyMealPlan={weeklyMealPlan}
             setWeeklyMealPlan={setWeeklyMealPlan}
+            availableMeals={sampleMeals}
+            onOpenGroceryList={() => setShowGroceryList(true)}
           />
         )}
         {activeTab === "nutrition" && (
           <NutritionContent
             selectedDay={selectedDay}
+            setSelectedDay={setSelectedDay}
             weeklyMealPlan={weeklyMealPlan}
           />
         )}
         {activeTab === "ai-assistant" && <AIAssistantContent />}
       </div>
+
+      {/* Grocery List Modal */}
+      <GroceryList
+        weeklyMealPlan={weeklyMealPlan}
+        isOpen={showGroceryList}
+        onClose={() => setShowGroceryList(false)}
+      />
     </div>
   );
 }
 
 const Dashboard: FC<DashboardProps> = () => {
-
-  // Destructure the authentication object to get user
   const { user } = useAuth();
+  const [showGroceryList, setShowGroceryList] = useState(false);
 
-  // Get the user identifiers
-  const displayName: string | undefined = user?.profile.extra.displayName?.split(' ')[0] || '';
-  const userEmail: string | undefined = user?.email || '';
+  // Get display name from user or use default
+  const displayName = user?.displayName || 'there';
 
   const dashboardSummary: SummaryCardData[] = [
     {
       title: "Weekly Budget",
-      value: user?.profile.extra.budget,
+      value: user?.budget?.default ?? 100,
       subtext: "",
       icon: "$",
       progressBar: {
         current: 50,
-        total: user?.profile.extra.budget,
+        total: user?.budget?.maximum ?? 100,
       },
     },
     {
@@ -1198,9 +1594,9 @@ const Dashboard: FC<DashboardProps> = () => {
     },
     {
       title: "Avg. Calories",
-      value: user?.profile.extra.nutritionGoals.calories,
+      value: user?.nutritionGoals?.calories ?? 2000,
       subtext: "",
-      icon: "👨‍👧‍👦",
+      icon: "⚡",
       progressBar: {
         current: 75,
         total: 100,
@@ -1238,7 +1634,10 @@ const Dashboard: FC<DashboardProps> = () => {
   return (
     <div className={styles.Dashboard}>
       {/* Top Navigation Bar */}
-      <TopNavBar userEmail={userEmail}/>
+      <TopNavBar
+        userEmail={user?.email || ""}
+        onOpenGroceryList={() => setShowGroceryList(true)}
+      />
 
       {/* Header/Greeting Section */}
       <div className={styles.header}>
@@ -1250,7 +1649,10 @@ const Dashboard: FC<DashboardProps> = () => {
       <div className={styles.summaryGrid}>{dashboardSummary.map(renderSummaryCard)}</div>
 
       {/* Dashboard Content Switcher Section */}
-      <DashboardContentSwitcher />
+      <DashboardContentSwitcher
+        showGroceryList={showGroceryList}
+        setShowGroceryList={setShowGroceryList}
+      />
     </div>
   )
 }

@@ -58,7 +58,7 @@ model Favorite {
 model MealPlan {
   id        Int            @id @default(autoincrement())
   userId    Int
-  user      User          @relation(fields: [userId], references: [id])
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items     MealPlanItem[]
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
@@ -68,8 +68,8 @@ model MealPlanItem {
   id          Int       @id @default(autoincrement())
   mealPlanId  Int
   recipeId    Int
-  mealPlan    MealPlan  @relation(fields: [mealPlanId], references: [id])
-  recipe      Recipe    @relation(fields: [recipeId], references: [id])
+  mealPlan    MealPlan  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   dayOfWeek   Int
   mealType    String
 }
