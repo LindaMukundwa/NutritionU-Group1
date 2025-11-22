@@ -4,6 +4,9 @@ import {
   signOut,
   sendPasswordResetEmail,
   updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   signInWithPopup,
   GoogleAuthProvider,
   signInWithRedirect
@@ -208,6 +211,39 @@ export class AuthService {
       return true;
     } catch (error) {
       return false;
+    }
+  }
+
+  static async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; error: string | null }> {
+    try {
+      const user = auth.currentUser;
+      if (!user || !user.email) {
+        return { success: false, error: 'No user is currently signed in.' };
+      }
+
+      // Re-authenticate the user with their current password
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // Update the password
+      await updatePassword(user, newPassword);
+
+      return { success: true, error: null };
+    } catch (error: any) {
+      const errorCode = error?.code || '';
+      let errorMessage = 'Failed to change password. Please try again.';
+      
+      if (errorCode === 'auth/wrong-password') {
+        errorMessage = 'Current password is incorrect.';
+      } else if (errorCode === 'auth/weak-password') {
+        errorMessage = 'New password should be at least 6 characters.';
+      } else if (errorCode === 'auth/requires-recent-login') {
+        errorMessage = 'Please sign out and sign in again before changing your password.';
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      return { success: false, error: errorMessage };
     }
   }
 

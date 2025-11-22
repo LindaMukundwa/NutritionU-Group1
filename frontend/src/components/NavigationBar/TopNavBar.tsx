@@ -1,5 +1,6 @@
 // Enhanced TopNavBar.tsx with click outside handler
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChefHat } from "lucide-react";
 import styles from "./TopNavBar.module.css";
 
@@ -9,6 +10,7 @@ interface TopNavBarProps {
 }
 
 export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu", onOpenGroceryList }: TopNavBarProps) {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +74,13 @@ export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu", onOpenGroc
                   <span className={styles.menuIcon}>👤</span>
                   Profile
                 </div>
-                <div className={styles.menuItem}>
+                <div 
+                  className={styles.menuItem}
+                  onClick={() => {
+                    navigate('/settings-preview');
+                    setIsMenuOpen(false);
+                  }}
+                >
                   <span className={styles.menuIcon}>⚙️</span>
                   Settings
                 </div>

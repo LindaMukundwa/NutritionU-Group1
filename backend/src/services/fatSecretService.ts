@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { NutritionGoals } from '../../../shared/types/user.ts';
 
 interface FatSecretConfig {
   clientId: string;
@@ -69,6 +70,19 @@ interface FatSecretRecipe {
     sodium?: string;
   };
 }
+
+function userPreferences(): NutritionGoals {
+  const userPreferences: NutritionGoals = {
+    "calories": 600,
+    "protein": 120,
+    "carbs": 250,
+    "fats": 100,
+    "goals": "Eat Healthier",
+    "description": "User nutrition and lifestyle goals"
+  }
+  return userPreferences
+}
+
 const FatSecretService = new class FatSecretService {
   private config: FatSecretConfig;
   private accessToken: string | null = null;
@@ -167,7 +181,9 @@ const FatSecretService = new class FatSecretService {
     try {
       const response = await this.makeRequest('recipes.search.v3', {
         search_expression: query,
-        max_results: maxResults
+        max_results: maxResults,
+        // TODO: Figure out why this isn't populating
+        calories_from: userPreferences().calories
       });
 
       if (!response.recipes || !response.recipes.recipe) {
@@ -265,14 +281,14 @@ const FatSecretService = new class FatSecretService {
     // Defensive parsing: guard against missing nested fields and unexpected shapes
     const ingredientsArray = fatSecretRecipe.ingredients && fatSecretRecipe.ingredients.ingredient
       ? (Array.isArray(fatSecretRecipe.ingredients.ingredient)
-          ? fatSecretRecipe.ingredients.ingredient
-          : [fatSecretRecipe.ingredients.ingredient])
+        ? fatSecretRecipe.ingredients.ingredient
+        : [fatSecretRecipe.ingredients.ingredient])
       : [];
 
     const directionsArray = fatSecretRecipe.directions && fatSecretRecipe.directions.direction
       ? (Array.isArray(fatSecretRecipe.directions.direction)
-          ? fatSecretRecipe.directions.direction
-          : [fatSecretRecipe.directions.direction])
+        ? fatSecretRecipe.directions.direction
+        : [fatSecretRecipe.directions.direction])
       : [];
 
     const safeParseInt = (v: any, fallback = 0) => {
