@@ -39,6 +39,188 @@ export default function OnboardingPage() {
 
   const nextStep = () => setStep(Math.min(step + 1, totalSteps));
   const prevStep = () => setStep(Math.max(step - 1, 1));
+<<<<<<< Updated upstream
+=======
+  const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const { refreshUser } = useAuth();
+
+  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
+
+  const handleComplete = async () => {
+  try {
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) {
+      console.error('No authenticated firebase user found');
+      navigate('/auth');
+      return;
+    }
+
+    setSubmitting(true);
+    const idToken = await firebaseUser.getIdToken();
+
+    const url = `${API_BASE}/api/users/${firebaseUser.uid}`;
+
+    // 🔹 Frontend logging
+    console.log('handleComplete called');
+    console.log('API_BASE:', API_BASE);
+    console.log('PATCH URL:', url);
+    console.log('Firebase UID:', firebaseUser.uid);
+    console.log('Onboarding formData being sent:', formData);
+
+    const resp = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const text = await resp.text();
+    console.log('PATCH response status:', resp.status);
+    console.log('PATCH response body:', text);
+
+    if (!resp.ok) {
+      console.error('Failed to save onboarding:', resp.status, text);
+      setSubmitting(false);
+      return;
+    }
+
+    // Try to parse JSON if it is JSON
+    let data: any = null;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      // ignore if not JSON
+    }
+    console.log('Onboarding saved successfully, response data:', data);
+
+    try {
+      if (refreshUser) await refreshUser();
+    } catch (err) {
+      console.warn('refreshUser failed', err);
+    }
+
+    navigate('/dashboard');
+  } catch (err) {
+    console.error('Error completing onboarding', err);
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+  // Method to dynamically add functionality between card when onboarding
+  const handleNext = async () => {
+    if (step === 5 && !macroError) {
+      setIsLoadingMacros(true);
+      try {
+        const suggestions = await getMacroSuggestions(formData);
+
+        setMacroSuggestions(suggestions);
+
+        setFormData(prev => ({
+          ...prev,
+          macros: {
+            calories: suggestions.calories || prev.macros.calories,
+            fats: suggestions.fats?.grams || prev.macros.fats,
+            carbs: suggestions.carbs?.grams || prev.macros.carbs,
+            protein: suggestions.protein?.grams || prev.macros.protein
+          }
+        }));
+
+        console.log('Updated formData.macros:', formData.macros);
+
+        setStep(step + 1);
+      } catch (error) {
+        console.error('Error fetching macros:', error);
+        return;
+      } finally {
+        setIsLoadingMacros(false);
+      }
+    } else {
+      // Reset error and advance to next step for manual entry
+      setMacroError(false);
+      setStep(step + 1);
+    }
+  };
+
+  const handleRetryMacros = async () => {
+    setIsLoadingMacros(true);
+    try {
+      const suggestions = await getMacroSuggestions(formData);
+      console.log('API suggestions received:', suggestions);
+
+      setMacroSuggestions(suggestions);
+
+      setFormData(prev => ({
+        ...prev,
+        macros: {
+          calories: suggestions.calories || prev.macros.calories,
+          fats: suggestions.fats?.grams || prev.macros.fats,
+          carbs: suggestions.carbs?.grams || prev.macros.carbs,
+          protein: suggestions.protein?.grams || prev.macros.protein
+        }
+      }));
+
+      console.log('Updated formData.macros:', formData.macros);
+
+      // Only advance if successful
+      setStep(step + 1);
+    } catch (error) {
+      console.error('Error fetching macros:', error);
+      // Don't advance - stay on current step with error showing
+    } finally {
+      setIsLoadingMacros(false);
+    }
+  };
+
+  // Get macro suggestions for onboarding card 6
+  const getMacroSuggestions = async (formData: any): Promise<Record<string, any>> => {
+    try {
+      setMacroError(false);
+
+      const payload = {
+        age: formData.age,
+        height: formData.height,
+        weight: formData.weight,
+        units: formData.units,
+        activityLevel: formData.activityLevel,
+        budget: formData.budget,
+        cookingLevel: formData.cookingLevel,
+        lifestyleDiets: formData.lifestyleDiets,
+        medicalRestrictions: formData.medicalRestrictions,
+        culturalDiets: formData.culturalDiets,
+        goals: formData.goals,
+        mealPrep: formData.mealPrep
+      };
+
+      console.log('Sending payload to API:', payload);
+      console.log('API URL:', `${API_BASE}/api/chatbot/macros`);
+
+      const response = await fetch(`${API_BASE}/api/chatbot/macros`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        setMacroError(true);
+        throw new Error(`Failed to fetch macro suggestions: ${response.status} - ${responseText}`);
+      }
+
+      return JSON.parse(responseText);
+    } catch (error) {
+      console.error('Full error:', error);
+      setMacroError(true);
+      throw error;
+    }
+  };
+>>>>>>> Stashed changes
 
   const toggleArrayItem = (array: string[], item: string, setter: (items: string[]) => void) => {
     if (array.includes(item)) {
