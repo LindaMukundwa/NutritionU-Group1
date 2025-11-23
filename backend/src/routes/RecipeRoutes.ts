@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { 
+  createRecipe,
   searchRecipes, 
   getRecipeById, 
   searchFoods, 
@@ -8,6 +9,9 @@ import {
 } from '../controllers/RecipeController.ts';
 
 const router = Router();
+
+// Recipe creation (for saving FatSecret recipes to DB)
+router.post('/', createRecipe);
 
 // FatSecret recipe routes
 router.get('/search', searchRecipes);

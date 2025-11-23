@@ -7,7 +7,8 @@ import {
     deleteMealPlan,
     addMealPlanItem,
     removeMealPlanItem,
-    getCurrentWeekMealPlan
+    getCurrentWeekMealPlan,
+    getMealPlansByDateRange
 } from '../controllers/MealPlanController.ts';
 
 const router = Router();
@@ -16,6 +17,7 @@ const router = Router();
 router.post('/users/:userId/meal-plans', createMealPlan);
 router.get('/users/:userId/meal-plans', getUserMealPlans);
 router.get('/users/:userId/meal-plans/current', getCurrentWeekMealPlan);
+router.get('/users/:userId/meal-plans/range', getMealPlansByDateRange);
 
 // General meal plan routes
 router.get('/meal-plans/:mealPlanId', getMealPlan);

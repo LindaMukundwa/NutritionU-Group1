@@ -4,11 +4,12 @@ import prisma from '../lib/prisma.ts';
 /**
  * Create a new meal plan for a user
  * POST /api/users/:userId/meal-plans
+ * Body: { startDate, endDate, items: [{ recipeId, date, mealType }] }
  */
 export const createMealPlan = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
-        const { items } = req.body; // items: Array<{ recipeId, dayOfWeek, mealType }>
+        const { startDate, endDate, items } = req.body;
 
         // Find user by firebaseUid or Prisma ID
         const user = await prisma.user.findFirst({
@@ -24,14 +25,55 @@ export const createMealPlan = async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Create meal plan with items
+        // Check if meal plan already exists for this week
+        const existingPlan = await prisma.mealPlan.findFirst({
+            where: {
+                userId: user.id,
+                startDate: new Date(startDate)
+            }
+        });
+
+        if (existingPlan) {
+            // Update existing plan instead of creating a new one
+            await prisma.mealPlanItem.deleteMany({
+                where: { mealPlanId: existingPlan.id }
+            });
+
+            const updatedPlan = await prisma.mealPlan.update({
+                where: { id: existingPlan.id },
+                data: {
+                    endDate: new Date(endDate),
+                    items: {
+                        create: items.map((item: any) => ({
+                            recipeId: item.recipeId,
+                            date: new Date(item.date),
+                            mealType: item.mealType
+                        }))
+                    },
+                    updatedAt: new Date()
+                },
+                include: {
+                    items: {
+                        include: {
+                            recipe: true
+                        }
+                    }
+                }
+            });
+
+            return res.status(200).json(updatedPlan);
+        }
+
+        // Create new meal plan
         const mealPlan = await prisma.mealPlan.create({
             data: {
                 userId: user.id,
+                startDate: new Date(startDate),
+                endDate: new Date(endDate),
                 items: {
                     create: items.map((item: any) => ({
                         recipeId: item.recipeId,
-                        dayOfWeek: item.dayOfWeek,
+                        date: new Date(item.date),
                         mealType: item.mealType
                     }))
                 }
@@ -126,11 +168,12 @@ export const getMealPlan = async (req: Request, res: Response) => {
 /**
  * Update a meal plan
  * PUT /api/meal-plans/:mealPlanId
+ * Body: { startDate, endDate, items: [{ recipeId, date, mealType }] }
  */
 export const updateMealPlan = async (req: Request, res: Response) => {
     try {
         const { mealPlanId } = req.params;
-        const { items } = req.body;
+        const { startDate, endDate, items } = req.body;
 
         // Delete existing items
         await prisma.mealPlanItem.deleteMany({
@@ -141,10 +184,12 @@ export const updateMealPlan = async (req: Request, res: Response) => {
         const updatedMealPlan = await prisma.mealPlan.update({
             where: { id: Number(mealPlanId) },
             data: {
+                startDate: startDate ? new Date(startDate) : undefined,
+                endDate: endDate ? new Date(endDate) : undefined,
                 items: {
                     create: items.map((item: any) => ({
                         recipeId: item.recipeId,
-                        dayOfWeek: item.dayOfWeek,
+                        date: new Date(item.date),
                         mealType: item.mealType
                     }))
                 },
@@ -194,17 +239,18 @@ export const deleteMealPlan = async (req: Request, res: Response) => {
 /**
  * Add a recipe to an existing meal plan
  * POST /api/meal-plans/:mealPlanId/items
+ * Body: { recipeId, date, mealType }
  */
 export const addMealPlanItem = async (req: Request, res: Response) => {
     try {
         const { mealPlanId } = req.params;
-        const { recipeId, dayOfWeek, mealType } = req.body;
+        const { recipeId, date, mealType } = req.body;
 
         const item = await prisma.mealPlanItem.create({
             data: {
                 mealPlanId: Number(mealPlanId),
                 recipeId: Number(recipeId),
-                dayOfWeek,
+                date: new Date(date),
                 mealType
             },
             include: {
@@ -277,5 +323,58 @@ export const getCurrentWeekMealPlan = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error fetching current meal plan:', error);
         res.status(500).json({ error: 'Failed to fetch current meal plan' });
+    }
+};
+
+/**
+ * Get meal plans for a specific date range
+ * GET /api/users/:userId/meal-plans/range?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+ */
+export const getMealPlansByDateRange = async (req: Request, res: Response) => {
+    try {
+        const { userId } = req.params;
+        const { startDate, endDate } = req.query;
+
+        // Find user by firebaseUid or Prisma ID
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { id: isNaN(Number(userId)) ? undefined : Number(userId) },
+                    { firebaseUid: userId }
+                ]
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const mealPlans = await prisma.mealPlan.findMany({
+            where: {
+                userId: user.id,
+                startDate: {
+                    gte: new Date(startDate as string)
+                },
+                endDate: {
+                    lte: new Date(endDate as string)
+                }
+            },
+            include: {
+                items: {
+                    include: {
+                        recipe: true
+                    },
+                    orderBy: {
+                        date: 'asc'
+                    }
+                }
+            },
+            orderBy: { startDate: 'asc' }
+        });
+
+        res.status(200).json(mealPlans);
+    } catch (error) {
+        console.error('Error fetching meal plans by date range:', error);
+        res.status(500).json({ error: 'Failed to fetch meal plans' });
     }
 };

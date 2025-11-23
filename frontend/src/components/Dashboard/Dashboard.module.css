@@ -1,6 +1,5 @@
 /* General Layout and Reset */
 .Dashboard {
-  padding: 20px;
   font-family: Arial, sans-serif;
 }
 
@@ -22,6 +21,7 @@
 
 .greeting {
   font-size: 2rem;
+  padding: 10px;  /*better spacing*/
   font-weight: 700;
   color: var(--text);
   margin-top: 8px;
@@ -32,6 +32,7 @@
 
 .prompt {
   font-size: 1rem;
+  padding: 10px;  /*better spacing*/
   color: var(--text-muted);
   margin-top: 0;
   text-align: left;

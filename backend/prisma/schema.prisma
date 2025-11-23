@@ -8,28 +8,44 @@ datasource db {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  firebaseUid String?   @unique
-  email       String?   @unique
-  profile     Profile?
-  favorites   Favorite[]
-  mealPlans   MealPlan[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id          Int     @id @default(autoincrement())
+  firebaseUid String? @unique
+  email       String? @unique
+  displayName String?
+  photoURL    String?
+
+  // Onboarding data
+  age                 Int?
+  height              Float?
+  weight              Float?
+  units               String  @default("metric")
+  bmi                 Float?
+  activityLevel       String  @default("moderately_active")
+  onboardingCompleted Boolean @default(false)
+
+  // User preferences stored as JSON
+  medicalRestrictions Json?
+  nutritionGoals      Json?
+  lifestyleDiets      Json?
+  culturalDiets       Json?
+  budget              Json?
+
+  // Timestamps and counters
+  lastLogin           DateTime @default(now())
+  planGenerationCount Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  favorites Favorite[]
+  mealPlans MealPlan[]
 }
 
-model Profile {
-  id        Int     @id @default(autoincrement())
-  userId    Int     @unique
-  user      User    @relation(fields: [userId], references: [id])
-  onboardingCompleted Boolean @default(false)
-  units     String  @default("metric")
-  extra     Json?
-}
+// Removed Profile model - all data now in User model directly
 
 model Recipe {
-  id                      Int       @id @default(autoincrement())
-  externalId              String?   @unique
+  id                      Int            @id @default(autoincrement())
+  externalId              String?        @unique
   title                   String
   description             String?
   imageUrl                String?
@@ -37,39 +53,45 @@ model Recipe {
   totalTime               Int?
   estimatedCostPerServing Float?
   nutritionInfo           Json?
-  ingredients             Json?     // simple stored array for demo; normalize later if desired
+  ingredients             Json? // simple stored array for demo; normalize later if desired
   instructions            Json?
-  dietaryTags             String[]  @default([])
+  dietaryTags             String[]       @default([])
   favorites               Favorite[]
   mealPlanItems           MealPlanItem[]
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
 }
 
 model Favorite {
   userId    Int
   recipeId  Int
-  user      User   @relation(fields: [userId], references: [id])
-  recipe    Recipe @relation(fields: [recipeId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
   @@id([userId, recipeId])
 }
 
 model MealPlan {
   id        Int            @id @default(autoincrement())
   userId    Int
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startDate DateTime // Start of the week (e.g., Monday)
+  endDate   DateTime // End of the week (e.g., Sunday)
   items     MealPlanItem[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([userId, startDate]) // One meal plan per user per week
 }
 
 model MealPlanItem {
-  id          Int       @id @default(autoincrement())
-  mealPlanId  Int
-  recipeId    Int
-  mealPlan    MealPlan  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  dayOfWeek   Int
-  mealType    String
+  id         Int      @id @default(autoincrement())
+  mealPlanId Int
+  recipeId   Int
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  date       DateTime // Specific date for this meal (YYYY-MM-DD)
+  mealType   String // "breakfast", "lunch", "dinner", "snacks"
+  createdAt  DateTime @default(now())
 }

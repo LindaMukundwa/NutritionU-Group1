@@ -4,96 +4,90 @@ import prisma from '../lib/prisma.ts';
 import Recipe from '../models/RecipeModel.ts';
 
 
-// Create a new user
+// Create a new user - updated to work with new schema (no Profile model)
 export const createUser = async (req: Request, res: Response) => {
     try {
         const userData = req.body || {};
 
-        // Use Firebase UID if available, otherwise use provided ID
+        // Use Firebase UID if available
         const firebaseUid = userData.firebaseUid?.trim() || undefined;
 
-        // Create user and profile in a transaction
+        // Create user with all fields directly on User model
         const newUser = await prisma.user.create({
             data: {
                 firebaseUid,
                 email: userData.email,
-                profile: {
-                    create: {
-                        onboardingCompleted: false,
-                        units: userData.units || 'metric',
-                        extra: {
-                            displayName: userData.displayName || (userData.email ? String(userData.email).split('@')[0] : 'User'),
-                            photoURL: userData.photoURL,
-                            age: userData.age,
-                            height: userData.height,
-                            weight: userData.weight,
-                            activityLevel: userData.activityLevel || 'moderately_active',
-                            bmi: userData.bmi,
-                            medicalRestrictions: userData.medicalRestrictions || {
-                                gluten: false,
-                                dairy: false,
-                                nuts: false,
-                                peanuts: false,
-                                soy: false,
-                                eggs: false,
-                                shellfish: false,
-                                wheat: false,
-                                sesame: false,
-                                corn: false,
-                                sulfites: false,
-                                fodmap: false,
-                                histamine: false,
-                                lowSodium: false,
-                                lowSugar: false,
-                                none: true,
-                                description: 'Medical and health dietary restrictions'
-                            },
-                            nutritionGoals: userData.nutritionGoals || {
-                                goals: 'None',
-                                calories: undefined,
-                                protein: undefined,
-                                carbs: undefined,
-                                fats: undefined,
-                                description: 'User nutrition and lifestyle goals'
-                            },
-                            lifestyleDiets: userData.lifestyleDiets || {
-                                vegetarian: false,
-                                pescetarian: false,
-                                flexitarian: false,
-                                mediterranean: false,
-                                paleo: false,
-                                keto: false,
-                                whole30: false,
-                                none: true,
-                                description: 'Lifestyle and ethical dietary choices'
-                            },
-                            culturalDiets: userData.culturalDiets || {
-                                halal: false,
-                                kosher: false,
-                                jain: false,
-                                hindu: false,
-                                buddhist: false,
-                                none: true,
-                                description: 'Cultural and religious dietary preferences'
-                            },
-                            budget: userData.budget || {
-                                minimum: undefined,
-                                maximum: undefined,
-                                step: 25,
-                                default: 100,
-                                description: 'Weekly food budget in dollars'
-                            }
-                        }
-                    }
+                displayName: userData.displayName || (userData.email ? String(userData.email).split('@')[0] : 'User'),
+                photoURL: userData.photoURL,
+                age: userData.age,
+                height: userData.height,
+                weight: userData.weight,
+                bmi: userData.bmi,
+                units: userData.units || 'metric',
+                activityLevel: userData.activityLevel || 'moderately_active',
+                onboardingCompleted: false,
+                medicalRestrictions: userData.medicalRestrictions || {
+                    gluten: false,
+                    dairy: false,
+                    nuts: false,
+                    peanuts: false,
+                    soy: false,
+                    eggs: false,
+                    shellfish: false,
+                    wheat: false,
+                    sesame: false,
+                    corn: false,
+                    sulfites: false,
+                    fodmap: false,
+                    histamine: false,
+                    lowSodium: false,
+                    lowSugar: false,
+                    none: true,
+                    description: 'Medical and health dietary restrictions'
+                },
+                nutritionGoals: userData.nutritionGoals || {
+                    goals: 'None',
+                    calories: undefined,
+                    protein: undefined,
+                    carbs: undefined,
+                    fats: undefined,
+                    description: 'User nutrition and lifestyle goals'
+                },
+                lifestyleDiets: userData.lifestyleDiets || {
+                    vegetarian: false,
+                    pescetarian: false,
+                    flexitarian: false,
+                    mediterranean: false,
+                    paleo: false,
+                    keto: false,
+                    whole30: false,
+                    none: true,
+                    description: 'Lifestyle and ethical dietary choices'
+                },
+                culturalDiets: userData.culturalDiets || {
+                    halal: false,
+                    kosher: false,
+                    jain: false,
+                    hindu: false,
+                    buddhist: false,
+                    none: true,
+                    description: 'Cultural and religious dietary preferences'
+                },
+                budget: userData.budget || {
+                    minimum: undefined,
+                    maximum: undefined,
+                    step: 25,
+                    default: 100,
+                    description: 'Weekly food budget in dollars'
                 }
             },
             include: {
-                profile: true,
                 favorites: {
                     include: {
                         recipe: true
                     }
-                }
+                },
+                mealPlans: true
             }
         });
 
@@ -117,7 +111,6 @@ export const getUser = async (req: Request, res: Response) => {
                 ]
             },
             include: {
-                profile: true,
                 favorites: {
                     include: {
                         recipe: true
@@ -473,33 +466,28 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                     { id: parseInt(id, 10) || undefined },
                     { firebaseUid: id }
                 ]
-            },
-            include: {
-                profile: true
             }
         });
 
-        if (user && user.profile) {
-            // Merge existing extra data with new profile data
-            const mergedExtra = {
-                ...(typeof user.profile.extra === 'object' && user.profile.extra !== null ? user.profile.extra : {}),  // Ensure it's an object
-                ...profile              // Override with new data
-            };
-
-
+        if (user) {
+            // Update existing user directly (no profile table)
             const updatedUser = await prisma.user.update({
                 where: { id: user.id },
                 data: {
-                    profile: {
-                        update: {
-                            onboardingCompleted: true,
-                            units: profile.units || user.profile.units,
-                            extra: mergedExtra
-                        }
-                    }
-                },
-                include: {
-                    profile: true
+                    displayName: profile.displayName,
+                    photoURL: profile.photoURL,
+                    age: profile.age,
+                    height: profile.height,
+                    weight: profile.weight,
+                    bmi: profile.bmi,
+                    units: profile.units || user.units,
+                    activityLevel: profile.activityLevel,
+                    onboardingCompleted: true,
+                    medicalRestrictions: profile.medicalRestrictions,
+                    nutritionGoals: profile.nutritionGoals,
+                    lifestyleDiets: profile.lifestyleDiets,
+                    culturalDiets: profile.culturalDiets,
+                    budget: profile.budget
                 }
             });
 
@@ -510,16 +498,20 @@ export const patchUserProfile = async (req: Request, res: Response) => {
         const newUser = await prisma.user.create({
             data: {
                 firebaseUid: id,
-                profile: {
-                    create: {
-                        onboardingCompleted: true,
-                        units: profile.units || 'metric',
-                        extra: profile
-                    }
-                }
-            },
-            include: {
-                profile: true
+                displayName: profile.displayName,
+                photoURL: profile.photoURL,
+                age: profile.age,
+                height: profile.height,
+                weight: profile.weight,
+                bmi: profile.bmi,
+                units: profile.units || 'metric',
+                activityLevel: profile.activityLevel || 'moderately_active',
+                onboardingCompleted: true,
+                medicalRestrictions: profile.medicalRestrictions,
+                nutritionGoals: profile.nutritionGoals,
+                lifestyleDiets: profile.lifestyleDiets,
+                culturalDiets: profile.culturalDiets,
+                budget: profile.budget
             }
         });
 

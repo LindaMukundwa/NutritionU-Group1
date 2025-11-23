@@ -1,214 +1,136 @@
-import { useState, useEffect, useCallback } from 'react';
-import { mealPlanService, type MealPlan, type MealPlanItem } from '../../services/mealPlanService';
-
-interface Meal {
-  id?: number;
-  name: string;
-  calories: number;
-  time: string;
-  cost: string;
-  recipe: {
-    ingredients: string[];
-    instructions: string[];
-    nutrition: {
-      protein: number;
-      carbs: number;
-      fat: number;
-      fiber: number;
-    };
-  };
-}
-
-interface DayMealPlan {
-  breakfast: Meal[];
-  lunch: Meal[];
-  dinner: Meal[];
-  snacks: Meal[];
-}
-
-interface WeeklyMealPlan {
-  [dateString: string]: DayMealPlan;
-}
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { mealPlanService } from '../../services/mealPlanService';
+import {
+  getWeekStart,
+  getWeekEnd,
+  convertBackendPlansToFrontend,
+  convertFrontendToBackendItems,
+  type WeeklyMealPlan,
+} from '../utils/mealPlanUtils';
 
 /**
  * Custom hook to manage weekly meal plans with backend persistence
+ * Implements auto-save with 2-second debounce
  */
 export function useMealPlan(userId: string | undefined) {
   const [weeklyMealPlan, setWeeklyMealPlan] = useState<WeeklyMealPlan>({});
-  const [currentMealPlanId, setCurrentMealPlanId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load meal plan from backend on mount
+  // Load meal plans from backend on mount
   useEffect(() => {
     if (!userId) {
+      console.log('[useMealPlan] No userId provided, skipping load');
       setLoading(false);
       return;
     }
 
-    const loadMealPlan = async () => {
+    const loadMealPlans = async () => {
       try {
         setLoading(true);
-        const mealPlan = await mealPlanService.getCurrentWeekMealPlan(userId);
+        setError(null);
+
+        const today = new Date();
+        const startDate = getWeekStart(today);
+        const endDate = getWeekEnd(today);
+
+        console.log('[useMealPlan] Loading meal plans for user:', userId);
+        console.log('[useMealPlan] Date range:', { startDate, endDate });
+
+        const plans = await mealPlanService.getMealPlansByDateRange(
+          userId,
+          startDate,
+          endDate
+        );
+
+        console.log('[useMealPlan] Received plans from backend:', plans);
+
+        const converted = convertBackendPlansToFrontend(plans);
+        console.log('[useMealPlan] Converted to frontend format:', converted);
         
-        if (mealPlan) {
-          setCurrentMealPlanId(mealPlan.id);
-          // Convert backend format to component format
-          const convertedPlan = convertBackendToFrontend(mealPlan);
-          setWeeklyMealPlan(convertedPlan);
-        }
+        setWeeklyMealPlan(converted);
       } catch (err) {
-        console.error('Error loading meal plan:', err);
-        setError('Failed to load meal plan');
+        console.error('[useMealPlan] Failed to load meal plans:', err);
+        setError('Failed to load meal plans. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadMealPlan();
+    loadMealPlans();
   }, [userId]);
 
-  // Save meal plan to backend
-  const saveMealPlan = useCallback(async (plan: WeeklyMealPlan) => {
+  // Auto-save meal plan when it changes - debounced
+  useEffect(() => {
+    if (!userId || loading) {
+      console.log('[useMealPlan] Skipping auto-save:', { userId, loading });
+      return;
+    }
+
+    if (saveTimeoutRef.current) {
+      console.log('[useMealPlan] Clearing existing save timeout');
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        console.log('[useMealPlan] Auto-saving meal plan...');
+        console.log('[useMealPlan] Current weeklyMealPlan state:', weeklyMealPlan);
+        
+        const items = convertFrontendToBackendItems(weeklyMealPlan);
+        console.log('[useMealPlan] Converted to backend items:', items);
+        
+        if (items.length > 0) {
+          const result = await mealPlanService.saveMealPlan(
+            userId,
+            getWeekStart(new Date()),
+            getWeekEnd(new Date()),
+            items
+          );
+          console.log('[useMealPlan] ✅ Save result:', result);
+        } else {
+          console.log('[useMealPlan] No items to save, skipping');
+        }
+      } catch (err) {
+        console.error('[useMealPlan] ❌ Auto-save failed:', err);
+        setError('Failed to save changes. Please try again.');
+      }
+    }, 2000);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [weeklyMealPlan, userId, loading]);
+
+  // Manual save function
+  const saveMealPlan = useCallback(async () => {
     if (!userId) return;
 
     try {
-      const items = convertFrontendToBackend(plan);
+      const items = convertFrontendToBackendItems(weeklyMealPlan);
       
-      if (currentMealPlanId) {
-        // Update existing meal plan
-        await mealPlanService.updateMealPlan(currentMealPlanId, items);
-      } else {
-        // Create new meal plan
-        const newMealPlan = await mealPlanService.createMealPlan(userId, items);
-        setCurrentMealPlanId(newMealPlan.id);
+      if (items.length > 0) {
+        await mealPlanService.saveMealPlan(
+          userId,
+          getWeekStart(new Date()),
+          getWeekEnd(new Date()),
+          items
+        );
       }
     } catch (err) {
-      console.error('Error saving meal plan:', err);
+      console.error('Failed to save meal plan:', err);
       setError('Failed to save meal plan');
     }
-  }, [userId, currentMealPlanId]);
-
-  // Debounced save function - saves after changes stop for 2 seconds
-  const debouncedSave = useCallback(
-    (() => {
-      let timeoutId: NodeJS.Timeout;
-      return (plan: WeeklyMealPlan) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          saveMealPlan(plan);
-        }, 2000); // Save 2 seconds after last change
-      };
-    })(),
-    [saveMealPlan]
-  );
-
-  // Update meal plan with automatic save
-  const updateWeeklyMealPlan = useCallback((plan: WeeklyMealPlan) => {
-    setWeeklyMealPlan(plan);
-    debouncedSave(plan);
-  }, [debouncedSave]);
+  }, [userId, weeklyMealPlan]);
 
   return {
     weeklyMealPlan,
-    setWeeklyMealPlan: updateWeeklyMealPlan,
+    setWeeklyMealPlan,
     loading,
     error,
-    saveMealPlan: () => saveMealPlan(weeklyMealPlan), // Manual save option
+    saveMealPlan,
   };
-}
-
-/**
- * Convert backend MealPlan format to frontend WeeklyMealPlan format
- */
-function convertBackendToFrontend(mealPlan: MealPlan): WeeklyMealPlan {
-  const plan: WeeklyMealPlan = {};
-  
-  // Group items by date
-  mealPlan.items.forEach((item) => {
-    if (!item.recipe) return;
-    
-    // Calculate date string from dayOfWeek
-    const date = getDateForDayOfWeek(item.dayOfWeek);
-    const dateString = date.toISOString().split('T')[0];
-    
-    if (!plan[dateString]) {
-      plan[dateString] = {
-        breakfast: [],
-        lunch: [],
-        dinner: [],
-        snacks: [],
-      };
-    }
-    
-    const meal: Meal = {
-      id: item.id,
-      name: item.recipe.title,
-      calories: item.recipe.nutritionInfo?.calories || 0,
-      time: `${item.recipe.totalTime || 0} min`,
-      cost: `$${item.recipe.estimatedCostPerServing?.toFixed(2) || '0.00'}`,
-      recipe: {
-        ingredients: Array.isArray(item.recipe.ingredients) 
-          ? item.recipe.ingredients.map((ing: any) => 
-              typeof ing === 'string' ? ing : `${ing.amount} ${ing.unit?.value || ''} ${ing.name}`
-            )
-          : [],
-        instructions: Array.isArray(item.recipe.instructions)
-          ? item.recipe.instructions.map((step: any) => 
-              typeof step === 'string' ? step : step.instruction
-            )
-          : [],
-        nutrition: {
-          protein: item.recipe.nutritionInfo?.protein || 0,
-          carbs: item.recipe.nutritionInfo?.carbs || 0,
-          fat: item.recipe.nutritionInfo?.fat || 0,
-          fiber: item.recipe.nutritionInfo?.fiber || 0,
-        },
-      },
-    };
-    
-    plan[dateString][item.mealType as keyof DayMealPlan].push(meal);
-  });
-  
-  return plan;
-}
-
-/**
- * Convert frontend WeeklyMealPlan format to backend MealPlanItem format
- */
-function convertFrontendToBackend(plan: WeeklyMealPlan): Omit<MealPlanItem, 'id'>[] {
-  const items: Omit<MealPlanItem, 'id'>[] = [];
-  
-  Object.entries(plan).forEach(([dateString, dayPlan]) => {
-    const date = new Date(dateString + 'T00:00:00');
-    const dayOfWeek = date.getDay();
-    
-    (['breakfast', 'lunch', 'dinner', 'snacks'] as const).forEach((mealType) => {
-      dayPlan[mealType].forEach((meal) => {
-        // For now, we'll need to store/retrieve recipe IDs
-        // This is a placeholder - you'll need to handle recipe creation/retrieval
-        if (meal.id) {
-          items.push({
-            recipeId: meal.id, // Assuming meal.id is the recipe ID
-            dayOfWeek,
-            mealType,
-          });
-        }
-      });
-    });
-  });
-  
-  return items;
-}
-
-/**
- * Get date for a specific day of week in the current week
- */
-function getDateForDayOfWeek(dayOfWeek: number): Date {
-  const today = new Date();
-  const currentDay = today.getDay();
-  const diff = dayOfWeek - currentDay;
-  const date = new Date(today);
-  date.setDate(date.getDate() + diff);
-  return date;
 }

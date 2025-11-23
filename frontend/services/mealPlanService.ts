@@ -7,35 +7,53 @@ const API_BASE = (import.meta.env.VITE_API_BASE as string) || 'http://localhost:
 export interface MealPlanItem {
   id?: number;
   recipeId: number;
-  dayOfWeek: number; // 0-6 (Sunday-Saturday)
+  date: string; // YYYY-MM-DD format
   mealType: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
   recipe?: any; // Recipe object when included
 }
 
 export interface MealPlan {
-  id: number;
-  userId: number;
+  id?: number;
+  userId?: number;
+  startDate: string; // YYYY-MM-DD format
+  endDate: string; // YYYY-MM-DD format
   items: MealPlanItem[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 class MealPlanService {
   /**
-   * Create a new meal plan for a user
+   * Create a new meal plan for a user or update if one exists for the week
    */
-  async createMealPlan(userId: string, items: Omit<MealPlanItem, 'id'>[]): Promise<MealPlan> {
-    const response = await fetch(`${API_BASE}/api/users/${userId}/meal-plans`, {
+  async saveMealPlan(
+    userId: string,
+    startDate: string,
+    endDate: string,
+    items: Omit<MealPlanItem, 'id'>[]
+  ): Promise<MealPlan> {
+    console.log('[mealPlanService] saveMealPlan called:', { userId, startDate, endDate, items });
+    
+    const url = `${API_BASE}/api/users/${userId}/meal-plans`;
+    console.log('[mealPlanService] Request URL:', url);
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ startDate, endDate, items }),
     });
 
+    console.log('[mealPlanService] Response status:', response.status);
+
     if (!response.ok) {
-      throw new Error('Failed to create meal plan');
+      const errorText = await response.text();
+      console.error('[mealPlanService] ❌ Save failed:', { status: response.status, error: errorText });
+      throw new Error('Failed to save meal plan');
     }
 
-    return response.json();
+    const result = await response.json();
+    console.log('[mealPlanService] ✅ Save successful:', result);
+    return result;
   }
 
   /**
@@ -49,6 +67,33 @@ class MealPlanService {
     }
 
     return response.json();
+  }
+
+  /**
+   * Get meal plans for a specific date range
+   */
+  async getMealPlansByDateRange(
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<MealPlan[]> {
+    const url = `${API_BASE}/api/users/${userId}/meal-plans/range?startDate=${startDate}&endDate=${endDate}`;
+    console.log('[mealPlanService] getMealPlansByDateRange called:', { userId, startDate, endDate });
+    console.log('[mealPlanService] Request URL:', url);
+    
+    const response = await fetch(url);
+
+    console.log('[mealPlanService] Response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[mealPlanService] ❌ Load failed:', { status: response.status, error: errorText });
+      throw new Error('Failed to fetch meal plans');
+    }
+
+    const result = await response.json();
+    console.log('[mealPlanService] ✅ Load successful:', result);
+    return result;
   }
 
   /**
@@ -81,11 +126,16 @@ class MealPlanService {
   /**
    * Update an existing meal plan
    */
-  async updateMealPlan(mealPlanId: number, items: Omit<MealPlanItem, 'id'>[]): Promise<MealPlan> {
+  async updateMealPlan(
+    mealPlanId: number,
+    startDate: string,
+    endDate: string,
+    items: Omit<MealPlanItem, 'id'>[]
+  ): Promise<MealPlan> {
     const response = await fetch(`${API_BASE}/api/meal-plans/${mealPlanId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ startDate, endDate, items }),
     });
 
     if (!response.ok) {

@@ -12,8 +12,6 @@ import GroceryList from "./GroceryList/GroceryList"
 import GenerateMealPlanModal from "./GenerateMealPlanModal/GenerateMealPlanModal"
 import type { Recipe } from '../../../../shared/types/recipe';
 import { useAuth } from '../../contexts/AuthContext';
-
-// meal plan hook imports
 import { useMealPlan } from '../../hooks/useMealPlan';
 
 interface SummaryCardData {
@@ -29,6 +27,7 @@ interface SummaryCardData {
 
 // Simplified Meal type for the planner (compatible with Recipe schema)
 interface Meal {
+  recipeId?: number;  // Added for backend persistence
   name: string;  // Maps to Recipe.title
   calories: number;  // Maps to Recipe.nutritionInfo.calories
   time: string;  // Maps to Recipe.totalTime
@@ -734,8 +733,72 @@ function MealContent({
         <AddToPlanModal
           isOpen={showAddToPlanModal}
           onClose={() => setShowAddToPlanModal(false)}
-          onAddToPlan={(dateString, mealType) => {
+          onAddToPlan={async (dateString, mealType) => {
+            console.log('[Dashboard] Adding meal from modal:', mealToAdd);
+            console.log('[Dashboard] Meal ID:', mealToAdd.id);
+            
+            let recipeId: number;
+            
+            // Check if this is a FatSecret recipe (needs to be saved to DB first)
+            if (typeof mealToAdd.id === 'string' && mealToAdd.id.startsWith('fatsecret_')) {
+              console.log('[Dashboard] FatSecret recipe detected, saving to database first...');
+              
+              try {
+                const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
+                
+                const recipeData = {
+                  externalId: mealToAdd.id, // Store fatsecret_<id> to prevent duplicates
+                  title: mealToAdd.name || mealToAdd.title,
+                  description: mealToAdd.description || `Delicious ${mealToAdd.name || mealToAdd.title}`,
+                  imageUrl: (mealToAdd as any).imageUrl,
+                  mealType: (mealToAdd as any).category || 'dinner',
+                  totalTime: parseInt(mealToAdd.time?.toString().replace(' min', '')) || 30,
+                  estimatedCostPerServing: parseFloat((mealToAdd.cost || mealToAdd.price || '$5').replace('$', '')) || 5,
+                  nutritionInfo: {
+                    calories: mealToAdd.calories || 0,
+                    protein: mealToAdd.recipe?.nutrition?.protein || 0,
+                    carbs: mealToAdd.recipe?.nutrition?.carbs || 0,
+                    fat: mealToAdd.recipe?.nutrition?.fat || 0,
+                  },
+                  ingredients: mealToAdd.recipe?.ingredients?.map((ing: string) => ({
+                    name: ing,
+                    amount: 1,
+                    unit: { type: 'metric', value: 'serving' },
+                  })) || [],
+                  instructions: mealToAdd.recipe?.instructions?.map((inst: string, idx: number) => ({
+                    stepNumber: idx + 1,
+                    instruction: inst,
+                    equipment: [],
+                  })) || [],
+                  dietaryTags: (mealToAdd as any).tags || [],
+                };
+
+                const response = await fetch(`${API_BASE}/api/recipes`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(recipeData),
+                });
+
+                if (!response.ok) {
+                  throw new Error('Failed to save recipe to database');
+                }
+
+                const savedRecipe = await response.json();
+                recipeId = savedRecipe.id;
+                console.log('[Dashboard] ✅ Recipe saved to database with ID:', recipeId);
+              } catch (err) {
+                console.error('[Dashboard] ❌ Failed to save recipe:', err);
+                alert('Failed to save recipe. Please try again.');
+                return;
+              }
+            } else {
+              // Already a database ID
+              recipeId = typeof mealToAdd.id === 'string' ? parseInt(mealToAdd.id) : mealToAdd.id;
+              console.log('[Dashboard] Using existing database ID:', recipeId);
+            }
+            
             const plannerMeal: Meal = {
+              recipeId,
               name: mealToAdd.name || mealToAdd.title,
               calories: mealToAdd.calories,
               time: typeof mealToAdd.time === 'string' ? mealToAdd.time : `${mealToAdd.time} min`,
@@ -743,17 +806,21 @@ function MealContent({
               recipe: mealToAdd.recipe,
             };
 
+            console.log('[Dashboard] Created planner meal with recipeId:', plannerMeal);
+
             const mealTypeKey = mealType as keyof DayMealPlan;
 
             setWeeklyMealPlan((prev) => {
               const dayPlan = getOrCreateDayPlan(prev, dateString);
-              return {
+              const newPlan = {
                 ...prev,
                 [dateString]: {
                   ...dayPlan,
                   [mealTypeKey]: [...dayPlan[mealTypeKey], plannerMeal],
                 },
               };
+              console.log('[Dashboard] Updated meal plan from modal:', newPlan);
+              return newPlan;
             });
           }}
           mealTitle={mealToAdd.title || mealToAdd.name}
@@ -778,6 +845,7 @@ function PlannerContent({
   availableMeals: any[]
   onOpenGroceryList: () => void
 }) {
+  const { user } = useAuth();
   const [selectedRecipe, setSelectedRecipe] = useState<Meal | null>(null)
   const [showRecipeModal, setShowRecipeModal] = useState(false)
   const [showAddMealModal, setShowAddMealModal] = useState(false)
@@ -812,69 +880,123 @@ function PlannerContent({
   }
 
   /**
-   * Handles adding a meal to the meal planner by generating instructions and ingredients via API.
+   * Handles adding a meal to the meal planner.
+   * 
+   * Security: Validates user authentication before making API calls
    * 
    * This function performs the following steps:
-   * 1. Calls the chatbot API to generate cooking instructions and ingredients based on the meal's nutritional information
-   * 2. Updates the meal object with the generated data (or keeps existing data if generation fails)
-   * 3. Adds the updated meal to the appropriate meal type slot for the selected day in the weekly meal plan
-   * 4. Closes the add meal modal on success
-   * 
-   * @param meal - The meal object to be added to the planner, containing name, calories, and recipe information
-   * @throws Will log an error to console if the API call fails or returns a non-OK response
-   * 
-   * @remarks
-   * - Uses the `addMealType` state variable to determine which meal slot (breakfast, lunch, dinner, snack) to populate
-   * - Uses the `selectedDay` state variable to determine which day of the week to add the meal to
-   * - Automatically creates a day plan if one doesn't exist for the selected day
-   * - Does not throw errors to the caller; errors are caught and logged internally
+   * 1. Validates user is authenticated
+   * 2. Saves the recipe to backend to get its ID
+   * 3. Generates enhanced instructions and ingredients via chatbot API
+   * 4. Adds the meal with recipeId to the weekly meal plan
+   * 5. Auto-save will persist changes to database
    */
   const handleAddMealToPlanner = async (meal: Meal) => {
-    // Add loading state
-    setIsAddingMeal(true); // Use the state from component
+    if (!user?.firebaseUid) {
+      alert('Please log in to save meals');
+      return;
+    }
+
+    setIsAddingMeal(true);
     
     try {
-      const response = await fetch('http://localhost:3001/api/chatbot/instructions-ingredients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: `${meal.name} with approximately ${meal.calories} calories, ${meal.recipe.nutrition.protein}g protein, ${meal.recipe.nutrition.carbs}g carbs, and ${meal.recipe.nutrition.fat}g fat.`
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to generate instructions and ingredients');
-      }
-  
-      const data = await response.json() as { ingredients?: string[]; instructions?: string[] };
+      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
       
-      const updatedMeal = {
-        ...meal,
-        recipe: {
-          ingredients: data.ingredients || meal.recipe.ingredients,
-          instructions: data.instructions || meal.recipe.instructions,
-          nutrition: meal.recipe.nutrition,
+      // Step 1: Save recipe to backend to get its ID
+      const recipeData = {
+        title: meal.name,
+        description: `Delicious ${meal.name}`,
+        totalTime: parseInt(meal.time.replace(' min', '')) || 0,
+        estimatedCostPerServing: parseFloat(meal.cost.replace('$', '')) || 0,
+        nutritionInfo: {
+          calories: meal.calories,
+          protein: meal.recipe.nutrition.protein,
+          carbs: meal.recipe.nutrition.carbs,
+          fat: meal.recipe.nutrition.fat,
+          fiber: meal.recipe.nutrition.fiber,
         },
+        ingredients: meal.recipe.ingredients.map((ing) => ({
+          name: ing,
+          amount: 1,
+          unit: { type: 'metric', value: 'serving' },
+        })),
+        instructions: meal.recipe.instructions.map((inst, idx) => ({
+          stepNumber: idx + 1,
+          instruction: inst,
+          equipment: [],
+        })),
       };
-  
+
+      const recipeResponse = await fetch(`${API_BASE}/api/recipes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(recipeData),
+      });
+
+      if (!recipeResponse.ok) {
+        throw new Error('Failed to save recipe');
+      }
+
+      const savedRecipe = await recipeResponse.json();
+      console.log('[Dashboard] ✅ Recipe saved to backend:', savedRecipe);
+      console.log('[Dashboard] Recipe ID:', savedRecipe.id);
+      
+      // Step 2: Optionally enhance with chatbot-generated content
+      let enhancedMeal = meal;
+      try {
+        const chatbotResponse = await fetch(`${API_BASE}/api/chatbot/instructions-ingredients`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: `${meal.name} with approximately ${meal.calories} calories, ${meal.recipe.nutrition.protein}g protein, ${meal.recipe.nutrition.carbs}g carbs, and ${meal.recipe.nutrition.fat}g fat.`
+          }),
+        });
+
+        if (chatbotResponse.ok) {
+          const data = await chatbotResponse.json() as { ingredients?: string[]; instructions?: string[] };
+          enhancedMeal = {
+            ...meal,
+            recipe: {
+              ingredients: data.ingredients || meal.recipe.ingredients,
+              instructions: data.instructions || meal.recipe.instructions,
+              nutrition: meal.recipe.nutrition,
+            },
+          };
+        }
+      } catch (chatbotErr) {
+        console.warn('Chatbot enhancement failed, using original meal data:', chatbotErr);
+      }
+
+      // Step 3: Add to meal plan with recipe ID
       const mealTypeKey = addMealType as keyof DayMealPlan;
+      const mealWithRecipeId = {
+        ...enhancedMeal,
+        recipeId: savedRecipe.id,
+      };
+      console.log('[Dashboard] Adding meal to planner:', mealWithRecipeId);
+      console.log('[Dashboard] Selected day:', selectedDay);
+      console.log('[Dashboard] Meal type:', addMealType);
+      
       setWeeklyMealPlan((prev) => {
         const dayPlan = getOrCreateDayPlan(prev, selectedDay);
-        return {
+        const newPlan = {
           ...prev,
           [selectedDay]: {
             ...dayPlan,
-            [mealTypeKey]: [...dayPlan[mealTypeKey], updatedMeal],
+            [mealTypeKey]: [
+              ...dayPlan[mealTypeKey], 
+              mealWithRecipeId
+            ],
           },
         };
+        console.log('[Dashboard] Updated meal plan:', newPlan);
+        return newPlan;
       });
-  
+
       setShowAddMealModal(false);
     } catch (error) {
-      console.error('Error generating instructions and ingredients:', error);
-      // Show error to user
+      console.error('Error adding meal to planner:', error);
+      alert('Failed to add meal. Please try again.');
     } finally {
       setIsAddingMeal(false);
     }
@@ -1535,164 +1657,6 @@ function DashboardContentSwitcher({
   if (error) {
     console.error('Meal plan error:', error);
   }
-
-  /* const [weeklyMealPlan, setWeeklyMealPlan] = useState<WeeklyMealPlan>({
-    [todayString]: {
-      breakfast: [
-        {
-          name: "Greek Yogurt Bowl",
-          calories: 320,
-          time: "10 min",
-          cost: "$3.50",
-          recipe: {
-            ingredients: ["1 cup Greek yogurt", "1/2 cup granola", "1/2 cup mixed berries", "1 tbsp honey"],
-            instructions: [
-              "Add Greek yogurt to a bowl",
-              "Top with granola and mixed berries",
-              "Drizzle with honey",
-              "Enjoy immediately",
-            ],
-            nutrition: { protein: 20, carbs: 45, fat: 8, fiber: 6 },
-          },
-        },
-      ],
-      lunch: [
-        {
-          name: "Mediterranean Chickpea Bowl",
-          calories: 420,
-          time: "25 min",
-          cost: "$4.50",
-          recipe: {
-            ingredients: [
-              "1 cup chickpeas",
-              "1 cup mixed greens",
-              "1/2 cup cherry tomatoes",
-              "1/4 cup cucumber",
-              "2 tbsp tahini dressing",
-              "1/4 cup feta cheese",
-            ],
-            instructions: [
-              "Drain and rinse chickpeas",
-              "Chop vegetables into bite-sized pieces",
-              "Combine all ingredients in a bowl",
-              "Drizzle with tahini dressing",
-              "Top with feta cheese",
-            ],
-            nutrition: { protein: 18, carbs: 52, fat: 14, fiber: 12 },
-          },
-        },
-      ],
-      dinner: [
-        {
-          name: "Grilled Salmon with Roasted Vegetables",
-          calories: 380,
-          time: "30 min",
-          cost: "$8.50",
-          recipe: {
-            ingredients: [
-              "6 oz salmon fillet",
-              "1 tbsp olive oil",
-              "1 lemon",
-              "2 cloves garlic",
-              "Fresh herbs",
-              "Salt and pepper",
-            ],
-            instructions: [
-              "Preheat grill to medium-high heat",
-              "Season salmon with salt, pepper, and herbs",
-              "Brush with olive oil and minced garlic",
-              "Grill for 4-5 minutes per side",
-              "Squeeze fresh lemon juice before serving",
-            ],
-            nutrition: { protein: 34, carbs: 2, fat: 22, fiber: 0 },
-          },
-        },
-      ],
-      snacks: [
-        {
-          name: "Apple & Almond Butter",
-          calories: 180,
-          time: "2 min",
-          cost: "$2.00",
-          recipe: {
-            ingredients: ["1 medium apple", "2 tbsp almond butter"],
-            instructions: ["Slice apple into wedges", "Serve with almond butter for dipping"],
-            nutrition: { protein: 4, carbs: 24, fat: 9, fiber: 5 },
-          },
-        },
-        {
-          name: "Greek Yogurt",
-          calories: 120,
-          time: "1 min",
-          cost: "$1.50",
-          recipe: {
-            ingredients: ["1 cup Greek yogurt", "1 tsp honey"],
-            instructions: ["Add yogurt to bowl", "Drizzle with honey"],
-            nutrition: { protein: 15, carbs: 12, fat: 3, fiber: 0 },
-          },
-        },
-      ],
-    },
-    [tomorrowString]: {
-      breakfast: [
-        {
-          name: "Overnight Oats",
-          calories: 290,
-          time: "5 min prep",
-          cost: "$2.50",
-          recipe: {
-            ingredients: ["1/2 cup oats", "1/2 cup milk", "1/2 banana", "1 tbsp chia seeds", "Cinnamon"],
-            instructions: [
-              "Mix oats, milk, and chia seeds in a jar",
-              "Refrigerate overnight",
-              "Top with sliced banana and cinnamon in the morning",
-            ],
-            nutrition: { protein: 12, carbs: 48, fat: 6, fiber: 8 },
-          },
-        },
-      ],
-      lunch: [
-        {
-          name: "Quick Chicken Stir Fry",
-          calories: 380,
-          time: "15 min",
-          cost: "$6.20",
-          recipe: {
-            ingredients: [
-              "6 oz chicken breast",
-              "2 cups mixed vegetables",
-              "2 tbsp soy sauce",
-              "1 tbsp sesame oil",
-              "Garlic and ginger",
-            ],
-            instructions: [
-              "Cut chicken into bite-sized pieces",
-              "Heat sesame oil in a wok or large pan",
-              "Cook chicken until golden brown",
-              "Add vegetables and stir fry for 5 minutes",
-              "Add soy sauce, garlic, and ginger",
-              "Serve hot",
-            ],
-            nutrition: { protein: 38, carbs: 28, fat: 12, fiber: 4 },
-          },
-        },
-      ],
-      dinner: [],
-      snacks: [
-        {
-          name: "Trail Mix",
-          calories: 200,
-          time: "1 min",
-          cost: "$1.50",
-          recipe: {
-            ingredients: ["1/4 cup mixed nuts", "2 tbsp dried cranberries", "1 tbsp dark chocolate chips"],
-            instructions: ["Mix all ingredients together", "Portion into small bags for easy snacking"],
-            nutrition: { protein: 6, carbs: 18, fat: 14, fiber: 3 },
-          },
-        },
-      ],
-    },
-  }); */
 
   const tabs = [
     { id: "meals", label: "Meals" },
