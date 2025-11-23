@@ -1,0 +1,170 @@
+/* TopNavBar.module.css */
+.navBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: var(--bg-light);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Logo Styles */
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  background-color: rgba(92, 107, 204, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chefHat {
+  width: 24px;
+  height: 24px;
+  color: var(--primary);
+  padding: 2px;
+}
+
+.logoText {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.logoAccent {
+  color: var(--text-muted); 
+}
+
+/* Right Section */
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Grocery List Button */
+.groceryListButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.groceryListButton:hover {
+  background-color: var(--bg-dark);
+  border-color: var(--border-muted);
+}
+
+.groceryCount {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Hamburger Menu */
+.menuContainer {
+  position: relative;
+}
+
+.hamburgerButton {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.hamburgerButton:hover {
+  background-color: var(--bg);
+  border-color: var(--border-muted);
+}
+
+.hamburgerLine {
+  width: 18px;
+  height: 2px;
+  background-color: var(--text-muted);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Dropdown Menu */
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 240px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  z-index: 1001;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.menuItem:hover {
+  background-color: var(--bg);
+}
+
+.menuIcon {
+  width: 20px;
+  text-align: center;
+}
+
+.menuDivider {
+  height: 1px;
+  background-color: var(--border);
+  margin: 8px 0;
+}
+
+.userInfo {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.userEmail {
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+/* Click outside to close */
+.menuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}

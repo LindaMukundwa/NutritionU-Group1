@@ -3,6 +3,10 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 /* Navigation Styles */
@@ -10,33 +14,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 0;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0 0 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  margin: 0;
 }
 
 .logo h2 {
   margin: 0;
-  color: #10b981;
+  color: var(--text);
   font-size: 1.5rem;
-}
-
-.nav-links {
-  display: flex;
-  gap: 2rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: #374151;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.nav-links a:hover {
-  color: #10b981;
+  line-height: 1;
 }
 
 .auth-buttons {
@@ -48,7 +41,7 @@
 .sign-in-btn {
   background: none;
   border: none;
-  color: #374151;
+  color: var(--text);
   font-weight: 500;
   cursor: pointer;
   padding: 0.5rem 1rem;
@@ -57,12 +50,19 @@
 }
 
 .sign-in-btn:hover {
-  background-color: #f3f4f6;
+  background-color: var(--bg-dark);
+}
+
+.sign-in-btn:active,
+.sign-in-btn:focus {
+  background-color: var(--secondary);
+  color: var(--bg-light);
+  outline: none;
 }
 
 .get-started-btn {
-  background: #10b981;
-  color: white;
+  background: var(--secondary);
+  color: var(--bg-light);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
@@ -72,22 +72,32 @@
 }
 
 .get-started-btn:hover {
-  background: #059669;
+  background: var(--primary);
+}
+
+.get-started-btn:active,
+.get-started-btn:focus {
+  background: var(--secondary);
+  outline: none;
 }
 
 /* Hero Section Styles */
 .hero-section {
   text-align: center;
-  padding: 4rem 0;
+  padding: 1.5rem 0 2rem 0;
   max-width: 800px;
   margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hero-subtitle {
-  color: #10b981;
+  color: var(--text-muted);
   font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -96,15 +106,15 @@
   font-size: 3.5rem;
   font-weight: 700;
   line-height: 1.1;
-  color: #111827;
-  margin-bottom: 1.5rem;
+  color: var(--text);
+  margin-bottom: 1rem;
 }
 
 .hero-description {
   font-size: 1.25rem;
-  color: #6b7280;
+  color: var(--text-muted);
   line-height: 1.6;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .cta-buttons {
@@ -115,8 +125,8 @@
 }
 
 .primary-btn {
-  background: #10b981;
-  color: white;
+  background: var(--secondary);
+  color: var(--bg-light);
   border: none;
   padding: 1rem 2rem;
   border-radius: 0.5rem;
@@ -127,13 +137,19 @@
 }
 
 .primary-btn:hover {
-  background: #059669;
+  background: var(--primary);
+}
+
+.primary-btn:active,
+.primary-btn:focus {
+  background: var(--secondary);
+  outline: none;
 }
 
 .secondary-btn {
   background: none;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  border: 1px solid var(--border-muted);
+  color: var(--text);
   padding: 1rem 2rem;
   border-radius: 0.5rem;
   font-size: 1.125rem;
@@ -143,14 +159,23 @@
 }
 
 .secondary-btn:hover {
-  border-color: #10b981;
-  color: #10b981;
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+.secondary-btn:active,
+.secondary-btn:focus {
+  background: var(--secondary);
+  color: var(--bg-light);
+  border-color: var(--secondary);
+  outline: none;
 }
 
 .divider {
   height: 1px;
-  background: #e5e7eb;
-  margin: 2rem 0;
+  background: var(--border);
+  margin: 0.75rem 0;
+  flex-shrink: 0;
 }
 
 /* Responsive Design */
@@ -158,12 +183,6 @@
   .navbar {
     flex-direction: column;
     gap: 1rem;
-  }
-  
-  .nav-links {
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
   }
   
   .hero-title {

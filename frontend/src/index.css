@@ -1,11 +1,27 @@
 :root {
+  /* Universal Color Palette - OKLCH */
+  --bg-dark: oklch(0.92 0.025 264);
+  --bg: oklch(0.96 0.025 264);
+  --bg-light: oklch(1 0.025 264);
+  --text: oklch(0.15 0.05 264);
+  --text-muted: oklch(0.4 0.05 264);
+  --highlight: oklch(1 0.05 264);
+  --border: oklch(0.6 0.05 264);
+  --border-muted: oklch(0.7 0.05 264);
+  --primary: oklch(0.55 0.15 264);
+  --secondary: oklch(0.70 0.10 180);
+  --danger: oklch(0.5 0.05 30);
+  --warning: oklch(0.5 0.05 100);
+  --success: oklch(0.5 0.05 160);
+  --info: oklch(0.60 0.15 260);
+
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #fdfbfb;
+  color: var(--text);
+  background-color: var(--bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,11 +31,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--text);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--text-muted);
 }
 
 body {
@@ -37,32 +53,51 @@ h1 {
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--bg-dark);
+  color: var(--text);
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--primary);
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  /*outline: 4px auto -webkit-focus-ring-color; */
+}
+
+/* Dark mode theme */
+[data-theme="dark"] {
+  --bg-dark: oklch(0.15 0.025 264);
+  --bg: oklch(0.20 0.025 264);
+  --bg-light: oklch(0.25 0.025 264);
+  --text: oklch(0.95 0.05 264);
+  --text-muted: oklch(0.70 0.05 264);
+  --highlight: oklch(0.30 0.05 264);
+  --border: oklch(0.40 0.05 264);
+  --border-muted: oklch(0.35 0.05 264);
+  --primary: oklch(0.65 0.15 264);
+  --secondary: oklch(0.60 0.10 180);
+  --danger: oklch(0.60 0.05 30);
+  --warning: oklch(0.60 0.05 100);
+  --success: oklch(0.60 0.05 160);
+  --info: oklch(0.70 0.15 260);
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--text);
+    background-color: var(--bg-light);
   }
   a:hover {
-    color: #747bff;
+    color: var(--info);
   }
   button {
-    background-color: #f9f9f9;
+    background-color: var(--bg);
   }
 }

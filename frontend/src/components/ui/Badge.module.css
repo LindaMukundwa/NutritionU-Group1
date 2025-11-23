@@ -15,59 +15,101 @@
 }
 
 .default {
-  background: #5c6bcc;
-  color: white;
+  background: var(--primary);
+  color: var(--bg-light);
 }
 
 .default:hover {
-  background: #4a5bb8;
+  background: var(--info);
+}
+
+.default:active,
+.default:focus {
+  background: var(--primary);
+  outline: none;
 }
 
 .secondary {
-  background: #f8fafc;
-  color: #555555;
-  border-color: #e2e8f0;
+  background: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
 }
 
 .secondary:hover {
-  background: #f1f5f9;
-  border-color: #6ab3a7;
+  background: var(--info);
+  border-color: var(--info);
+}
+
+.secondary:active,
+.secondary:focus {
+  background: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
+  outline: none;
 }
 
 .outline {
   background: transparent;
-  color: #555555;
-  border-color: #e2e8f0;
+  color: var(--text);
+  border-color: var(--border);
 }
 
 .outline:hover {
-  background: #f8fafc;
-  border-color: #6ab3a7;
+  background: var(--bg);
+  border-color: var(--secondary);
+}
+
+.outline:active,
+.outline:focus {
+  background: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
+  outline: none;
 }
 
 .destructive {
-  background: #ef4444;
-  color: white;
+  background: var(--primary);
+  color: var(--bg-light);
 }
 
 .destructive:hover {
-  background: #dc2626;
+  background: var(--info);
+}
+
+.destructive:active,
+.destructive:focus {
+  background: var(--primary);
+  color: var(--bg-light);
+  outline: none;
 }
 
 .cultural {
-  background: #10b981;
-  color: white;
+  background: var(--primary);
+  color: var(--bg-light);
 }
 
 .cultural:hover {
-  background: #059669;
+  background: var(--info);
+}
+
+.cultural:active,
+.cultural:focus {
+  background: var(--primary);
+  color: var(--bg-light);
+  outline: none;
 }
 
 .goals {
-  background: #5c6bcc;
-  color: white;
+  background: var(--primary);
+  color: var(--bg-light);
 }
 
 .goals:hover {
-  background: #4a5bb8;
+  background: var(--info);
+}
+
+.goals:active,
+.goals:focus {
+  background: var(--primary);
+  outline: none;
 }

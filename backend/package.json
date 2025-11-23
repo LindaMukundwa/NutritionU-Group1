@@ -3,19 +3,21 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-<<<<<<< Updated upstream
-    "test": "echo \"Error: no test specified\" && exit 1"
-=======
-    "start": "npx tsx src/server.ts",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "test": "jest"
->>>>>>> Stashed changes
+    "start": "NODE_OPTIONS='--experimental-specifier-resolution=node' node src/server.ts",
+    "dev": "nodemon server.js",
+    "test": "jest",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google-cloud/aiplatform": "^5.9.0",
+    "@prisma/client": "^6.19.0",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -26,8 +28,17 @@
     "helmet": "^8.1.0",
     "joi": "^18.0.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.18.2",
-    "openai": "^5.22.0",
+    "mongoose": "^8.18.3",
+    "openai": "^6.5.0",
+    "prisma": "^6.19.0",
     "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^24.10.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
   }
 }

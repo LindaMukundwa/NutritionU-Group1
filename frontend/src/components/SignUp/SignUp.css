@@ -1,0 +1,263 @@
+.nutritionU-signup-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.nutritionU-signup-card {
+  background: var(--bg-light);
+  border-radius: 24px;
+  padding: 32px 40px 48px 40px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+  margin: auto;
+}
+
+.nutritionU-logo {
+  width: 180px;
+  height: auto;
+  margin: 0 auto 24px;
+  display: block;
+}
+
+.nutritionU-signup-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.nutritionU-signup-subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.nutritionU-form-group {
+  margin-bottom: 24px;
+}
+
+.nutritionU-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.nutritionU-form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px;
+  background-color: var(--bg-light);
+  color: var(--text);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.nutritionU-form-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.nutritionU-form-input:hover {
+  border-color: var(--border-muted);
+}
+
+.nutritionU-form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: var(--bg-light);
+  box-shadow: 0 0 0 4px rgba(92, 107, 204, 0.1);
+}
+
+.nutritionU-primary-button {
+  width: 100%;
+  background: var(--primary);
+  color: var(--bg-light);
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.2), 0px 8px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nutritionU-primary-button:hover {
+  background: var(--info);
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.25), 0px 12px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nutritionU-primary-button:active,
+.nutritionU-primary-button:focus {
+  background: var(--primary);
+  transform: translateY(0);
+  outline: none;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.2), 0px 8px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nutritionU-secondary-button {
+  width: 100%;
+  background: var(--bg-light);
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.nutritionU-secondary-button:hover {
+  background: var(--primary);
+  color: var(--bg-light);
+  transform: translateY(-1px);
+  box-shadow: 0px 4px 8px rgba(92, 107, 204, 0.2);
+}
+
+.nutritionU-secondary-button:active,
+.nutritionU-secondary-button:focus {
+  background: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
+  transform: translateY(0);
+  outline: none;
+  box-shadow: 0px 2px 4px rgba(92, 107, 204, 0.2);
+}
+
+.nutritionU-divider {
+  text-align: center;
+  margin: 32px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  position: relative;
+}
+
+.nutritionU-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+
+.nutritionU-divider span {
+  background: var(--bg-light);
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.nutritionU-social-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.nutritionU-social-button {
+  flex: 1;
+  padding: 14px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.nutritionU-social-button:hover {
+  border-color: var(--text-muted);
+  background: var(--bg);
+  transform: translateY(-1px);
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nutritionU-social-button:active,
+.nutritionU-social-button:focus {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--bg-light);
+  transform: translateY(0);
+  outline: none;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nutritionU-social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.nutritionU-login-link {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.nutritionU-login-link a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nutritionU-login-link a:hover {
+  text-decoration: underline;
+}
+
+.forgot-password-link {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.nutritionU-form-input:invalid {
+  border-color: var(--border);
+}
+
+.nutritionU-form-input:valid {
+  border-color: var(--border);
+}

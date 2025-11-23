@@ -1,8 +1,8 @@
 /* MAIN CONTAINER & LAYOUT */
 
-/* Main page container - white background */
+/* Main page container - var(--bg-light) background */
 .container {
-  background: #ffffff;       
+  background: var(--bg-light);       
   padding: 0;
   /* Override body's flex centering for natural height */
   align-self: flex-start;
@@ -15,7 +15,7 @@
   max-width: 1400px;        
   margin: 0 auto;          
   padding: 1rem;           
-  background: #ffffff;     
+  background: var(--bg-light);     
 }
 /* HEADER SECTION */
 
@@ -30,13 +30,13 @@
 .title {
   font-size: 1.75rem;      
   font-weight: 700;        
-  color: #555555;          
+  color: var(--text);          
   margin: 0 0 0.5rem 0;    /* Small margin below title */
 }
 
 /* Subtitle text - smaller, slightly transparent */
 .subtitle {
-  color: #555555;          
+  color: var(--text);          
   margin: 0;               
   font-size: 1rem;        
   opacity: 0.8;           
@@ -47,10 +47,10 @@
 /* Progress container - light gray background with border */
 .progressContainer {
   margin-bottom: 1rem;      
-  background: #f8fafc;     
+  background: var(--bg);     
   padding: 0.75rem;           
   border-radius: 8px;      
-  border: 1px solid #e2e8f0; 
+  border: 1px solid var(--border); 
 }
 
 /* Progress labels - step counter and percentage */
@@ -58,20 +58,20 @@
   display: flex;            
   justify-content: space-between; 
   font-size: 0.875rem;     
-  color: #555555;          
+  color: var(--text);          
   margin-bottom: 0.5rem;   
 font-weight: 500;        
 }
 
 /* MAIN CARD & STEP CONTENT */
 
-/* Main content card - white background with shadow */
+/* Main content card - var(--bg-light) background with shadow */
 .cardContent {
   padding: 1.5rem;         
-  background: #ffffff;     
-  border: 1px solid #e2e8f0; 
+  background: var(--bg-light);     
+  border: 1px solid var(--border); 
   border-radius: 12px;     
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15); 
 }
 
 /* Step content area - natural height based on content */
@@ -105,7 +105,7 @@ font-weight: 500;
   width: 100%;              
   height: 8px;              
   border-radius: 4px;       
-  background: #f1f5f9;     
+  background: var(--bg-dark);     
   outline: none;            
   -webkit-appearance: none; 
   appearance: none;         
@@ -118,7 +118,7 @@ font-weight: 500;
   width: 20px;             
   height: 20px;            
   border-radius: 50%;      
-  background: #5c6bcc;     
+  background: var(--primary);     
   cursor: pointer;         
 }
 
@@ -127,7 +127,7 @@ font-weight: 500;
   width: 20px;             
   height: 20px;            
   border-radius: 50%;      
-  background: #5c6bcc;     
+  background: var(--primary);     
   cursor: pointer;         
   border: none;            
 }
@@ -137,14 +137,14 @@ font-weight: 500;
   display: flex;            
   justify-content: space-between; 
   font-size: 0.875rem;     
-  color: #555555;          
+  color: var(--text);          
   margin-top: 0.5rem;      
 }
 
-/* Current value - highlighted in purple */
+/* Current value - highlighted */
 .currentValue {
   font-weight: 600;        
-  color: #5c6bcc;         
+  color: var(--text);         
 }
 
 /* PERSONAL INFORMATION SECTION */
@@ -165,7 +165,7 @@ font-weight: 500;
   font-weight: 500;         
   margin-bottom: 0.75rem;   
   display: block;          
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Unit options container */
@@ -178,18 +178,18 @@ font-weight: 500;
 .unitCard {
   cursor: pointer;          
   transition: all 0.2s ease; 
-  border: 1px solid #e2e8f0; 
+  border: 1px solid var(--border); 
   flex: 1;                  
 }
 
 /* Hover state for unit cards */
 .unitCard:hover {
-  border-color: #5c6bcc;   
+  border-color: var(--primary);   
 }
 
 /* Selected state for unit cards */
 .unitCard.selected {
-  border-color: #5c6bcc;   
+  border-color: var(--primary);   
   background: rgba(92, 107, 204, 0.05); 
 }
 
@@ -203,12 +203,12 @@ font-weight: 500;
   display: flex;           
   align-items: center;   
   gap: 0.75rem;           
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Unit option text */
 .unitOption span {
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Row of input fields (age, height, weight) */
@@ -233,12 +233,12 @@ font-weight: 500;
 .numberInput {
   width: 100%;             
   padding: 0.75rem;        
-  border: 1px solid #e2e8f0; 
+  border: 1px solid var(--border); 
   border-radius: 8px;       
-  background: white;        
+  background: var(--bg-light);        
   font-size: 1rem;          
   margin-top: 0.5rem;       
-  color: #555555;           
+  color: var(--text);           
   text-align: center;       
   box-sizing: border-box;   
   max-width: 100%;         
@@ -246,7 +246,7 @@ font-weight: 500;
 
 /* Focus state for number inputs */
 .numberInput:focus {
-  outline: 2px solid #5c6bcc; 
+  outline: 2px solid var(--primary); 
   outline-offset: 2px;      
 }
 
@@ -261,7 +261,7 @@ font-weight: 500;
   font-weight: 500;         
   margin-bottom: 0.75rem;   
   display: block;          
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Activity level options container */
@@ -275,17 +275,17 @@ font-weight: 500;
 .activityLevelCard {
   cursor: pointer;          
   transition: all 0.2s ease; 
-  border: 1px solid #e2e8f0; 
+  border: 1px solid var(--border); 
 }
 
 /* Hover state for activity level cards */
 .activityLevelCard:hover {
-  border-color: #5c6bcc;   
+  border-color: var(--primary);   
 }
 
 /* Selected state for activity level cards */
 .activityLevelCard.selected {
-  border-color: #5c6bcc;   
+  border-color: var(--primary);   
   background: rgba(92, 107, 204, 0.05); 
 }
 
@@ -299,12 +299,12 @@ font-weight: 500;
   display: flex;           
   align-items: center;   
   gap: 0.75rem;           
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Activity level option text */
 .activityLevelOption span {
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* COOKING EXPERIENCE SECTION */
@@ -318,23 +318,23 @@ font-weight: 500;
 .select {
   width: 100%;              
   padding: 0.75rem;         
-  border: 1px solid #e2e8f0; 
+  border: 1px solid var(--border); 
   border-radius: 8px;       
-  background: white;        
+  background: var(--bg-light);        
   font-size: 1rem;          
   margin-top: 0.5rem;       
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Select options text color */
 .select option {
-  color: #555555;          
-  background: white;        
+  color: var(--text);          
+  background: var(--bg-light);        
 }
 
 /* Focus state for select dropdown */
 .select:focus {
-  outline: 2px solid #5c6bcc; 
+  outline: 2px solid var(--primary); 
   outline-offset: 2px;      
 }
 
@@ -349,7 +349,7 @@ font-weight: 500;
   font-weight: 500;         
   margin-bottom: 0.75rem;   
   display: block;          
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Grid of meal prep options */
@@ -363,17 +363,17 @@ font-weight: 500;
 .mealPrepCard {
   cursor: pointer;          
   transition: all 0.2s ease; 
-  border: 1px solid #e2e8f0; 
+  border: 1px solid var(--border); 
 }
 
 /* Hover state for meal prep cards */
 .mealPrepCard:hover {
-  border-color: #5c6bcc;   
+  border-color: var(--primary);   
 }
 
 /* Selected state for meal prep cards */
 .mealPrepCard.selected {
-  border-color: #5c6bcc;   
+  border-color: var(--primary);   
   background: rgba(92, 107, 204, 0.05); 
 }
 
@@ -387,12 +387,12 @@ font-weight: 500;
   display: flex;           
   align-items: center;   
   gap: 0.75rem;           
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Meal prep option text */
 .mealPrepOption span {
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Custom radio button */
@@ -400,14 +400,14 @@ font-weight: 500;
   width: 16px;            
   height: 16px;            
   border-radius: 50%;      
-  border: 2px solid #e2e8f0; 
+  border: 2px solid var(--border); 
   transition: all 0.2s ease; 
 }
 
 /* Selected radio button */
 .radioSelected {
-  border-color: #5c6bcc;   
-  background: #5c6bcc;     
+  border-color: var(--primary);   
+  background: var(--primary);     
 }
 
 /* DIETARY PREFERENCES SECTION */
@@ -428,7 +428,7 @@ font-weight: 500;
   font-weight: 500;         
   margin-bottom: 0.75rem;   
   display: block;          
-  color: #555555 !important; 
+  color: var(--text) !important; 
 }
 
 /* Container for dietary badges */
@@ -447,9 +447,10 @@ font-weight: 500;
 
 /* Completion card - final step message */
 .completionCard {
-  background: #f8fafc;     
-  border: 2px dashed #e2e8f0; 
-  margin-top: 1rem;         
+  background: var(--bg);     
+  border: 2px dashed var(--border); 
+  margin-top: 1rem;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Content inside completion card */
@@ -463,13 +464,13 @@ font-weight: 500;
   font-size: 1.125rem;     
   font-weight: 600;        
   margin: 0 0 0.5rem 0;    
-  color: #555555;          
+  color: var(--text);          
 }
 
 /* Completion description text */
 .completionText {
   font-size: 0.875rem;     
-  color: #555555;          
+  color: var(--text);          
   margin: 0;               
   opacity: 0.8;            
 }
@@ -486,26 +487,236 @@ font-weight: 500;
 /* Back button - secondary style */
 .backButton {
   background: transparent !important;  
-  color: #555555 !important;          
-  border: 1px solid #e2e8f0 !important; 
+  color: var(--text) !important;          
+  border: 1px solid var(--border) !important; 
 }
 
 /* Back button hover state */
 .backButton:hover {
-  background: #f8fafc !important;     
-  border-color: #6ab3a7 !important;   
-  color: #555555 !important;         
+  background: var(--bg) !important;     
+  border-color: var(--secondary) !important;   
+  color: var(--text) !important;         
 }
 
 /* Next button - primary style */
 .nextButton {
-  background: #5c6bcc !important;    
-  color: white !important;            
+  background: var(--primary) !important;    
+  color: var(--bg-light) !important;            
   border: none !important;            
 }
 
 /* Next button hover state */
 .nextButton:hover {
-  background: #4a5bb8 !important;    
-  color: white !important;            
+  background: var(--info) !important;    
+  color: var(--bg-light) !important;            
+}
+
+/* MACROS SECTION */
+
+/* Macros section container */
+.macrosSection {
+  margin-top: 0.5rem;
+}
+
+/* Grid layout for macro cards */
+.macrosGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Individual macro card */
+.macroCard {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+/* Macro card hover state */
+.macroCard:hover {
+  border-color: var(--primary);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Macro label */
+.macroLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Macro input group - contains buttons and input */
+.macroInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 200px;
+}
+
+/* Macro increment/decrement buttons */
+.macroButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-light);
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Macro button hover state */
+.macroButton:hover {
+  background: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
+}
+
+/* Macro button active state */
+.macroButton:active {
+  transform: scale(0.95);
+}
+
+/* Macro input field */
+.macroInput {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-light);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Macro input focus state */
+.macroInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Remove spinner arrows from number input */
+.macroInput::-webkit-outer-spin-button,
+.macroInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.macroInput[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Macro unit label */
+.macroUnit {
+  font-size: 0.875rem;
+  color: var(--text);
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: white;
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #f3f4f6;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  color: #1f2937;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.errorSection {
+  padding: 20px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #dc2626;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.errorActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.retryButton,
+.manualButton {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.retryButton {
+  background-color: #2563eb;
+  color: white;
+}
+
+.manualButton {
+  background-color: #6b7280;
+  color: white;
+}
+
+.errorHelp {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 14px;
 }

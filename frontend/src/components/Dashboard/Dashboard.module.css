@@ -1,8 +1,6 @@
 /* General Layout and Reset */
 .Dashboard {
-  padding: 20px;
   font-family: Arial, sans-serif;
-  /* Use a common font */
 }
 
 /* Header Styling */
@@ -11,9 +9,8 @@
 }
 
 .block {
-  /* Styling for the small 'v0 block' box */
-  background-color: #333;
-  color: white;
+  background-color: var(--text);
+  color: var(--bg-light);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -24,18 +21,19 @@
 
 .greeting {
   font-size: 2rem;
+  padding: 10px;  /*better spacing*/
   font-weight: 700;
-  color: #333;
-  margin-top: 5px;
+  color: var(--text);
+  margin-top: 8px;
   margin-bottom: 5px;
-  /* Use flex to align 'v0 block' and 'Good morning, Jessica!' */
   display: flex;
   align-items: center;
 }
 
 .prompt {
   font-size: 1rem;
-  color: #666;
+  padding: 10px;  /*better spacing*/
+  color: var(--text-muted);
   margin-top: 0;
   text-align: left;
 }
@@ -44,28 +42,24 @@
 .summaryGrid {
   display: flex;
   gap: 20px;
-  /* Space between cards */
   justify-content: flex-start;
 }
 
 /* Summary Card Styling */
 .summaryCard {
   flex: 1;
-  /* Makes all cards take up equal width */
   min-width: 280px;
-  /* Ensures they don't get too small */
-  background-color: white;
+  background-color: var(--bg-light);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  /* Soft, subtle shadow */
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .cardHeader {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 10px;
@@ -81,11 +75,10 @@
 .cardValue {
   font-size: 2rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text);
 }
 
 .iconBackground {
-  /* Styling for the small, light purple/green/grey circle with an icon */
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -96,51 +89,40 @@
   font-weight: 600;
 }
 
-/* Custom colors for icons based on the image (approximations) */
 .summaryCard:nth-child(1) .iconBackground {
-  /* Weekly Budget */
-  background-color: #e0e0f0;
-  /* Light purple */
-  color: #5d5dff;
+  background-color: var(--bg-dark);
+  color: var(--text);
 }
 
 .summaryCard:nth-child(2) .iconBackground {
-  /* Meals Planned */
-  background-color: #e0f0e0;
-  /* Light green */
-  color: #5d8e5d;
+  background-color: var(--bg-dark);
+  color: var(--text);
 }
 
 .summaryCard:nth-child(3) .iconBackground {
-  /* Avg. Calories */
-  background-color: #f0f0f0;
-  /* Light grey */
-  color: #666;
+  background-color: var(--bg-dark);
+  color: var(--text-muted);
 }
 
 .cardSubtext {
   font-size: 0.85rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 /* Progress Bar Styling */
 .progressBarContainer {
   height: 8px;
-  background-color: #e0e0e0;
-  /* Light grey track */
+  background-color: var(--bg-dark);
   border-radius: 4px;
   overflow: hidden;
-  /* Ensures the fill stays within bounds */
   margin-top: 15px;
-  /* Add some space above the bar */
 }
 
 .progressBarFill {
   height: 100%;
   border-radius: 4px;
-  background-color: #5d5dff;
+  background-color: var(--primary);
   transition: width 0.3s ease-in-out;
-  /* The width is set dynamically via the style prop in the component */
 }
 
 /* --- Dashboard Content Switcher --- */
@@ -152,7 +134,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0px;
-  background-color: #f1f5f9;
+  background-color: var(--bg-dark);
   padding: 4px;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -163,7 +145,7 @@
   border-radius: 6px;
   font-weight: 500;
   font-size: 0.95rem;
-  color: #6b7280;
+  color: var(--text-muted);
   background: transparent;
   border: none;
   outline: none;
@@ -174,27 +156,875 @@
 }
 
 .tabButton:hover {
-  color: #555555;
-  background-color: rgba(255, 255, 255, 0.5);
+  color: var(--text);
+  background-color: var(--bg);
 }
 
 .tabButton.active {
-  background-color: #ffffff;
-  color: #555555;
+  background-color: var(--bg-light);
+  color: var(--text);
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   font-weight: 600;
 }
 
-/* Remove any focus styles completely for these tabs */
 .tabButton:focus,
 .tabButton:focus-visible {
   outline: none;
 }
 
 .tabContent {
-  background: #ffffff;
+  background: var(--bg-light);
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
   min-height: 400px;
+}
+
+/* Added filter chips styling */
+.filterChipsContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background-color: var(--bg-light);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.filterChip:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+.filterChipActive {
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
+}
+
+.filterChipActive:hover {
+  background-color: var(--info);
+  border-color: var(--info);
+}
+
+.filterChip:focus,
+.filterChip:focus-visible {
+  outline: none;
+}
+
+/* Horizontal Scroll Container */
+.mealScrollContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 16px 0;
+  max-width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .mealScrollContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mealScrollContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Search Bar Container */
+.searchBarContainer {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* Added filter dropdown styles */
+.filterDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-muted) var(--bg-dark);
+}
+
+.filterDropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filterDropdown::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+  border-radius: 3px;
+}
+
+.filterDropdown::-webkit-scrollbar-thumb {
+  background: var(--border-muted);
+  border-radius: 3px;
+}
+
+.filterDropdown::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.filterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.filterTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.clearButton:hover {
+  background-color: var(--bg);
+}
+
+.filterSection {
+  margin-bottom: 20px;
+}
+
+.filterSection:last-child {
+  margin-bottom: 0;
+}
+
+.filterLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.filterOptions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: left;
+}
+
+.filterOption {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background-color: var(--bg-light);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.filterOption:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+.filterOptionActive {
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border-color: var(--primary);
+}
+
+.filterOptionActive:hover {
+  background-color: var(--info);
+  border-color: var(--info);
+}
+
+.slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #e5e7eb 0%, #5c6bcc 100%);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 12px 0;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #5c6bcc;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #5c6bcc;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.filterCheckboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid var(--border-muted);
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.checkbox:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ===== PLANNER STYLES ===== */
+.plannerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.dayNavigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--bg);
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dayButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.dayButton {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background-color: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  min-width: 48px;
+  text-align: center;
+}
+
+.dayButton:hover {
+  background-color: var(--border);
+  color: var(--text);
+}
+
+.dayButtonActive {
+  background-color: var(--primary);
+  color: var(--bg-light);
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(92, 107, 204, 0.2);
+}
+
+.navButton {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.navButton:hover {
+  background-color: var(--bg);
+  border-color: var(--border-muted);
+  color: var(--text);
+}
+
+/* Date Navigation Component Styles */
+.dateNavigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--bg);
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dateDisplay {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 280px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.dateDisplay:hover {
+  border-color: var(--primary);
+  background-color: var(--bg);
+}
+
+.dateText {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.datePicker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.datePicker::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.plannerContent {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mealSection {
+  background-color: var(--bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mealSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.mealSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.mealColorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.addMealButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.addMealButton:hover {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--bg-light);
+}
+
+.plusIcon {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.mealCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.mealCard {
+  background-color: var(--bg-light);
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mealCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.35), 0px 16px 16px rgba(0, 0, 0, 0.2);
+}
+
+.mealCardContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mealCardMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.mealCardTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.mealCardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.mealCardMeta span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.deleteMealButton {
+  background: none;
+  border: none;
+  font-size: 1.125rem;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.deleteMealButton:hover {
+  opacity: 1;
+}
+
+.emptyMealCard {
+  background-color: var(--bg-light);
+  border: 2px dashed var(--border-muted);
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+}
+
+.emptyMealText {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.plannerFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: var(--bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-top: 1rem;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dailyTotals {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+
+.totalItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.totalItem strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.primaryButton {
+  padding: 10px 20px;
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.primaryButton:hover {
+  background-color: var(--info);
+  box-shadow: 0 4px 12px rgba(92, 107, 204, 0.3);
+}
+
+.secondaryButton {
+  padding: 10px 20px;
+  background-color: var(--bg-light);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.secondaryButton:hover {
+  background-color: var(--bg);
+  border-color: var(--info);
+  color: var(--info);
+}
+
+/* Nutrition Tracker Styles */
+.nutritionTracker {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.nutritionItem {
+  background-color: var(--bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nutritionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.nutritionLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.nutritionIcon {
+  font-size: 1.25rem;
+}
+
+.nutritionValue {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background-color: var(--bg-light);
+  border-radius: 16px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem 2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-light);
+  z-index: 10;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px 0;
+}
+
+.modalMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.modalCloseButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.modalCloseButton:hover {
+  background-color: var(--bg-dark);
+  color: var(--text-muted);
+}
+
+.modalBody {
+  padding: 2rem;
+}
+
+.recipeSection {
+  margin-bottom: 2rem;
+}
+
+.recipeSection:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 1rem 0;
+}
+
+.ingredientsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ingredientItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 0.9375rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.bullet {
+  color: var(--text-muted);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.instructionsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.instructionItem {
+  display: flex;
+  gap: 12px;
+  font-size: 0.9375rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.stepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.modalActions .primaryButton,
+.modalActions .secondaryButton {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .plannerHeader {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .dayNavigation {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .mealCards {
+    grid-template-columns: 1fr;
+  }
+
+  .plannerFooter {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .dailyTotals {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
 }

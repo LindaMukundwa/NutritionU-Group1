@@ -1,78 +1,99 @@
+import { Recipe } from "./recipe";
+
 /**
  * Definining shared user types and interfaces to be used thhroughut application
  */
-export interface DietaryRestrictions {
-  vegetarian: boolean;
-  vegan: boolean;
-  glutenFree: boolean;
-  dairyFree: boolean;
-  nutFree: boolean;
-  //kosher: boolean;
-  halal: boolean;
-  custom: string[];
-}
-
-export interface NutritionGoals {
-  dailyCalories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
-  sodium: number;
-}
-
-export interface UserPreferences {
-  cuisineTypes: string[];
-  cookingTime: 'quick' | 'moderate' | 'lengthy';
-  skillLevel: 'beginner' | 'intermediate' | 'advanced';
-  budgetRange: {
-    min: number;
-    max: number;
-  };
-  servingSize: number;
-}
-/*
-// Notification settings for user defined but commented out till needed in future.
-export interface NotificationSettings {
-  mealReminders: boolean;
-  groceryReminders: boolean;
-  hydrationReminders: boolean;
-  weeklyPlanReminders: boolean;
-  preferredTime: string;
-}
-  */
-
 export interface User {
+  // Generally static
   _id: string;
   firebaseUid: string;
   email: string;
   displayName: string;
   photoURL?: string;
+
+  // Gathered from onboarding
   age?: number;
   height?: number;
   weight?: number;
   units: 'imperial' | 'metric';
+  bmi?: number;
   activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active';
-  dietaryRestrictions: DietaryRestrictions;
+  medicalRestrictions: MedicalRestrictions;
   nutritionGoals: NutritionGoals;
-  preferences: UserPreferences;
-  //notificationSettings: NotificationSettings;
-  //timezone: string;
+  lifestyleDiets: LifestyleDiets;
+  culturalDiets: CulturalDiets;
+  budget: Budget;
+
+  // Update on action
   onboardingCompleted: boolean;
   lastLogin: Date;
   planGenerationCount: number;
-  mealHistory: MealHistoryEntry[];
-  favoriteRecipes: string[];
-  bmr?: number;
-  recommendedCalories?: number;
+  favoriteRecipes?: string[]; // string of recipe ids
+  mealPlans?: Recipe[];
   createdAt: Date;
   updatedAt: Date;
+
+  // Meals
+  recipe?: string[]; // string of recipe ids
+  // free-form onboarding/profile data
+  profile?: any;
 }
 
-export interface MealHistoryEntry {
-  mealId: string;
-  rating: number;
-  cookedDate: Date;
-  notes?: string;
+export interface MedicalRestrictions {
+  gluten: boolean;
+  dairy: boolean;
+  nuts: boolean;
+  peanuts: boolean;
+  soy: boolean;
+  eggs: boolean;
+  shellfish: boolean;
+  wheat: boolean;
+  sesame: boolean;
+  corn: boolean;
+  sulfites: boolean;
+  fodmap: boolean;
+  histamine: boolean;
+  lowSodium: boolean;
+  lowSugar: boolean;
+  none: boolean;
+  description: "Medical and health dietary restrictions";
+}
+
+export interface LifestyleDiets {
+  vegeterian: boolean;
+  pescetarian: boolean;
+  flexiterian: boolean;
+  mediterranean: boolean;
+  paleo: boolean;
+  keto: boolean;
+  whole30: boolean;
+  none: boolean;
+  description: "Lifestyle and ethical dietary choices";
+}
+
+export interface CulturalDiets {
+  halal: boolean;
+  kosher: boolean;
+  jain: boolean;
+  hindu: boolean;
+  buddhist: boolean;
+  none: boolean;
+  description: "Cultural and religious dietary preferences";
+}
+
+export interface Budget {
+  minimum?: number;
+  maximum?: number;
+  step: 25; // Increment
+  default: 100; // Value if budget is not set
+  description: "Weekly food budget in dollars";
+}
+
+export interface NutritionGoals {
+  goals?: "Save Money" | "Eat Healthier" | "Save Time" | "Learn to Cook" | "Lose Weight" | "Gain Muscle" | "None";
+  calories?: number;
+  protein?: number; // In grams
+  carbs?: number; // In grams
+  fats?: number; // In grams
+  description: "User nutrition and lifestyle goals";
 }

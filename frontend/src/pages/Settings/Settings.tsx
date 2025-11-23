@@ -137,20 +137,11 @@ export default function Settings() {
 
   // Load saved preferences on mount
   useEffect(() => {
-    if (user) {
-      // Try to load from user profile first (backend)
-      const profileData = (user as any)?.profile || {};
-      if (profileData.emailFrequency && ['never', 'daily', 'weekly', 'monthly'].includes(profileData.emailFrequency)) {
-        setEmailFrequency(profileData.emailFrequency as 'never' | 'daily' | 'weekly' | 'monthly');
-      } else {
-        // Fallback to localStorage
-        const savedEmailFrequency = localStorage.getItem('emailFrequency');
-        if (savedEmailFrequency && ['never', 'daily', 'weekly', 'monthly'].includes(savedEmailFrequency)) {
-          setEmailFrequency(savedEmailFrequency as 'never' | 'daily' | 'weekly' | 'monthly');
-        }
-      }
+    const savedEmailFrequency = localStorage.getItem('emailFrequency');
+    if (savedEmailFrequency && ['never', 'daily', 'weekly', 'monthly'].includes(savedEmailFrequency)) {
+      setEmailFrequency(savedEmailFrequency as 'never' | 'daily' | 'weekly' | 'monthly');
     }
-  }, [user]);
+  }, []);
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme);
@@ -196,50 +187,14 @@ export default function Settings() {
     }));
   };
 
-  const handleSave = async () => {
-    const firebaseUser = auth.currentUser;
-    if (!firebaseUser) {
-      alert('You must be signed in to save settings.');
-      return;
-    }
-
-    try {
-      // Save email frequency to backend
-      const idToken = await firebaseUser.getIdToken();
-      const API_BASE = (import.meta.env.VITE_API_BASE as string) || 'http://localhost:3001';
-
-      const resp = await fetch(`${API_BASE}/api/users/${firebaseUser.uid}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({
-          emailFrequency,
-        }),
-      });
-
-      if (!resp.ok) {
-        throw new Error('Failed to save email frequency to server');
-      }
-
-      // Also save to localStorage as backup
-      localStorage.setItem('emailFrequency', emailFrequency);
-      localStorage.setItem('theme', theme);
-
-      // Refresh user data to get updated profile
-      if (refreshUser) {
-        await refreshUser();
-      }
-
-      alert('Settings saved successfully!');
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      // Fallback to localStorage only
-      localStorage.setItem('emailFrequency', emailFrequency);
-      localStorage.setItem('theme', theme);
-      alert('Settings saved locally. Could not connect to server.');
-    }
+  const handleSave = () => {
+    // Save all preferences to localStorage
+    localStorage.setItem('emailFrequency', emailFrequency);
+    localStorage.setItem('theme', theme);
+    
+    console.log('Settings saved:', { emailFrequency, theme });
+    // Show success message or navigate back
+    alert('Settings saved successfully!');
   };
 
   const handleProfileSave = async (e: React.FormEvent) => {
