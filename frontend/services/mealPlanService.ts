@@ -51,7 +51,7 @@ class MealPlanService {
       throw new Error('Failed to save meal plan');
     }
 
-    const result = await response.json();
+    const result = await response.json() as MealPlan;
     console.log('[mealPlanService] ✅ Save successful:', result);
     return result;
   }
@@ -66,7 +66,7 @@ class MealPlanService {
       throw new Error('Failed to fetch meal plans');
     }
 
-    return response.json();
+    return response.json() as Promise<MealPlan[]>;
   }
 
   /**
@@ -91,7 +91,7 @@ class MealPlanService {
       throw new Error('Failed to fetch meal plans');
     }
 
-    const result = await response.json();
+    const result = await response.json() as MealPlan[];
     console.log('[mealPlanService] ✅ Load successful:', result);
     return result;
   }
@@ -107,7 +107,7 @@ class MealPlanService {
       throw new Error('Failed to fetch current meal plan');
     }
 
-    return response.json();
+    return response.json() as Promise<MealPlan>;
   }
 
   /**
@@ -120,7 +120,7 @@ class MealPlanService {
       throw new Error('Failed to fetch meal plan');
     }
 
-    return response.json();
+    return response.json() as Promise<MealPlan>;
   }
 
   /**
@@ -142,7 +142,7 @@ class MealPlanService {
       throw new Error('Failed to update meal plan');
     }
 
-    return response.json();
+    return response.json() as Promise<MealPlan>;
   }
 
   /**
@@ -175,7 +175,7 @@ class MealPlanService {
       throw new Error('Failed to add meal plan item');
     }
 
-    return response.json();
+    return response.json() as Promise<MealPlanItem>;
   }
 
   /**
