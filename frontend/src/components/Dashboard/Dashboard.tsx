@@ -733,72 +733,12 @@ function MealContent({
         <AddToPlanModal
           isOpen={showAddToPlanModal}
           onClose={() => setShowAddToPlanModal(false)}
-          onAddToPlan={async (dateString, mealType) => {
+          onAddToPlan={(dateString, mealType) => {
             console.log('[Dashboard] Adding meal from modal:', mealToAdd);
-            console.log('[Dashboard] Meal ID:', mealToAdd.id);
-            
-            let recipeId: number;
-            
-            // Check if this is a FatSecret recipe (needs to be saved to DB first)
-            if (typeof mealToAdd.id === 'string' && mealToAdd.id.startsWith('fatsecret_')) {
-              console.log('[Dashboard] FatSecret recipe detected, saving to database first...');
-              
-              try {
-                const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
-                
-                const recipeData = {
-                  externalId: mealToAdd.id, // Store fatsecret_<id> to prevent duplicates
-                  title: mealToAdd.name || mealToAdd.title,
-                  description: mealToAdd.description || `Delicious ${mealToAdd.name || mealToAdd.title}`,
-                  imageUrl: (mealToAdd as any).imageUrl,
-                  mealType: (mealToAdd as any).category || 'dinner',
-                  totalTime: parseInt(mealToAdd.time?.toString().replace(' min', '')) || 30,
-                  estimatedCostPerServing: parseFloat((mealToAdd.cost || mealToAdd.price || '$5').replace('$', '')) || 5,
-                  nutritionInfo: {
-                    calories: mealToAdd.calories || 0,
-                    protein: mealToAdd.recipe?.nutrition?.protein || 0,
-                    carbs: mealToAdd.recipe?.nutrition?.carbs || 0,
-                    fat: mealToAdd.recipe?.nutrition?.fat || 0,
-                  },
-                  ingredients: mealToAdd.recipe?.ingredients?.map((ing: string) => ({
-                    name: ing,
-                    amount: 1,
-                    unit: { type: 'metric', value: 'serving' },
-                  })) || [],
-                  instructions: mealToAdd.recipe?.instructions?.map((inst: string, idx: number) => ({
-                    stepNumber: idx + 1,
-                    instruction: inst,
-                    equipment: [],
-                  })) || [],
-                  dietaryTags: (mealToAdd as any).tags || [],
-                };
-
-                const response = await fetch(`${API_BASE}/api/recipes`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(recipeData),
-                });
-
-                if (!response.ok) {
-                  throw new Error('Failed to save recipe to database');
-                }
-
-                const savedRecipe = await response.json();
-                recipeId = savedRecipe.id;
-                console.log('[Dashboard] ✅ Recipe saved to database with ID:', recipeId);
-              } catch (err) {
-                console.error('[Dashboard] ❌ Failed to save recipe:', err);
-                alert('Failed to save recipe. Please try again.');
-                return;
-              }
-            } else {
-              // Already a database ID
-              recipeId = typeof mealToAdd.id === 'string' ? parseInt(mealToAdd.id) : mealToAdd.id;
-              console.log('[Dashboard] Using existing database ID:', recipeId);
-            }
+            console.log('[Dashboard] Meal database ID:', mealToAdd.id);
             
             const plannerMeal: Meal = {
-              recipeId,
+              recipeId: typeof mealToAdd.id === 'string' ? parseInt(mealToAdd.id) : mealToAdd.id,
               name: mealToAdd.name || mealToAdd.title,
               calories: mealToAdd.calories,
               time: typeof mealToAdd.time === 'string' ? mealToAdd.time : `${mealToAdd.time} min`,
@@ -1145,20 +1085,6 @@ function PlannerContent({
       dates.push(getDateString(date))
     }
     return dates
-  }
-
-  const weekDates = generateWeekDates()
-
-  const goToPreviousDay = () => {
-    const currentDate = new Date(selectedDay + 'T00:00:00')
-    currentDate.setDate(currentDate.getDate() - 1)
-    setSelectedDay(getDateString(currentDate))
-  }
-
-  const goToNextDay = () => {
-    const currentDate = new Date(selectedDay + 'T00:00:00')
-    currentDate.setDate(currentDate.getDate() + 1)
-    setSelectedDay(getDateString(currentDate))
   }
 
   const calculateDailyTotals = () => {
