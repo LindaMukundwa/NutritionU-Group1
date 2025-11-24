@@ -340,3 +340,109 @@ export const generateInstructionsAndIngredients = async (req: Request, res: Resp
     res.status(500).json({ error: 'Failed to generate recipe' });
   }
 };
+
+export const generateIngredientPrices = async (req: Request, res: Response) => {
+  try {
+    const { query } = req.body;
+    console.log(query);
+
+    // Build the prompt for OpenAI
+    const prompt = `
+        Estimate the cost of specified food ingredients in the user's location and provide the sources used.  
+        Given an input JSON with "ingredients" (a list of food items as strings or a dictionary of items) and "location" (a string), for each ingredient, estimate its local cost using online sources relevant to the specified location. For each ingredient, list the estimated unit price, the total estimated cost (for all ingredients), and indicate the internet sources where price information was found. Output the results as a structured JSON.
+
+        - Carefully review the provided ingredients and location found her ${JSON.stringify(query)}
+        - For each ingredient, search for price information from reputable online sources (such as grocery chains, marketplaces, or price aggregators) that serve the given location.
+        - Clearly separate out your reasoning process (e.g., how you found the prices; what assumptions you made) from the final JSON output.  
+        - Only include sources you actually used, providing URLs.
+        - If you cannot find a price for any ingredient, indicate this explicitly in the output for that item with "price": null and provide a brief note in the "notes" field.
+        - Be accurate and clear; total the cost for all items where prices are known.  
+        - Reason step by step internally before producing the final output.
+
+        **Output Format:**  
+        - Respond with a single JSON object containing:
+          - "ingredients_costs": a list with entries for each ingredient:
+              - "name": ingredient name (string)
+              - "price": estimated price per common unit/currency (float or null if not found)
+              - "unit": unit for the price (string)
+              - "source": a list of nearby stores
+              - "notes": explanation or comment if applicable (string)
+          - "total_cost": sum of all known ingredient prices (float, same currency as above)
+          - "location": user-provided location (string)
+          - "reasoning": a description of the search strategy, sources used, and methods/assumptions
+        - Output ONLY the JSON described above, nothing else. Do not use code blocks.
+
+        ---
+
+        ### Example Input
+        {
+          "ingredients": ["milk", "eggs", "cheddar cheese"],
+          "location": "Toronto, Canada"
+        }
+
+        ### Example Output
+        {
+          "ingredients_costs": [
+            {
+              "name": "milk",
+              "price": 2.99,
+              "unit": "1 L",
+              "source": "https://www.loblaws.ca/milk-1L",
+              "notes": ""
+            },
+            {
+              "name": "eggs",
+              "price": 3.49,
+              "unit": "12 count",
+              "source": "https://www.metro.ca/eggs-dozen",
+              "notes": ""
+            },
+            {
+              "name": "cheddar cheese",
+              "price": null,
+              "unit": "",
+              "source": [],
+              "notes": "Cheddar cheese pricing was not listed online for this location."
+            }
+          ],
+          "total_cost": 6.48,
+          "location": "Toronto, Canada",
+          "reasoning": "Looked up current prices for each ingredient on major grocery store sites (Loblaws and Metro) serving Toronto, Canada. Used the price for the smallest standard unit; if unavailable, marked as null."
+        }
+
+        _(For real examples, the "ingredients" list may be longer, and links/units/prices should be updated according to web findings. Most notes will be blank unless special circumstances arise.)_
+
+        ---
+
+        **Important:**  
+        - Output must be a single JSON object (see above structure), with clear reasoning included as a field.  
+        - Always report accurate source URLs.  
+        - Mark not-found ingredients with null prices and explain in "notes".
+        - Reason step by step before providing the answer.
+        - Remember: objective is to estimate ingredient costs, total, and sources, outputting in the specified JSON structure.
+      `;
+
+    // Query OpenAI
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional internet surfer tasked to search the internet for the prices of food ingredients."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    });
+
+    const responseMessage = completion.choices[0].message?.content;
+    const recipe = JSON.parse(responseMessage || '{}');
+
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error('OpenAI API error:', error);
+    res.status(500).json({ error: 'Failed to generate recipe' });
+  }
+};

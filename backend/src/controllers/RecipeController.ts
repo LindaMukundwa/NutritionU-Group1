@@ -105,6 +105,78 @@ import Recipe from '../models/RecipeModel';
 import type { Request, Response } from 'express';
 import fatSecretService from '../services/fatSecretService.ts';
 import Recipe from '../models/RecipeModel.ts';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+/**
+ * Create a new recipe in the database
+ */
+export const createRecipe = async (req: Request, res: Response) => {
+  try {
+    const {
+      title,
+      description,
+      imageUrl,
+      mealType,
+      totalTime,
+      estimatedCostPerServing,
+      nutritionInfo,
+      ingredients,
+      instructions,
+      dietaryTags = [],
+      externalId,
+    } = req.body;
+
+    // Validate required fields
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    // Check if externalId already exists (prevent duplicates from FatSecret)
+    if (externalId) {
+      const existing = await prisma.recipe.findUnique({
+        where: { externalId },
+      });
+      
+      if (existing) {
+        console.log('[createRecipe] Recipe with externalId already exists:', externalId);
+        return res.json({
+          success: true,
+          id: existing.id,
+          recipe: existing,
+        });
+      }
+    }
+
+    const recipe = await prisma.recipe.create({
+      data: {
+        title,
+        description,
+        imageUrl,
+        mealType,
+        totalTime,
+        estimatedCostPerServing,
+        nutritionInfo: nutritionInfo || {},
+        ingredients: ingredients || [],
+        instructions: instructions || [],
+        dietaryTags,
+        externalId,
+      },
+    });
+
+    console.log('[createRecipe] ✅ Recipe created with ID:', recipe.id);
+
+    res.status(201).json({
+      success: true,
+      id: recipe.id,
+      recipe,
+    });
+  } catch (error) {
+    console.error('[createRecipe] Error:', error);
+    res.status(500).json({ error: 'Failed to create recipe' });
+  }
+};
 
 /**
  * Search recipes from FatSecret API

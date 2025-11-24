@@ -1,3 +1,4 @@
+import React from "react"
 import styles from "../Dashboard.module.css"
 
 interface Meal {
