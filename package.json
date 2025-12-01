@@ -22,6 +22,7 @@
   "homepage": "https://github.com/LindaMukundwa/NutritionU-Group1#readme",
   "devDependencies": {
     "create-react-component-folder": "^0.3.7",
-    "react-router-dom": "^7.9.3"
+    "react-router-dom": "^7.9.3",
+    "typescript": "5.9.3"
   }
 }

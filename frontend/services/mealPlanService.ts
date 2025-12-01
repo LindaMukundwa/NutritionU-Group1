@@ -36,6 +36,7 @@ class MealPlanService {
     
     const url = `${API_BASE}/api/users/${userId}/meal-plans`;
     console.log('[mealPlanService] Request URL:', url);
+    console.log(items);
     
     const response = await fetch(url, {
       method: 'POST',

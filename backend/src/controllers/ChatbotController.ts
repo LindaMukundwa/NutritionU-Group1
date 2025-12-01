@@ -24,6 +24,7 @@ const tools = [{
 
 // Generate a response for chatbot
 export const generateChatbotResponse = async (req: Request, res: Response) => {
+  console.log("[CHATBOT]: Generating chatbot response")
   try {
     const { message } = req.body;
 
@@ -86,7 +87,6 @@ export const generateChatbotResponse = async (req: Request, res: Response) => {
             `;
           recipeString += currentRecipe;
         }
-
         res.status(200).json({ reply: recipeString });
       } else {
         res.status(200).json({ reply: responseMessage.content });
@@ -94,6 +94,7 @@ export const generateChatbotResponse = async (req: Request, res: Response) => {
     } else {
       res.status(200).json({ reply: responseMessage.content });
     }
+    console.log("[CHATBOT]: Sending chatbot response");
   } catch (error) {
     console.error('OpenAI API error:', error);
     res.status(500).json({ error: 'Failed to get response from assistant' });
@@ -147,7 +148,6 @@ export const generateMacros = async (req: Request, res: Response) => {
     const preferences = req.body;
     const preferencesString = JSON.stringify(preferences);
 
-    console.log(preferencesString);
 
     // Build the prompt for OpenAI
     const prompt = `
@@ -223,7 +223,6 @@ export const generateMacros = async (req: Request, res: Response) => {
 
       Reminder: Always reason through user data and macronutrient calculation steps before finalizing and presenting the result in JSON format with rationale.`
 
-    console.log(prompt);
     // Query OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
@@ -238,8 +237,6 @@ export const generateMacros = async (req: Request, res: Response) => {
         }
       ]
     });
-
-    console.log(completion.choices);
 
     const responseMessage = completion.choices[0].message?.content;
     // Parse and return the response
@@ -344,7 +341,6 @@ export const generateInstructionsAndIngredients = async (req: Request, res: Resp
 export const generateIngredientPrices = async (req: Request, res: Response) => {
   try {
     const { query } = req.body;
-    console.log(query);
 
     // Build the prompt for OpenAI
     const prompt = `

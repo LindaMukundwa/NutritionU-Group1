@@ -951,9 +951,24 @@ function PlannerContent({
             query: `${meal.name} with approximately ${meal.calories} calories, ${meal.recipe.nutrition.protein}g protein, ${meal.recipe.nutrition.carbs}g carbs, and ${meal.recipe.nutrition.fat}g fat.`
           }),
         });
-
+      
         if (chatbotResponse.ok) {
           const data = await chatbotResponse.json() as { ingredients?: string[]; instructions?: string[] };
+          
+          // Update the recipe in the database with generated content
+          const updateResponse = await fetch(`${API_BASE}/api/recipes/${savedRecipe.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ingredients: data.ingredients,
+              instructions: data.instructions
+            }),
+          });
+      
+          if (updateResponse.ok) {
+            console.log('[Dashboard] ✅ Recipe updated with generated content');
+          }
+      
           enhancedMeal = {
             ...meal,
             recipe: {
@@ -963,6 +978,28 @@ function PlannerContent({
             },
           };
         }
+
+        // const data = await chatbotResponse.json();
+        // if (data.ingredients || data.instructions) {
+        //   // Update the recipe in the database with enhanced content
+        //   await fetch(`${API_BASE}/api/recipes/${savedRecipe.id}`, {
+        //     method: 'PUT',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({
+        //       ingredients: (data.ingredients || meal.recipe.ingredients).map((ing) => ({
+        //         name: ing,
+        //         amount: 1,
+        //         unit: { type: 'metric', value: 'serving' },
+        //       })),
+        //       instructions: (data.instructions || meal.recipe.instructions).map((inst, idx) => ({
+        //         stepNumber: idx + 1,
+        //         instruction: inst,
+        //         equipment: [],
+        //       })),
+        //     }),
+        //   });
+        // }
+
       } catch (chatbotErr) {
         console.warn('Chatbot enhancement failed, using original meal data:', chatbotErr);
       }
