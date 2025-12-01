@@ -109,10 +109,6 @@ export function convertFrontendToBackendItems(plan: WeeklyMealPlan): Omit<MealPl
       });
     });
   });
-
-  for (var item of items) {
-    console.log(item.recipe);
-  }
   
   console.log('[convertFrontendToBackendItems] Final items array:', items);
   return items;
