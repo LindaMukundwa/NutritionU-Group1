@@ -64,6 +64,8 @@ export default function OnboardingPage() {
   const handleComplete = async () => {
     // Finalize onboarding: send profile to backend and navigate to dashboard
     try {
+      console.log(formData);
+
       const firebaseUser = auth.currentUser;
       if (!firebaseUser) {
         console.error('No authenticated firebase user found');
