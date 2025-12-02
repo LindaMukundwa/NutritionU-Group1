@@ -72,7 +72,13 @@ export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu", onOpenGroc
           {isMenuOpen && (
             <>
               <div className={styles.dropdownMenu}>
-                <div className={styles.menuItem}>
+                <div 
+                  className={styles.menuItem}
+                  onClick={() => {
+                    navigate('/profile');
+                    setIsMenuOpen(false);
+                  }}
+                >
                   <span className={styles.menuIcon}>
                     <Icon name="user" size={16} />
                   </span>
