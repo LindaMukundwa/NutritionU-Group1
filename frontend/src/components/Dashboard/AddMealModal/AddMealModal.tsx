@@ -3,6 +3,7 @@ import styles from './AddMealModal.module.css';
 import { recipeService } from '../../../../services/recipeService';
 import MealContentCard from '../MealContentCard/MealContentCard';
 import SearchBar from '../SearchBar/SearchBar';
+import { Icon } from '../../ui/Icon';
 
 interface AddMealModalProps {
   isOpen: boolean;
@@ -133,7 +134,7 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Add {mealType}</h2>
           <button className={styles.closeButton} onClick={onClose}>
-            ✕
+            <Icon name="close" size={20} />
           </button>
         </div>
 
@@ -143,13 +144,15 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
             className={`${styles.tabButton} ${activeTab === 'search' ? styles.active : ''}`}
             onClick={() => setActiveTab('search')}
           >
-            🔍 Search Meals
+            <Icon name="search" size={16} />
+            <span style={{ marginLeft: '6px' }}>Search Meals</span>
           </button>
           <button
             className={`${styles.tabButton} ${activeTab === 'favorites' ? styles.active : ''}`}
             onClick={() => setActiveTab('favorites')}
           >
-            ❤️ Favorites ({favoriteMeals.length})
+            <Icon name="heart" size={16} />
+            <span style={{ marginLeft: '6px' }}>Favorites ({favoriteMeals.length})</span>
           </button>
         </div>
 

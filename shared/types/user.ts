@@ -1,4 +1,4 @@
-import { Recipe } from "./recipe";
+import type { Recipe } from "./recipe";
 
 /**
  * Definining shared user types and interfaces to be used thhroughut application

@@ -89,6 +89,11 @@
   font-weight: 600;
 }
 
+.iconBackground svg {
+  display: block;
+  margin: auto;
+}
+
 .summaryCard:nth-child(1) .iconBackground {
   background-color: var(--bg-dark);
   color: var(--text);
@@ -991,11 +996,7 @@
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 1px solid var(--border);
-}
-
-.modalActions .primaryButton,
-.modalActions .secondaryButton {
-  flex: 1;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {

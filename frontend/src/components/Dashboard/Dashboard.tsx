@@ -15,6 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useMealPlan } from '../../hooks/useMealPlan';
 import type { User } from "firebase/auth"
 import { mealPlanService } from "../../../services/mealPlanService"
+import { Icon } from '../ui/Icon';
 
 interface SummaryCardData {
   title: string;
@@ -175,18 +176,22 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
           <div>
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
             <div className={styles.modalMeta}>
-              <span>⏱ {recipe.time || recipe.cookTime}</span>
-              <span>💲 {recipe.cost}</span>
-              <span>⚡ {recipe.calories} cal</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Icon name="clock" size={13} style={{ flexShrink: 0 }} /> 
+                <span style={{ fontSize: '1rem', fontWeight: '500' }}>{recipe.time || recipe.cookTime}</span>
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '1rem', fontWeight: '500' }}>$ {recipe.cost.replace('$', '')}</span>
+              </span>
             </div>
           </div>
           <button className={styles.modalCloseButton} onClick={onClose}>
-            ✕
+            <Icon name="close" size={20} />
           </button>
         </div>
 
         <div className={styles.modalBody}>
-          {/* FIXED NUTRITION GRID - just change this part */}
+          {/* NUTRITION GRID - 4 columns with calories */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
@@ -197,6 +202,14 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
             border: '1px solid #e2e8f0',
             marginBottom: '24px'
           }}>
+            <div style={{ textAlign: 'center', padding: '8px' }}>
+              <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                {recipe.calories}
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                Calories
+              </p>
+            </div>
             <div style={{ textAlign: 'center', padding: '8px' }}>
               <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
                 {recipe.recipe.nutrition.protein}g
@@ -221,16 +234,8 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
                 Fat
               </p>
             </div>
-            <div style={{ textAlign: 'center', padding: '8px' }}>
-              <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
-                {recipe.recipe.nutrition.fiber}g
-              </p>
-              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
-                Fiber
-              </p>
-            </div>
           </div>
-          {/* END OF FIXED NUTRITION GRID */}
+          {/* END OF NUTRITION GRID */}
 
           {/* Keep the rest exactly as it was */}
           <div className={styles.recipeSection}>
@@ -258,8 +263,14 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
           </div>
 
           <div className={styles.modalActions}>
-            <button className={styles.primaryButton}>🛒 Add to Grocery List</button>
-            <button className={styles.secondaryButton}>✏️ Edit Recipe</button>
+            <button className={styles.primaryButton}>
+              <Icon name="shopping-cart" size={18} />
+              <span style={{ marginLeft: '6px' }}>Add to Grocery List</span>
+            </button>
+            <button className={styles.secondaryButton}>
+              <Icon name="edit" size={18} />
+              <span style={{ marginLeft: '6px' }}>Edit Recipe</span>
+            </button>
           </div>
         </div>
       </div>
@@ -735,72 +746,12 @@ function MealContent({
         <AddToPlanModal
           isOpen={showAddToPlanModal}
           onClose={() => setShowAddToPlanModal(false)}
-          onAddToPlan={async (dateString, mealType) => {
+          onAddToPlan={(dateString, mealType) => {
             console.log('[Dashboard] Adding meal from modal:', mealToAdd);
-            console.log('[Dashboard] Meal ID:', mealToAdd.id);
-            
-            let recipeId: number;
-            
-            // Check if this is a FatSecret recipe (needs to be saved to DB first)
-            if (typeof mealToAdd.id === 'string' && mealToAdd.id.startsWith('fatsecret_')) {
-              console.log('[Dashboard] FatSecret recipe detected, saving to database first...');
-              
-              try {
-                const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
-                
-                const recipeData = {
-                  externalId: mealToAdd.id, // Store fatsecret_<id> to prevent duplicates
-                  title: mealToAdd.name || mealToAdd.title,
-                  description: mealToAdd.description || `Delicious ${mealToAdd.name || mealToAdd.title}`,
-                  imageUrl: (mealToAdd as any).imageUrl,
-                  mealType: (mealToAdd as any).category || 'dinner',
-                  totalTime: parseInt(mealToAdd.time?.toString().replace(' min', '')) || 30,
-                  estimatedCostPerServing: parseFloat((mealToAdd.cost || mealToAdd.price || '$5').replace('$', '')) || 5,
-                  nutritionInfo: {
-                    calories: mealToAdd.calories || 0,
-                    protein: mealToAdd.recipe?.nutrition?.protein || 0,
-                    carbs: mealToAdd.recipe?.nutrition?.carbs || 0,
-                    fat: mealToAdd.recipe?.nutrition?.fat || 0,
-                  },
-                  ingredients: mealToAdd.recipe?.ingredients?.map((ing: string) => ({
-                    name: ing,
-                    amount: 1,
-                    unit: { type: 'metric', value: 'serving' },
-                  })) || [],
-                  instructions: mealToAdd.recipe?.instructions?.map((inst: string, idx: number) => ({
-                    stepNumber: idx + 1,
-                    instruction: inst,
-                    equipment: [],
-                  })) || [],
-                  dietaryTags: (mealToAdd as any).tags || [],
-                };
-
-                const response = await fetch(`${API_BASE}/api/recipes`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(recipeData),
-                });
-
-                if (!response.ok) {
-                  throw new Error('Failed to save recipe to database');
-                }
-
-                const savedRecipe = await response.json();
-                recipeId = savedRecipe.id;
-                console.log('[Dashboard] ✅ Recipe saved to database with ID:', recipeId);
-              } catch (err) {
-                console.error('[Dashboard] ❌ Failed to save recipe:', err);
-                alert('Failed to save recipe. Please try again.');
-                return;
-              }
-            } else {
-              // Already a database ID
-              recipeId = typeof mealToAdd.id === 'string' ? parseInt(mealToAdd.id) : mealToAdd.id;
-              console.log('[Dashboard] Using existing database ID:', recipeId);
-            }
+            console.log('[Dashboard] Meal database ID:', mealToAdd.id);
             
             const plannerMeal: Meal = {
-              recipeId,
+              recipeId: typeof mealToAdd.id === 'string' ? parseInt(mealToAdd.id) : mealToAdd.id,
               name: mealToAdd.name || mealToAdd.title,
               calories: mealToAdd.calories,
               time: typeof mealToAdd.time === 'string' ? mealToAdd.time : `${mealToAdd.time} min`,
@@ -1181,20 +1132,6 @@ function PlannerContent({
     return dates
   }
 
-  const weekDates = generateWeekDates()
-
-  const goToPreviousDay = () => {
-    const currentDate = new Date(selectedDay + 'T00:00:00')
-    currentDate.setDate(currentDate.getDate() - 1)
-    setSelectedDay(getDateString(currentDate))
-  }
-
-  const goToNextDay = () => {
-    const currentDate = new Date(selectedDay + 'T00:00:00')
-    currentDate.setDate(currentDate.getDate() + 1)
-    setSelectedDay(getDateString(currentDate))
-  }
-
   const calculateDailyTotals = () => {
     const dayPlan = getOrCreateDayPlan(weeklyMealPlan, selectedDay)
     const totalCalories =
@@ -1226,7 +1163,8 @@ function PlannerContent({
             className={styles.primaryButton}
             onClick={() => setShowGenerateMealPlanModal(true)}
           >
-            ✨ Generate Meal Plan
+            <Icon name="sparkles" size={18} />
+            <span style={{ marginLeft: '6px' }}>Generate Meal Plan</span>
           </button>
           <DateNavigation selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
         </div>
@@ -1236,7 +1174,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="breakfast"
           meals={currentDayPlan.breakfast}
-          color="#f97316"
+          color="#FFB084"
           label="Breakfast"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1246,7 +1184,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="lunch"
           meals={currentDayPlan.lunch}
-          color="#22c55e"
+          color="#7FD8A4"
           label="Lunch"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1256,7 +1194,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="dinner"
           meals={currentDayPlan.dinner}
-          color="#3b82f6"
+          color="#84C9FF"
           label="Dinner"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1266,7 +1204,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="snacks"
           meals={currentDayPlan.snacks}
-          color="#a855f7"
+          color="#FFD88D"
           label="Snacks"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1284,7 +1222,10 @@ function PlannerContent({
             <strong>${totalCost}</strong> daily cost
           </span>
         </div>
-        <button className={styles.primaryButton} onClick={onOpenGroceryList}>🛒 Add to Grocery List</button>
+        <button className={styles.primaryButton} onClick={onOpenGroceryList}>
+          <Icon name="shopping-cart" size={18} />
+          <span style={{ marginLeft: '6px' }}>Add to Grocery List</span>
+        </button>
       </div>
 
       {showRecipeModal && selectedRecipe && (
@@ -1389,66 +1330,61 @@ function NutritionContent({
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>⚡</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="zap" size={18} />
+              </span>
               <span>Calories</span>
             </div>
             <span className={styles.nutritionValue}>
               {nutritionData.calories.consumed} / {nutritionData.calories.target}
             </span>
           </div>
-          {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "#f97316")}
+          {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "#FFB084")}
         </div>
 
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>💪</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="drumstick" size={18} />
+              </span>
               <span>Protein</span>
             </div>
             <span className={styles.nutritionValue}>
               {nutritionData.protein.consumed}g / {nutritionData.protein.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#ef4444")}
+          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#84C9FF")}
         </div>
 
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>🍎</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="wheat" size={18} />
+              </span>
               <span>Carbohydrates</span>
             </div>
             <span className={styles.nutritionValue}>
               {nutritionData.carbs.consumed}g / {nutritionData.carbs.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "#22c55e")}
+          {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "#7FD8A4")}
         </div>
 
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>💧</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="droplet" size={18} />
+              </span>
               <span>Fat</span>
             </div>
             <span className={styles.nutritionValue}>
               {nutritionData.fat.consumed}g / {nutritionData.fat.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "#eab308")}
-        </div>
-
-        <div className={styles.nutritionItem}>
-          <div className={styles.nutritionHeader}>
-            <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>🌾</span>
-              <span>Fiber</span>
-            </div>
-            <span className={styles.nutritionValue}>
-              {nutritionData.fiber.consumed}g / {nutritionData.fiber.target}g
-            </span>
-          </div>
-          {renderProgressBar(nutritionData.fiber.consumed, nutritionData.fiber.target, "#3b82f6")}
+          {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "#FFD88D")}
         </div>
       </div>
     </div>
@@ -1727,7 +1663,10 @@ function DashboardContentSwitcher({
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <span>⚠️ Failed to sync meal plan. Changes are saved locally.</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Icon name="alert" size={16} />
+            Failed to sync meal plan. Changes are saved locally.
+          </span>
           <button onClick={saveMealPlan} style={{ padding: '0.25rem 0.5rem' }}>
             Retry
           </button>
@@ -1790,7 +1729,7 @@ const Dashboard: FC<DashboardProps> = () => {
       title: "Weekly Budget",
       value: user?.budget?.default ?? 100,
       subtext: "",
-      icon: "$",
+      icon: "circle-dollar",
       progressBar: {
         current: 50,
         total: user?.budget?.maximum ?? 100,
@@ -1800,13 +1739,13 @@ const Dashboard: FC<DashboardProps> = () => {
       title: "Meals Planned",
       value: totalMeals ?? 0,
       subtext: "This week",
-      icon: "🍴",
+      icon: "soup",
     },
     {
       title: "Avg. Calories",
       value: user?.nutritionGoals?.calories ?? 2000,
       subtext: "",
-      icon: "⚡",
+      icon: "zap",
       progressBar: {
         current: 75,
         total: 100,
@@ -1823,23 +1762,34 @@ const Dashboard: FC<DashboardProps> = () => {
     )
   }
 
-  const renderSummaryCard = (card: SummaryCardData) => (
-    <div key={card.title} className={styles.summaryCard}>
-      <div className={styles.cardHeader}>
-        <div className={styles.cardTitle}>{card.title}</div>
-      </div>
-      <div className={styles.cardBody}>
-        <div className={styles.cardValue}>{card.value}</div>
-        <div className={styles.iconBackground}>{card.icon}</div>
-      </div>
+  const renderSummaryCard = (card: SummaryCardData) => {
+    // Determine if icon is a lucide icon name or a simple string (like "$")
+    const isLucideIcon = card.icon !== "$";
+    
+    return (
+      <div key={card.title} className={styles.summaryCard}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardTitle}>{card.title}</div>
+        </div>
+        <div className={styles.cardBody}>
+          <div className={styles.cardValue}>{card.value}</div>
+          <div className={styles.iconBackground}>
+            {isLucideIcon ? (
+              <Icon name={card.icon as any} size={20} />
+            ) : (
+              card.icon
+            )}
+          </div>
+        </div>
 
-      {card.progressBar ? (
-        renderProgressBar(card.progressBar.current, card.progressBar.total)
-      ) : (
-        <div className={styles.cardSubtext}>{card.subtext}</div>
-      )}
-    </div>
-  )
+        {card.progressBar ? (
+          renderProgressBar(card.progressBar.current, card.progressBar.total)
+        ) : (
+          <div className={styles.cardSubtext}>{card.subtext}</div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={styles.Dashboard}>
@@ -1851,7 +1801,9 @@ const Dashboard: FC<DashboardProps> = () => {
 
       {/* Header/Greeting Section */}
       <div className={styles.header}>
-        <h1 className={styles.greeting}>Good morning, {displayName} 👋</h1>
+        <h1 className={styles.greeting}>
+          Good morning, {displayName}
+        </h1>
         <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
       </div>
 

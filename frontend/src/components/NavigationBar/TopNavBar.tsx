@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChefHat } from "lucide-react";
+import { Icon } from "../ui/Icon";
 import styles from "./TopNavBar.module.css";
 
 interface TopNavBarProps {
@@ -51,7 +52,8 @@ export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu", onOpenGroc
           className={styles.groceryListButton}
           onClick={onOpenGroceryList}
         >
-          🛒 Grocery List
+          <Icon name="shopping-cart" size={18} />
+          <span style={{ marginLeft: '6px' }}>Grocery List</span>
         </button>
 
         {/* Hamburger Menu */}
@@ -70,8 +72,16 @@ export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu", onOpenGroc
           {isMenuOpen && (
             <>
               <div className={styles.dropdownMenu}>
-                <div className={styles.menuItem}>
-                  <span className={styles.menuIcon}>👤</span>
+                <div 
+                  className={styles.menuItem}
+                  onClick={() => {
+                    navigate('/profile');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <span className={styles.menuIcon}>
+                    <Icon name="user" size={16} />
+                  </span>
                   Profile
                 </div>
                 <div 
@@ -81,7 +91,9 @@ export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu", onOpenGroc
                     setIsMenuOpen(false);
                   }}
                 >
-                  <span className={styles.menuIcon}>⚙️</span>
+                  <span className={styles.menuIcon}>
+                    <Icon name="settings" size={16} />
+                  </span>
                   Settings
                 </div>
                 <div className={styles.menuDivider}></div>

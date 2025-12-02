@@ -130,23 +130,26 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: var(--text-muted);
 }
 
 .detailItem {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .detailIcon {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
 }
 
 .detailText {
-  font-weight: 400;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1;
 }
 
 /* Action Buttons */
