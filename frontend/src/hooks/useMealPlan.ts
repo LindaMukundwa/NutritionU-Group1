@@ -48,7 +48,7 @@ export function useMealPlan(userId: string | undefined) {
 
         const converted = convertBackendPlansToFrontend(plans);
         console.log('[useMealPlan] Converted to frontend format:', converted);
-        
+
         setWeeklyMealPlan(converted);
       } catch (err) {
         console.error('[useMealPlan] Failed to load meal plans:', err);
@@ -77,10 +77,10 @@ export function useMealPlan(userId: string | undefined) {
       try {
         console.log('[useMealPlan] Auto-saving meal plan...');
         console.log('[useMealPlan] Current weeklyMealPlan state:', weeklyMealPlan);
-        
+
         const items = convertFrontendToBackendItems(weeklyMealPlan);
         console.log('[useMealPlan] Converted to backend items:', items);
-        
+
         if (items.length > 0) {
           const result = await mealPlanService.saveMealPlan(
             userId,
@@ -111,7 +111,7 @@ export function useMealPlan(userId: string | undefined) {
 
     try {
       const items = convertFrontendToBackendItems(weeklyMealPlan);
-      
+
       if (items.length > 0) {
         await mealPlanService.saveMealPlan(
           userId,
@@ -126,11 +126,24 @@ export function useMealPlan(userId: string | undefined) {
     }
   }, [userId, weeklyMealPlan]);
 
+  // Calculate total number of meals planned
+  const getTotalMealsCount = (): number => {
+    let count = 0;
+    Object.values(weeklyMealPlan).forEach((dayPlan) => {
+      count += dayPlan.breakfast.length;
+      count += dayPlan.lunch.length;
+      count += dayPlan.dinner.length;
+      count += dayPlan.snacks.length;
+    });
+    return count;
+  };
+
   return {
     weeklyMealPlan,
     setWeeklyMealPlan,
     loading,
     error,
     saveMealPlan,
+    getTotalMealsCount,
   };
 }

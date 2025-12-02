@@ -6,6 +6,7 @@
 import type { MealPlanItem } from '../../services/mealPlanService';
 
 export interface Meal {
+  id?: number
   recipeId?: number;  // Added for backend persistence
   name: string;
   calories: number;
@@ -135,6 +136,7 @@ export function convertBackendPlansToFrontend(plans: any[]): WeeklyMealPlan {
 
       if (item.recipe) {
         const meal: Meal = {
+          id: item.id,
           recipeId: item.recipeId,
           name: item.recipe.title,
           calories: item.recipe.nutritionInfo?.calories || 0,

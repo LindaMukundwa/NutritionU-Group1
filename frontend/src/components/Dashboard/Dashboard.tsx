@@ -14,6 +14,7 @@ import type { Recipe } from '../../../../shared/types/recipe';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMealPlan } from '../../hooks/useMealPlan';
 import type { User } from "firebase/auth"
+import { mealPlanService } from "../../../services/mealPlanService"
 
 interface SummaryCardData {
   title: string;
@@ -861,19 +862,34 @@ function PlannerContent({
     }
   }
 
-  const handleDeleteMeal = (dateString: string, mealType: string, mealIndex: number) => {
-    const mealTypeKey = mealType as keyof DayMealPlan
+  const handleDeleteMeal = async (dateString: string, mealType: string, mealIndex: number) => {
+    const mealTypeKey = mealType as keyof DayMealPlan;
+    const dayPlan = getOrCreateDayPlan(weeklyMealPlan, dateString);
+    const mealToDelete = dayPlan[mealTypeKey][mealIndex];
+    
+    // If meal has an itemId, delete it via API first
+    if (mealToDelete.recipeId) {
+      try {
+        await mealPlanService.removeMealPlanItem(mealToDelete.recipeId);
+      } catch (error) {
+        console.error('Failed to delete meal from backend:', error);
+        // Optionally show error to user
+        return;
+      }
+    }
+    
+    // Update local state
     setWeeklyMealPlan((prev) => {
-      const dayPlan = getOrCreateDayPlan(prev, dateString)
+      const dayPlan = getOrCreateDayPlan(prev, dateString);
       return {
         ...prev,
         [dateString]: {
           ...dayPlan,
-          [mealTypeKey]: dayPlan[mealTypeKey].filter((_: Meal, index: number) => index !== mealIndex),
+          [mealTypeKey]: dayPlan[mealTypeKey].filter((_, index) => index !== mealIndex),
         },
-      }
-    })
-  }
+      };
+    });
+  };
 
   const handleAddMeal = (mealType: string) => {
     setAddMealType(mealType)
@@ -980,27 +996,6 @@ function PlannerContent({
           };
         }
 
-        // const data = await chatbotResponse.json();
-        // if (data.ingredients || data.instructions) {
-        //   // Update the recipe in the database with enhanced content
-        //   await fetch(`${API_BASE}/api/recipes/${savedRecipe.id}`, {
-        //     method: 'PUT',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({
-        //       ingredients: (data.ingredients || meal.recipe.ingredients).map((ing) => ({
-        //         name: ing,
-        //         amount: 1,
-        //         unit: { type: 'metric', value: 'serving' },
-        //       })),
-        //       instructions: (data.instructions || meal.recipe.instructions).map((inst, idx) => ({
-        //         stepNumber: idx + 1,
-        //         instruction: inst,
-        //         equipment: [],
-        //       })),
-        //     }),
-        //   });
-        // }
-
       } catch (chatbotErr) {
         console.warn('Chatbot enhancement failed, using original meal data:', chatbotErr);
       }
@@ -1032,6 +1027,7 @@ function PlannerContent({
       });
 
       setShowAddMealModal(false);
+
     } catch (error) {
       console.error('Error adding meal to planner:', error);
       alert('Failed to add meal. Please try again.');
@@ -1780,6 +1776,11 @@ function DashboardContentSwitcher({
 const Dashboard: FC<DashboardProps> = () => {
   const { user } = useAuth();
   const [showGroceryList, setShowGroceryList] = useState(false);
+  // Get meal plan data and the count method
+  const { getTotalMealsCount } = useMealPlan(user?.firebaseUid);
+    
+  // Call the method to get total meals
+  const totalMeals = getTotalMealsCount();
 
   // Get display name from user or use default
   const displayName = user?.displayName || 'there';
@@ -1797,7 +1798,7 @@ const Dashboard: FC<DashboardProps> = () => {
     },
     {
       title: "Meals Planned",
-      value: user?.mealPlans?.length ?? 0,
+      value: totalMeals ?? 0,
       subtext: "This week",
       icon: "🍴",
     },
