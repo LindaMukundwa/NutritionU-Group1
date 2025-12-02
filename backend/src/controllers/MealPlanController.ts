@@ -244,6 +244,7 @@ export const deleteMealPlan = async (req: Request, res: Response) => {
 export const addMealPlanItem = async (req: Request, res: Response) => {
     try {
         const { mealPlanId } = req.params;
+
         const { recipeId, date, mealType } = req.body;
 
         const item = await prisma.mealPlanItem.create({
@@ -273,7 +274,8 @@ export const removeMealPlanItem = async (req: Request, res: Response) => {
     try {
         const { itemId } = req.params;
 
-        await prisma.mealPlanItem.delete({
+        // Delete a meal plan item based on its recipe origin
+        await prisma.recipe.delete({
             where: { id: Number(itemId) }
         });
 

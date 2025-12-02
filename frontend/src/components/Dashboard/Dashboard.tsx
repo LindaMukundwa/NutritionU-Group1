@@ -13,6 +13,8 @@ import GenerateMealPlanModal from "./GenerateMealPlanModal/GenerateMealPlanModal
 import type { Recipe } from '../../../../shared/types/recipe';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMealPlan } from '../../hooks/useMealPlan';
+import type { User } from "firebase/auth"
+import { mealPlanService } from "../../../services/mealPlanService"
 import { Icon } from '../ui/Icon';
 
 interface SummaryCardData {
@@ -811,19 +813,34 @@ function PlannerContent({
     }
   }
 
-  const handleDeleteMeal = (dateString: string, mealType: string, mealIndex: number) => {
-    const mealTypeKey = mealType as keyof DayMealPlan
+  const handleDeleteMeal = async (dateString: string, mealType: string, mealIndex: number) => {
+    const mealTypeKey = mealType as keyof DayMealPlan;
+    const dayPlan = getOrCreateDayPlan(weeklyMealPlan, dateString);
+    const mealToDelete = dayPlan[mealTypeKey][mealIndex];
+    
+    // If meal has an itemId, delete it via API first
+    if (mealToDelete.recipeId) {
+      try {
+        await mealPlanService.removeMealPlanItem(mealToDelete.recipeId);
+      } catch (error) {
+        console.error('Failed to delete meal from backend:', error);
+        // Optionally show error to user
+        return;
+      }
+    }
+    
+    // Update local state
     setWeeklyMealPlan((prev) => {
-      const dayPlan = getOrCreateDayPlan(prev, dateString)
+      const dayPlan = getOrCreateDayPlan(prev, dateString);
       return {
         ...prev,
         [dateString]: {
           ...dayPlan,
-          [mealTypeKey]: dayPlan[mealTypeKey].filter((_: Meal, index: number) => index !== mealIndex),
+          [mealTypeKey]: dayPlan[mealTypeKey].filter((_, index) => index !== mealIndex),
         },
-      }
-    })
-  }
+      };
+    });
+  };
 
   const handleAddMeal = (mealType: string) => {
     setAddMealType(mealType)
@@ -902,9 +919,24 @@ function PlannerContent({
             query: `${meal.name} with approximately ${meal.calories} calories, ${meal.recipe.nutrition.protein}g protein, ${meal.recipe.nutrition.carbs}g carbs, and ${meal.recipe.nutrition.fat}g fat.`
           }),
         });
-
+      
         if (chatbotResponse.ok) {
           const data = await chatbotResponse.json() as { ingredients?: string[]; instructions?: string[] };
+          
+          // Update the recipe in the database with generated content
+          const updateResponse = await fetch(`${API_BASE}/api/recipes/${savedRecipe.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ingredients: data.ingredients,
+              instructions: data.instructions
+            }),
+          });
+      
+          if (updateResponse.ok) {
+            console.log('[Dashboard] ✅ Recipe updated with generated content');
+          }
+      
           enhancedMeal = {
             ...meal,
             recipe: {
@@ -914,6 +946,7 @@ function PlannerContent({
             },
           };
         }
+
       } catch (chatbotErr) {
         console.warn('Chatbot enhancement failed, using original meal data:', chatbotErr);
       }
@@ -945,6 +978,7 @@ function PlannerContent({
       });
 
       setShowAddMealModal(false);
+
     } catch (error) {
       console.error('Error adding meal to planner:', error);
       alert('Failed to add meal. Please try again.');
@@ -1223,11 +1257,13 @@ function PlannerContent({
 function NutritionContent({
   selectedDay,
   setSelectedDay,
-  weeklyMealPlan
+  weeklyMealPlan,
+  userData
 }: {
   selectedDay: string;
   setSelectedDay: React.Dispatch<React.SetStateAction<string>>;
   weeklyMealPlan: WeeklyMealPlan;
+  userData: any
 }) {
   // Calculate nutrition data based on the selected day's meals
   const calculateNutritionData = () => {
@@ -1254,11 +1290,11 @@ function NutritionContent({
 
     // Target values (you can customize these based on user goals)
     const targets = {
-      calories: 2000,
-      protein: 120,
-      carbs: 250,
-      fat: 78,
-      fiber: 25
+      calories: userData?.nutritionGoals?.calories || 2000,
+      protein: userData?.nutritionGoals?.protein || 120,
+      carbs: userData?.nutritionGoals?.carbs || 250,
+      fat: userData?.nutritionGoals?.fats || 78,
+      fiber: 25 // Currently hardcoded because its not implemented 
     };
 
     return {
@@ -1660,6 +1696,7 @@ function DashboardContentSwitcher({
             selectedDay={selectedDay}
             setSelectedDay={setSelectedDay}
             weeklyMealPlan={weeklyMealPlan}
+            userData={user}
           />
         )}
         {activeTab === "ai-assistant" && <AIAssistantContent />}
@@ -1678,6 +1715,11 @@ function DashboardContentSwitcher({
 const Dashboard: FC<DashboardProps> = () => {
   const { user } = useAuth();
   const [showGroceryList, setShowGroceryList] = useState(false);
+  // Get meal plan data and the count method
+  const { getTotalMealsCount } = useMealPlan(user?.firebaseUid);
+    
+  // Call the method to get total meals
+  const totalMeals = getTotalMealsCount();
 
   // Get display name from user or use default
   const displayName = user?.displayName || 'there';
@@ -1695,7 +1737,7 @@ const Dashboard: FC<DashboardProps> = () => {
     },
     {
       title: "Meals Planned",
-      value: user?.mealPlans?.length ?? 0,
+      value: totalMeals ?? 0,
       subtext: "This week",
       icon: "soup",
     },

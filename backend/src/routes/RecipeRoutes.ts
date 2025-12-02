@@ -5,6 +5,7 @@ import {
   getRecipeById, 
   searchFoods, 
   getFoodById,
+  updateRecipe
   //generateRecipeFromOpenAI 
 } from '../controllers/RecipeController.ts';
 
@@ -12,6 +13,7 @@ const router = Router();
 
 // Recipe creation (for saving FatSecret recipes to DB)
 router.post('/', createRecipe);
+router.put('/:id', updateRecipe); // Add this route
 
 // FatSecret recipe routes
 router.get('/search', searchRecipes);

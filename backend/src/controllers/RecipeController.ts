@@ -179,6 +179,72 @@ export const createRecipe = async (req: Request, res: Response) => {
 };
 
 /**
+ * Update an existing recipe in the database
+ * PUT /api/recipes/:id
+ */
+export const updateRecipe = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      description,
+      imageUrl,
+      mealType,
+      totalTime,
+      estimatedCostPerServing,
+      nutritionInfo,
+      ingredients,
+      instructions,
+      dietaryTags,
+    } = req.body;
+
+    // Validate recipe ID
+    const recipeId = parseInt(id, 10);
+    if (isNaN(recipeId)) {
+      return res.status(400).json({ error: 'Invalid recipe ID' });
+    }
+
+    // Check if recipe exists
+    const existingRecipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    if (!existingRecipe) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+
+    // Update recipe with provided fields (only update fields that are provided)
+    const updatedRecipe = await prisma.recipe.update({
+      where: { id: recipeId },
+      data: {
+        ...(title && { title }),
+        ...(description !== undefined && { description }),
+        ...(imageUrl !== undefined && { imageUrl }),
+        ...(mealType && { mealType }),
+        ...(totalTime !== undefined && { totalTime }),
+        ...(estimatedCostPerServing !== undefined && { estimatedCostPerServing }),
+        ...(nutritionInfo && { nutritionInfo }),
+        ...(ingredients && { ingredients }),
+        ...(instructions && { instructions }),
+        ...(dietaryTags && { dietaryTags }),
+        updatedAt: new Date(),
+      },
+    });
+
+    console.log('[updateRecipe] ✅ Recipe updated with ID:', updatedRecipe.id);
+
+    res.status(200).json({
+      success: true,
+      id: updatedRecipe.id,
+      recipe: updatedRecipe,
+    });
+  } catch (error) {
+    console.error('[updateRecipe] Error:', error);
+    res.status(500).json({ error: 'Failed to update recipe' });
+  }
+};
+
+/**
  * Search recipes from FatSecret API
  */
 export const searchRecipes = async (req: Request, res: Response) => {

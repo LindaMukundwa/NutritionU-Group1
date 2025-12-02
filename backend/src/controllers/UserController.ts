@@ -484,10 +484,14 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                     activityLevel: profile.activityLevel,
                     onboardingCompleted: true,
                     medicalRestrictions: profile.medicalRestrictions,
-                    nutritionGoals: profile.nutritionGoals,
+                    nutritionGoals: profile.macros,
                     lifestyleDiets: profile.lifestyleDiets,
                     culturalDiets: profile.culturalDiets,
-                    budget: profile.budget
+                    budget: {
+                        value: profile.budget,
+                        default: profile.budget?.default || 100,
+                        description: profile.budget?.description || 'Weekly food budget in dollars'
+                    }
                 }
             });
 
