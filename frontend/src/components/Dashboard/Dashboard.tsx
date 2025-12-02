@@ -1777,7 +1777,7 @@ const Dashboard: FC<DashboardProps> = () => {
       {/* Header/Greeting Section */}
       <div className={styles.header}>
         <h1 className={styles.greeting}>
-          Good morning, {displayName} <Icon name="hand" size={20} style={{ display: 'inline-block', marginLeft: '4px', transform: 'translateY(-2px)' }} />
+          Good morning, {displayName}
         </h1>
         <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
       </div>

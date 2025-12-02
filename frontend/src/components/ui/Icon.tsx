@@ -32,6 +32,7 @@ import {
   Smile,
   Activity,
   Sprout,
+  Beef,
 } from 'lucide-react';
 
 export type IconName = 
@@ -66,7 +67,8 @@ export type IconName =
   | 'calendar-check'
   | 'smile'
   | 'activity'
-  | 'sprout';
+  | 'sprout'
+  | 'beef';
 
 interface IconProps extends React.HTMLAttributes<HTMLElement> {
   name: IconName;
@@ -109,6 +111,7 @@ const iconMap = {
   'smile': Smile,
   'activity': Activity,
   'sprout': Sprout,
+  'beef': Beef,
 };
 
 export const Icon: React.FC<IconProps> = ({ 
