@@ -33,6 +33,11 @@ import {
   Activity,
   Sprout,
   Beef,
+  Coins,
+  Wallet,
+  CircleDollarSign,
+  Soup,
+  Drumstick,
 } from 'lucide-react';
 
 export type IconName = 
@@ -46,6 +51,11 @@ export type IconName =
   | 'wheat'
   | 'clock'
   | 'dollar'
+  | 'coins'
+  | 'wallet'
+  | 'circle-dollar'
+  | 'soup'
+  | 'drumstick'
   | 'sparkles'
   | 'plus'
   | 'close'
@@ -89,6 +99,11 @@ const iconMap = {
   'wheat': Wheat,
   'clock': Clock,
   'dollar': DollarSign,
+  'coins': Coins,
+  'wallet': Wallet,
+  'circle-dollar': CircleDollarSign,
+  'soup': Soup,
+  'drumstick': Drumstick,
   'sparkles': Sparkles,
   'plus': Plus,
   'close': X,

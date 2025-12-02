@@ -175,13 +175,13 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
             <div className={styles.modalMeta}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Icon name="clock" size={16} /> {recipe.time || recipe.cookTime}
+                <Icon name="clock" size={14} /> {recipe.time || recipe.cookTime}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Icon name="dollar" size={16} /> {recipe.cost}
+                <Icon name="dollar" size={14} /> {recipe.cost.replace('$', '')}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Icon name="zap" size={16} /> {recipe.calories} cal
+                <Icon name="zap" size={14} /> {recipe.calories} cal
               </span>
             </div>
           </div>
@@ -191,10 +191,10 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
         </div>
 
         <div className={styles.modalBody}>
-          {/* FIXED NUTRITION GRID - just change this part */}
+          {/* FIXED NUTRITION GRID - 3 columns without fiber */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '16px',
             padding: '16px',
             backgroundColor: '#f8fafc',
@@ -224,14 +224,6 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
               </p>
               <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
                 Fat
-              </p>
-            </div>
-            <div style={{ textAlign: 'center', padding: '8px' }}>
-              <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
-                {recipe.recipe.nutrition.fiber}g
-              </p>
-              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
-                Fiber
               </p>
             </div>
           </div>
@@ -1312,7 +1304,7 @@ function NutritionContent({
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
               <span className={styles.nutritionIcon}>
-                <Icon name="dumbbell" size={18} />
+                <Icon name="drumstick" size={18} />
               </span>
               <span>Protein</span>
             </div>
@@ -1320,7 +1312,7 @@ function NutritionContent({
               {nutritionData.protein.consumed}g / {nutritionData.protein.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#FF9999")}
+          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#84C9FF")}
         </div>
 
         <div className={styles.nutritionItem}>
@@ -1351,21 +1343,6 @@ function NutritionContent({
             </span>
           </div>
           {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "#FFD88D")}
-        </div>
-
-        <div className={styles.nutritionItem}>
-          <div className={styles.nutritionHeader}>
-            <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>
-                <Icon name="sprout" size={18} />
-              </span>
-              <span>Fiber</span>
-            </div>
-            <span className={styles.nutritionValue}>
-              {nutritionData.fiber.consumed}g / {nutritionData.fiber.target}g
-            </span>
-          </div>
-          {renderProgressBar(nutritionData.fiber.consumed, nutritionData.fiber.target, "#84C9FF")}
         </div>
       </div>
     </div>
@@ -1704,7 +1681,7 @@ const Dashboard: FC<DashboardProps> = () => {
       title: "Weekly Budget",
       value: user?.budget?.default ?? 100,
       subtext: "",
-      icon: "$",
+      icon: "circle-dollar",
       progressBar: {
         current: 50,
         total: user?.budget?.maximum ?? 100,
@@ -1714,7 +1691,7 @@ const Dashboard: FC<DashboardProps> = () => {
       title: "Meals Planned",
       value: user?.mealPlans?.length ?? 0,
       subtext: "This week",
-      icon: "utensils",
+      icon: "soup",
     },
     {
       title: "Avg. Calories",
