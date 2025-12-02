@@ -72,10 +72,10 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
   };
 
   const mealTypes = [
-    { value: 'breakfast', label: 'Breakfast', color: '#f97316' },
-    { value: 'lunch', label: 'Lunch', color: '#22c55e' },
-    { value: 'dinner', label: 'Dinner', color: '#3b82f6' },
-    { value: 'snacks', label: 'Snacks', color: '#a855f7' },
+    { value: 'breakfast', label: 'Breakfast', color: '#FFB084' },
+    { value: 'lunch', label: 'Lunch', color: '#7FD8A4' },
+    { value: 'dinner', label: 'Dinner', color: '#84C9FF' },
+    { value: 'snacks', label: 'Snacks', color: '#FFD88D' },
   ];
 
   const handleAdd = () => {

@@ -1142,7 +1142,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="breakfast"
           meals={currentDayPlan.breakfast}
-          color="#f97316"
+          color="#FFB084"
           label="Breakfast"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1152,7 +1152,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="lunch"
           meals={currentDayPlan.lunch}
-          color="#22c55e"
+          color="#7FD8A4"
           label="Lunch"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1162,7 +1162,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="dinner"
           meals={currentDayPlan.dinner}
-          color="#3b82f6"
+          color="#84C9FF"
           label="Dinner"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1172,7 +1172,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="snacks"
           meals={currentDayPlan.snacks}
-          color="#a855f7"
+          color="#FFD88D"
           label="Snacks"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1305,7 +1305,7 @@ function NutritionContent({
               {nutritionData.calories.consumed} / {nutritionData.calories.target}
             </span>
           </div>
-          {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "#f97316")}
+          {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "#FFB084")}
         </div>
 
         <div className={styles.nutritionItem}>
@@ -1320,7 +1320,7 @@ function NutritionContent({
               {nutritionData.protein.consumed}g / {nutritionData.protein.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#ef4444")}
+          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#FF9999")}
         </div>
 
         <div className={styles.nutritionItem}>
@@ -1335,7 +1335,7 @@ function NutritionContent({
               {nutritionData.carbs.consumed}g / {nutritionData.carbs.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "#22c55e")}
+          {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "#7FD8A4")}
         </div>
 
         <div className={styles.nutritionItem}>
@@ -1350,7 +1350,7 @@ function NutritionContent({
               {nutritionData.fat.consumed}g / {nutritionData.fat.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "#eab308")}
+          {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "#FFD88D")}
         </div>
 
         <div className={styles.nutritionItem}>
@@ -1365,7 +1365,7 @@ function NutritionContent({
               {nutritionData.fiber.consumed}g / {nutritionData.fiber.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.fiber.consumed, nutritionData.fiber.target, "#3b82f6")}
+          {renderProgressBar(nutritionData.fiber.consumed, nutritionData.fiber.target, "#84C9FF")}
         </div>
       </div>
     </div>
