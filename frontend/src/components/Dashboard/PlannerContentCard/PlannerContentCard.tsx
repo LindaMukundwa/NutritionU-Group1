@@ -69,7 +69,7 @@ export default function PlannerMealCard({
                       <Icon name="clock" size={14} /> {meal.time}
                     </span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Icon name="dollar" size={14} /> {meal.cost}
+                      {meal.cost}
                     </span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Icon name="zap" size={14} /> {meal.calories} cal

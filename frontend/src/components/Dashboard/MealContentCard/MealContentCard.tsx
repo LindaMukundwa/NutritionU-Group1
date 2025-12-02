@@ -119,21 +119,20 @@ const MealContentCard: FC<MealContentCardProps> = ({
         <div className={styles.mealDetails}>
           {/* Time */}
           <div className={styles.detailItem}>
-            <Icon name="clock" size={14} className={styles.detailIcon} />
+            <Icon name="clock" size={12} className={styles.detailIcon} />
             <span className={styles.detailText}>{totalTime} min</span>
           </div>
 
           {/* Price */}
           <div className={styles.detailItem}>
-            <Icon name="dollar" size={14} className={styles.detailIcon} />
             <span className={styles.detailText}>
-              {estimatedCostPerServing.toFixed(2)}
+              $ {estimatedCostPerServing.toFixed(2)}
             </span>
           </div>
 
           {/* Calories */}
           <div className={styles.detailItem}>
-            <Icon name="zap" size={14} className={styles.detailIcon} />
+            <Icon name="zap" size={12} className={styles.detailIcon} />
             <span className={styles.detailText}>
               {Math.round(nutritionInfo.calories)} cal
             </span>

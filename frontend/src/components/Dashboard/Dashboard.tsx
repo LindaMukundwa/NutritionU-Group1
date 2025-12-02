@@ -175,13 +175,11 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
             <div className={styles.modalMeta}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Icon name="clock" size={14} /> {recipe.time || recipe.cookTime}
+                <Icon name="clock" size={13} style={{ flexShrink: 0 }} /> 
+                <span style={{ fontSize: '1rem', fontWeight: '500' }}>{recipe.time || recipe.cookTime}</span>
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Icon name="dollar" size={14} /> {recipe.cost.replace('$', '')}
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Icon name="zap" size={14} /> {recipe.calories} cal
+                <span style={{ fontSize: '1rem', fontWeight: '500' }}>$ {recipe.cost.replace('$', '')}</span>
               </span>
             </div>
           </div>
@@ -191,10 +189,10 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
         </div>
 
         <div className={styles.modalBody}>
-          {/* FIXED NUTRITION GRID - 3 columns without fiber */}
+          {/* NUTRITION GRID - 4 columns with calories */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '16px',
             padding: '16px',
             backgroundColor: '#f8fafc',
@@ -202,6 +200,14 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
             border: '1px solid #e2e8f0',
             marginBottom: '24px'
           }}>
+            <div style={{ textAlign: 'center', padding: '8px' }}>
+              <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                {recipe.calories}
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                Calories
+              </p>
+            </div>
             <div style={{ textAlign: 'center', padding: '8px' }}>
               <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
                 {recipe.recipe.nutrition.protein}g
@@ -227,7 +233,7 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
               </p>
             </div>
           </div>
-          {/* END OF FIXED NUTRITION GRID */}
+          {/* END OF NUTRITION GRID */}
 
           {/* Keep the rest exactly as it was */}
           <div className={styles.recipeSection}>
