@@ -455,8 +455,6 @@ export const patchUserProfile = async (req: Request, res: Response) => {
         const { id } = req.params;
         const profile = req.body;
 
-        console.log(profile);
-
         if (!profile || typeof profile !== 'object') {
             return res.status(400).json({ message: 'Profile data is required' });
         }
