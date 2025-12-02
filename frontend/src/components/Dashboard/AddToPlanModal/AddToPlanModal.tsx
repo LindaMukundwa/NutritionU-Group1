@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './AddToPlanModal.module.css';
+import { Icon } from '../../ui/Icon';
 
 interface AddToPlanModalProps {
   isOpen: boolean;
@@ -90,7 +91,7 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>Add to Meal Plan</h3>
           <button className={styles.closeButton} onClick={onClose}>
-            ✕
+            <Icon name="close" size={20} />
           </button>
         </div>
 

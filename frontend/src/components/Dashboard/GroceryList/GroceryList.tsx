@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './GroceryList.module.css';
+import { Icon } from '../../ui/Icon';
 
 interface Meal {
   name: string;
@@ -270,7 +271,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Grocery List</h2>
           <button className={styles.modalCloseButton} onClick={onClose}>
-            ✕
+            <Icon name="close" size={20} />
           </button>
         </div>
         <div className={styles.groceryList}>
@@ -288,13 +289,16 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
             className={styles.dateRangeButton} 
             onClick={() => setShowDateRangePicker(!showDateRangePicker)}
           >
-            📅 {formatDateRange()}
+            <Icon name="calendar" size={16} />
+            <span style={{ marginLeft: '6px' }}>{formatDateRange()}</span>
           </button>
           <button className={styles.generateButton} onClick={generateFromPlannedMeals}>
-            ✨ Generate
+            <Icon name="sparkles" size={16} />
+            <span style={{ marginLeft: '6px' }}>Generate</span>
           </button>
           <button className={styles.addButton} onClick={() => setShowAddForm(!showAddForm)}>
-            ➕ Add Item
+            <Icon name="plus" size={16} />
+            <span style={{ marginLeft: '6px' }}>Add Item</span>
           </button>
         </div>
       </div>
@@ -303,7 +307,9 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
         <div className={styles.dateRangePicker}>
           <div className={styles.dateRangeHeader}>
             <h3>Select Date Range</h3>
-            <button onClick={() => setShowDateRangePicker(false)} className={styles.closePicker}>✕</button>
+            <button onClick={() => setShowDateRangePicker(false)} className={styles.closePicker}>
+              <Icon name="close" size={18} />
+            </button>
           </div>
           <div className={styles.dateRangePresets}>
             <button onClick={() => setDateRangePreset(7)} className={styles.presetButton}>
@@ -378,7 +384,9 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
 
       {groceryItems.length === 0 ? (
         <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>🛒</div>
+          <div className={styles.emptyIcon}>
+            <Icon name="shopping-cart" size={48} color="#9ca3af" />
+          </div>
           <h3 className={styles.emptyTitle}>Your grocery list is empty</h3>
           <p className={styles.emptyText}>
             Generate a list from your meal plan or add items manually
@@ -420,7 +428,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
                       onClick={() => deleteItem(item.id)}
                       title="Delete item"
                     >
-                      ✕
+                      <Icon name="close" size={16} />
                     </button>
                   </div>
                 ))}
@@ -433,7 +441,8 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
       {checkedItems > 0 && (
         <div className={styles.footer}>
           <button className={styles.clearButton} onClick={clearCheckedItems}>
-            🗑️ Clear Checked Items ({checkedItems})
+            <Icon name="trash" size={16} />
+            <span style={{ marginLeft: '6px' }}>Clear Checked Items ({checkedItems})</span>
           </button>
         </div>
       )}

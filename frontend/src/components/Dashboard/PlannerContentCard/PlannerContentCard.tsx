@@ -1,5 +1,6 @@
 import React from "react"
 import styles from "../Dashboard.module.css"
+import { Icon } from "../../ui/Icon"
 
 interface Meal {
   name: string
@@ -64,9 +65,15 @@ export default function PlannerMealCard({
                 <div className={styles.mealCardMain}>
                   <h4 className={styles.mealCardTitle}>{meal.name}</h4>
                   <div className={styles.mealCardMeta}>
-                    <span>⏱ {meal.time}</span>
-                    <span>💲 {meal.cost}</span>
-                    <span>⚡ {meal.calories} cal</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Icon name="clock" size={14} /> {meal.time}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Icon name="dollar" size={14} /> {meal.cost}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Icon name="zap" size={14} /> {meal.calories} cal
+                    </span>
                   </div>
                 </div>
                 <button
@@ -76,7 +83,7 @@ export default function PlannerMealCard({
                     onDeleteMeal(selectedDay, mealType, index)
                   }}
                 >
-                  🗑️
+                  <Icon name="trash" size={16} />
                 </button>
               </div>
             </div>

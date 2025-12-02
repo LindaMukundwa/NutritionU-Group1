@@ -13,6 +13,7 @@ import GenerateMealPlanModal from "./GenerateMealPlanModal/GenerateMealPlanModal
 import type { Recipe } from '../../../../shared/types/recipe';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMealPlan } from '../../hooks/useMealPlan';
+import { Icon } from '../ui/Icon';
 
 interface SummaryCardData {
   title: string;
@@ -173,13 +174,19 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
           <div>
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
             <div className={styles.modalMeta}>
-              <span>⏱ {recipe.time || recipe.cookTime}</span>
-              <span>💲 {recipe.cost}</span>
-              <span>⚡ {recipe.calories} cal</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Icon name="clock" size={16} /> {recipe.time || recipe.cookTime}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Icon name="dollar" size={16} /> {recipe.cost}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Icon name="zap" size={16} /> {recipe.calories} cal
+              </span>
             </div>
           </div>
           <button className={styles.modalCloseButton} onClick={onClose}>
-            ✕
+            <Icon name="close" size={20} />
           </button>
         </div>
 
@@ -256,8 +263,14 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
           </div>
 
           <div className={styles.modalActions}>
-            <button className={styles.primaryButton}>🛒 Add to Grocery List</button>
-            <button className={styles.secondaryButton}>✏️ Edit Recipe</button>
+            <button className={styles.primaryButton}>
+              <Icon name="shopping-cart" size={18} />
+              <span style={{ marginLeft: '6px' }}>Add to Grocery List</span>
+            </button>
+            <button className={styles.secondaryButton}>
+              <Icon name="edit" size={18} />
+              <span style={{ marginLeft: '6px' }}>Edit Recipe</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1118,7 +1131,8 @@ function PlannerContent({
             className={styles.primaryButton}
             onClick={() => setShowGenerateMealPlanModal(true)}
           >
-            ✨ Generate Meal Plan
+            <Icon name="sparkles" size={18} />
+            <span style={{ marginLeft: '6px' }}>Generate Meal Plan</span>
           </button>
           <DateNavigation selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
         </div>
@@ -1176,7 +1190,10 @@ function PlannerContent({
             <strong>${totalCost}</strong> daily cost
           </span>
         </div>
-        <button className={styles.primaryButton} onClick={onOpenGroceryList}>🛒 Add to Grocery List</button>
+        <button className={styles.primaryButton} onClick={onOpenGroceryList}>
+          <Icon name="shopping-cart" size={18} />
+          <span style={{ marginLeft: '6px' }}>Add to Grocery List</span>
+        </button>
       </div>
 
       {showRecipeModal && selectedRecipe && (
@@ -1279,7 +1296,9 @@ function NutritionContent({
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>⚡</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="zap" size={18} />
+              </span>
               <span>Calories</span>
             </div>
             <span className={styles.nutritionValue}>
@@ -1292,7 +1311,9 @@ function NutritionContent({
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>💪</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="dumbbell" size={18} />
+              </span>
               <span>Protein</span>
             </div>
             <span className={styles.nutritionValue}>
@@ -1305,7 +1326,9 @@ function NutritionContent({
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>🍎</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="wheat" size={18} />
+              </span>
               <span>Carbohydrates</span>
             </div>
             <span className={styles.nutritionValue}>
@@ -1318,7 +1341,9 @@ function NutritionContent({
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>💧</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="droplet" size={18} />
+              </span>
               <span>Fat</span>
             </div>
             <span className={styles.nutritionValue}>
@@ -1331,7 +1356,9 @@ function NutritionContent({
         <div className={styles.nutritionItem}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
-              <span className={styles.nutritionIcon}>🌾</span>
+              <span className={styles.nutritionIcon}>
+                <Icon name="sprout" size={18} />
+              </span>
               <span>Fiber</span>
             </div>
             <span className={styles.nutritionValue}>
@@ -1617,7 +1644,10 @@ function DashboardContentSwitcher({
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <span>⚠️ Failed to sync meal plan. Changes are saved locally.</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Icon name="alert" size={16} />
+            Failed to sync meal plan. Changes are saved locally.
+          </span>
           <button onClick={saveMealPlan} style={{ padding: '0.25rem 0.5rem' }}>
             Retry
           </button>
@@ -1684,13 +1714,13 @@ const Dashboard: FC<DashboardProps> = () => {
       title: "Meals Planned",
       value: user?.mealPlans?.length ?? 0,
       subtext: "This week",
-      icon: "🍴",
+      icon: "utensils",
     },
     {
       title: "Avg. Calories",
       value: user?.nutritionGoals?.calories ?? 2000,
       subtext: "",
-      icon: "⚡",
+      icon: "zap",
       progressBar: {
         current: 75,
         total: 100,
@@ -1707,23 +1737,34 @@ const Dashboard: FC<DashboardProps> = () => {
     )
   }
 
-  const renderSummaryCard = (card: SummaryCardData) => (
-    <div key={card.title} className={styles.summaryCard}>
-      <div className={styles.cardHeader}>
-        <div className={styles.cardTitle}>{card.title}</div>
-      </div>
-      <div className={styles.cardBody}>
-        <div className={styles.cardValue}>{card.value}</div>
-        <div className={styles.iconBackground}>{card.icon}</div>
-      </div>
+  const renderSummaryCard = (card: SummaryCardData) => {
+    // Determine if icon is a lucide icon name or a simple string (like "$")
+    const isLucideIcon = card.icon !== "$";
+    
+    return (
+      <div key={card.title} className={styles.summaryCard}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardTitle}>{card.title}</div>
+        </div>
+        <div className={styles.cardBody}>
+          <div className={styles.cardValue}>{card.value}</div>
+          <div className={styles.iconBackground}>
+            {isLucideIcon ? (
+              <Icon name={card.icon as any} size={20} />
+            ) : (
+              card.icon
+            )}
+          </div>
+        </div>
 
-      {card.progressBar ? (
-        renderProgressBar(card.progressBar.current, card.progressBar.total)
-      ) : (
-        <div className={styles.cardSubtext}>{card.subtext}</div>
-      )}
-    </div>
-  )
+        {card.progressBar ? (
+          renderProgressBar(card.progressBar.current, card.progressBar.total)
+        ) : (
+          <div className={styles.cardSubtext}>{card.subtext}</div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={styles.Dashboard}>
@@ -1735,7 +1776,9 @@ const Dashboard: FC<DashboardProps> = () => {
 
       {/* Header/Greeting Section */}
       <div className={styles.header}>
-        <h1 className={styles.greeting}>Good morning, {displayName} 👋</h1>
+        <h1 className={styles.greeting}>
+          Good morning, {displayName} <Icon name="hand" size={20} style={{ display: 'inline-block', marginLeft: '4px', transform: 'translateY(-2px)' }} />
+        </h1>
         <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
       </div>
 
