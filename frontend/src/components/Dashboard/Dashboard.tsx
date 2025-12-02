@@ -13,6 +13,7 @@ import GenerateMealPlanModal from "./GenerateMealPlanModal/GenerateMealPlanModal
 import type { Recipe } from '../../../../shared/types/recipe';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMealPlan } from '../../hooks/useMealPlan';
+import type { User } from "firebase/auth"
 
 interface SummaryCardData {
   title: string;
@@ -1319,11 +1320,13 @@ function PlannerContent({
 function NutritionContent({
   selectedDay,
   setSelectedDay,
-  weeklyMealPlan
+  weeklyMealPlan,
+  userData
 }: {
   selectedDay: string;
   setSelectedDay: React.Dispatch<React.SetStateAction<string>>;
   weeklyMealPlan: WeeklyMealPlan;
+  userData: any
 }) {
   // Calculate nutrition data based on the selected day's meals
   const calculateNutritionData = () => {
@@ -1350,11 +1353,11 @@ function NutritionContent({
 
     // Target values (you can customize these based on user goals)
     const targets = {
-      calories: 2000,
-      protein: 120,
-      carbs: 250,
-      fat: 78,
-      fiber: 25
+      calories: userData?.nutritionGoals?.calories || 2000,
+      protein: userData?.nutritionGoals?.protein || 120,
+      carbs: userData?.nutritionGoals?.carbs || 250,
+      fat: userData?.nutritionGoals?.fats || 78,
+      fiber: 25 // Currently hardcoded because its not implemented 
     };
 
     return {
@@ -1758,6 +1761,7 @@ function DashboardContentSwitcher({
             selectedDay={selectedDay}
             setSelectedDay={setSelectedDay}
             weeklyMealPlan={weeklyMealPlan}
+            userData={user}
           />
         )}
         {activeTab === "ai-assistant" && <AIAssistantContent />}
