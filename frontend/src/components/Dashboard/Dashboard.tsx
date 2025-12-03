@@ -1732,7 +1732,7 @@ const Dashboard: FC<DashboardProps> = () => {
       icon: "circle-dollar",
       progressBar: {
         current: 50,
-        total: user?.budget?.maximum ?? 100,
+        total: user?.budget?.value ?? 100,
       },
     },
     {
