@@ -4,6 +4,7 @@ import userRoutes from './routes/UserRoutes.ts';
 import recipeRoutes from './routes/RecipeRoutes.ts';
 import chatbotRoutes from './routes/ChatbotRoutes.ts';
 import mealPlanRoutes from './routes/MealPlanRoutes.ts';
+import groceryListRoutes from './routes/GroceryListRoutes.ts';
 
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/chatbot', chatbotRoutes); // Open AI chat communcations
 app.use('/api', mealPlanRoutes); // Meal plan routes
+app.use('/api/grocery', groceryListRoutes);
 
 // Start the server
 const startServer = async () => {

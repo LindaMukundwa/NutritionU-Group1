@@ -32,6 +32,9 @@ model User {
   goals               Json?
   cookingLevel        String?
 
+  // Grocery lists
+  groceryLists GroceryList[]
+
   // Timestamps and counters
   lastLogin           DateTime @default(now())
   planGenerationCount Int      @default(0)
@@ -83,6 +86,7 @@ model MealPlan {
   items     MealPlanItem[]
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
+  groceryLists GroceryList[]
 
   @@unique([userId, startDate]) // One meal plan per user per week
 }
@@ -96,4 +100,32 @@ model MealPlanItem {
   date       DateTime // Specific date for this meal (YYYY-MM-DD)
   mealType   String // "breakfast", "lunch", "dinner", "snacks"
   createdAt  DateTime @default(now())
+}
+
+model GroceryList {
+  id        String   @id @default(cuid())
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  mealPlanId Int?
+  mealPlan   MealPlan? @relation(fields: [mealPlanId], references: [id], onDelete: SetNull)
+  
+  items GroceryItem[]
+}
+
+model GroceryItem {
+  id       String  @id @default(cuid())
+  name     String
+  quantity String  // e.g., "2 cups", "1 lb", "3 pieces"
+  source   String? // e.g., recipe name or manual entry
+  checked  Boolean @default(false) // for checking off items
+  
+  // Relations
+  groceryListId String
+  groceryList   GroceryList @relation(fields: [groceryListId], references: [id], onDelete: Cascade)
 }
