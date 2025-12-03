@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import styles from './GroceryList.module.css';
 
-// Types based on your Prisma schema
+// Types based on Prisma schema
 interface GroceryItem {
   id: string;
   name: string;
@@ -14,12 +14,6 @@ interface GroceryItem {
   updatedAt: string;
 }
 
-interface MealPlan {
-  id: number;
-  startDate: string;
-  endDate: string;
-}
-
 interface GroceryListData {
   id: string;
   name: string;
@@ -28,7 +22,6 @@ interface GroceryListData {
   createdAt: string;
   updatedAt: string;
   items: GroceryItem[];
-  mealPlan?: MealPlan;
 }
 
 interface GroceryListProps {
@@ -47,93 +40,157 @@ const GroceryList: React.FC<GroceryListProps> = ({
   pendingRecipe
 }) => {
   const { user } = useAuth();
-  const [groceryLists, setGroceryLists] = useState<GroceryListData[]>([]);
-  const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [groceryList, setGroceryList] = useState<GroceryListData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newListName, setNewListName] = useState('');
-  const [editingListName, setEditingListName] = useState(false);
-  const [tempListName, setTempListName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   // Categories for organizing items
   const categories = ['All', 'Produce', 'Meat', 'Dairy', 'Pantry', 'Other'];
 
-  // Fetch user's grocery lists
-  const fetchGroceryLists = async () => {
+  // Helper function to get the start of the current week (Sunday)
+  const getCurrentWeekStart = (): Date => {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - dayOfWeek);
+    weekStart.setHours(0, 0, 0, 0);
+    return weekStart;
+  };
+
+  // Helper function to format week range for display
+  const formatWeekRange = (weekStart: Date): string => {
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric'
+    };
+
+    return `${weekStart.toLocaleDateString('en-US', options)} - ${weekEnd.toLocaleDateString('en-US', options)}`;
+  };
+
+  // Fetch or create the current week's grocery list
+  const fetchCurrentWeekGroceryList = async () => {
     if (!user?.firebaseUid) return;
 
     try {
       setLoading(true);
+      setError(null);
+      const weekStart = getCurrentWeekStart();
+      const weekName = `Week of ${formatWeekRange(weekStart)}`;
+
+      console.log('Looking for list with name:', weekName);
+
+      // Get all user's grocery lists
       const response = await fetch(`${API_BASE_URL}/grocery/users/${user.firebaseUid}/grocery-lists`);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch grocery lists: ${response.status}`);
-      }
+      if (response.ok) {
+        const allLists = await response.json();
+        console.log('All lists:', allLists);
 
-      const data = await response.json();
-      setGroceryLists(data);
+        // Find the list for current week by name
+        const currentWeekList = allLists.find((list: GroceryListData) =>
+          list.name === weekName
+        );
 
-      // Auto-select the first list or create one if none exist
-      if (data.length > 0 && !selectedListId) {
-        setSelectedListId(data[0].id);
-      } else if (data.length === 0) {
-        // Create a default list
-        await createGroceryList('My Grocery List');
+        if (currentWeekList) {
+          console.log('Found existing weekly list:', currentWeekList);
+          setGroceryList(currentWeekList);
+        } else {
+          console.log('No list found for current week, creating new one');
+          // No list exists for this week, create one
+          await createWeeklyGroceryList();
+        }
+      } else if (response.status === 404) {
+        console.log('No lists exist, creating first one');
+        // No lists exist at all, create first one
+        await createWeeklyGroceryList();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch grocery lists: ${response.status} - ${errorText}`);
       }
     } catch (err) {
+      console.error('Error fetching grocery lists:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch grocery lists');
     } finally {
       setLoading(false);
     }
   };
 
-  // Create new grocery list
-  const createGroceryList = async (name: string, mealPlanId?: number) => {
+  // Fetch complete grocery list by ID (including items)
+  const fetchGroceryListById = async (listId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${listId}`);
+
+      if (response.ok) {
+        const listData = await response.json();
+        setGroceryList(listData);
+      } else {
+        throw new Error(`Failed to fetch grocery list details: ${response.status}`);
+      }
+    } catch (err) {
+      console.error('Error fetching grocery list by ID:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch grocery list details');
+    }
+  };
+
+  // Create a new weekly grocery list
+  // Create a new weekly grocery list
+  const createWeeklyGroceryList = async () => {
     if (!user?.firebaseUid) return;
 
     try {
+      const weekStart = getCurrentWeekStart();
+      const listName = `Week of ${formatWeekRange(weekStart)}`;
+
+      console.log('Creating weekly grocery list with name:', listName);
+
       const response = await fetch(`${API_BASE_URL}/grocery/users/${user.firebaseUid}/grocery-lists`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, mealPlanId }),
+        body: JSON.stringify({
+          name: listName
+          // Don't include weekStartDate or mealPlanId - backend doesn't expect weekStartDate
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create grocery list');
+        const errorText = await response.text();
+        console.error('Create list failed:', response.status, errorText);
+        throw new Error(`Failed to create grocery list: ${response.status} - ${errorText}`);
       }
 
       const newList = await response.json();
-      setGroceryLists(prev => [newList, ...prev]);
-      setSelectedListId(newList.id);
-      setNewListName('');
+      console.log('Created grocery list:', newList);
+
+      setGroceryList(newList);
+      setError(null);
+
     } catch (err) {
+      console.error('Error creating grocery list:', err);
       setError(err instanceof Error ? err.message : 'Failed to create grocery list');
     }
   };
 
   // Add grocery item
-  // Add grocery item
-  const addGroceryItem = async (listId: string) => {
-    
-    if (!newItemName.trim() || !newItemQuantity.trim()) {
-      console.log("❌ Empty name or quantity, returning early");
+  const addGroceryItem = async () => {
+    if (!newItemName.trim() || !newItemQuantity.trim() || !groceryList) {
       return;
     }
-  
+
     try {
       // Check for duplicate item names (case-insensitive)
-      const currentList = groceryLists.find(list => list.id === listId);
-      const existingItemNames = currentList?.items.map(item =>
+      const existingItemNames = groceryList.items.map(item =>
         item.name.toLowerCase().trim()
-      ) || [];
-  
-  
+      );
+
       if (existingItemNames.includes(newItemName.toLowerCase().trim())) {
         // Silently skip duplicate - just clear the form and return
         setNewItemName('');
@@ -141,8 +198,8 @@ const GroceryList: React.FC<GroceryListProps> = ({
         setShowAddForm(false);
         return;
       }
-  
-      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${listId}/items`, {
+
+      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,29 +210,24 @@ const GroceryList: React.FC<GroceryListProps> = ({
           source: pendingRecipe?.name || null,
         }),
       });
-  
+
       if (!response.ok) {
-        const errorText = await response.text();
         throw new Error('Failed to add grocery item');
       }
-  
+
       const newItem = await response.json();
-      
-      setGroceryLists(prev => prev.map(list =>
-        list.id === listId ? {
-          ...list,
-          items: [...list.items, newItem]
-        } : list
-      ));
-  
+
+      setGroceryList(prev => prev ? {
+        ...prev,
+        items: [...prev.items, newItem]
+      } : null);
+
       setNewItemName('');
       setNewItemQuantity('');
       setShowAddForm(false);
       setError(null);
-      
-      console.log("🔵 Function completed successfully");
+
     } catch (err) {
-      console.error("❌ Error in addGroceryItem:", err);
       setError(err instanceof Error ? err.message : 'Failed to add item');
     }
   };
@@ -192,12 +244,12 @@ const GroceryList: React.FC<GroceryListProps> = ({
       }
 
       const updatedItem = await response.json();
-      setGroceryLists(prev => prev.map(list => ({
-        ...list,
-        items: list.items.map(item =>
+      setGroceryList(prev => prev ? {
+        ...prev,
+        items: prev.items.map(item =>
           item.id === itemId ? updatedItem : item
         )
-      })));
+      } : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to toggle item');
     }
@@ -214,19 +266,21 @@ const GroceryList: React.FC<GroceryListProps> = ({
         throw new Error('Failed to delete grocery item');
       }
 
-      setGroceryLists(prev => prev.map(list => ({
-        ...list,
-        items: list.items.filter(item => item.id !== itemId)
-      })));
+      setGroceryList(prev => prev ? {
+        ...prev,
+        items: prev.items.filter(item => item.id !== itemId)
+      } : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete item');
     }
   };
 
   // Clear checked items
-  const clearCheckedItems = async (listId: string) => {
+  const clearCheckedItems = async () => {
+    if (!groceryList) return;
+
     try {
-      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${listId}/checked-items`, {
+      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/checked-items`, {
         method: 'DELETE',
       });
 
@@ -234,225 +288,174 @@ const GroceryList: React.FC<GroceryListProps> = ({
         throw new Error('Failed to clear checked items');
       }
 
-      setGroceryLists(prev => prev.map(list =>
-        list.id === listId ? {
-          ...list,
-          items: list.items.filter(item => !item.checked)
-        } : list
-      ));
+      setGroceryList(prev => prev ? {
+        ...prev,
+        items: prev.items.filter(item => !item.checked)
+      } : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to clear checked items');
     }
   };
 
   // Generate grocery list from meal plan
-// Generate grocery list from meal plan
-// Generate grocery list from meal plan
-// Generate grocery list from meal plan
-const generateFromMealPlan = async () => {
-  if (!selectedListId || !weeklyMealPlan) return;
+  const generateFromMealPlan = async () => {
+    if (!groceryList || !weeklyMealPlan) return;
 
-  console.log("🔵 Starting generateFromMealPlan");
-  console.log("📋 Weekly meal plan:", weeklyMealPlan);
+    try {
+      // Extract ingredients with their source recipes and count occurrences
+      const ingredientMap = new Map<string, { count: number; sources: string[]; recipeIds: Set<number> }>();
 
-  try {
-    // Extract ingredients with their source recipes and count occurrences
-    const ingredientMap = new Map<string, { count: number; sources: string[]; recipeIds: Set<number> }>();
-    
-    Object.values(weeklyMealPlan).forEach((dayPlan: any) => {
-      ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
-        dayPlan[mealType]?.forEach((meal: any) => {
-          console.log(`🍽️ Processing meal: ${meal.name} (ID: ${meal.recipeId})`);
-          console.log(`📦 Ingredients:`, meal.recipe?.ingredients);
-          
-          if (meal.recipe?.ingredients && meal.name && meal.recipeId) {
-            meal.recipe.ingredients.forEach((ingredient: string) => {
-              const ingredientKey = ingredient.toLowerCase().trim();
-              
-              if (ingredientMap.has(ingredientKey)) {
-                const existing = ingredientMap.get(ingredientKey)!;
-                
-                // Only increment count if this is a different recipe ID
-                if (!existing.recipeIds.has(meal.recipeId)) {
-                  console.log(`➕ Incrementing ${ingredientKey} from count ${existing.count} to ${existing.count + 1}`);
-                  existing.count += 1;
-                  existing.recipeIds.add(meal.recipeId);
-                  
-                  // Add source if it's not already included
-                  if (!existing.sources.includes(meal.name)) {
-                    existing.sources.push(meal.name);
+      Object.values(weeklyMealPlan).forEach((dayPlan: any) => {
+        ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
+          dayPlan[mealType]?.forEach((meal: any) => {
+            if (meal.recipe?.ingredients && meal.name && meal.recipeId) {
+              meal.recipe.ingredients.forEach((ingredient: string) => {
+                const ingredientKey = ingredient.toLowerCase().trim();
+
+                if (ingredientMap.has(ingredientKey)) {
+                  const existing = ingredientMap.get(ingredientKey)!;
+
+                  // Only increment count if this is a different recipe ID
+                  if (!existing.recipeIds.has(meal.recipeId)) {
+                    existing.count += 1;
+                    existing.recipeIds.add(meal.recipeId);
+
+                    // Add source if it's not already included
+                    if (!existing.sources.includes(meal.name)) {
+                      existing.sources.push(meal.name);
+                    }
+                  } else {
+                    // If same recipe ID, don't increment but still track the recipe name if different
+                    if (!existing.sources.includes(meal.name)) {
+                      existing.sources.push(meal.name);
+                    }
                   }
                 } else {
-                  console.log(`⏭️ Skipping ${ingredientKey} - same recipe ID ${meal.recipeId}`);
-                  // If same recipe ID, don't increment but still track the recipe name if different
-                  if (!existing.sources.includes(meal.name)) {
-                    existing.sources.push(meal.name);
-                  }
+                  ingredientMap.set(ingredientKey, {
+                    count: 1,
+                    sources: [meal.name],
+                    recipeIds: new Set([meal.recipeId])
+                  });
                 }
-              } else {
-                console.log(`🆕 Adding new ingredient: ${ingredientKey} (count: 1)`);
-                ingredientMap.set(ingredientKey, {
-                  count: 1,
-                  sources: [meal.name],
-                  recipeIds: new Set([meal.recipeId])
-                });
-              }
-            });
-          }
+              });
+            }
+          });
         });
       });
-    });
 
-    console.log("📊 Final ingredient map:", Array.from(ingredientMap.entries()));
+      // Get current grocery list to check for existing items
+      const existingItemsMap = new Map(
+        groceryList.items.map(item => [item.name.toLowerCase().trim(), item])
+      );
 
-    // Get current grocery list to check for existing items
-    const currentList = groceryLists.find(list => list.id === selectedListId);
-    const existingItemsMap = new Map(
-      (currentList?.items || []).map(item => [item.name.toLowerCase().trim(), item])
-    );
+      // Process all ingredients - update existing or add new
+      const newItemsToAdd: GroceryItem[] = [];
+      let addedCount = 0;
+      let updatedCount = 0;
 
-    console.log("🔍 Existing items in grocery list:", Array.from(existingItemsMap.keys()));
-
-    // Process all ingredients - update existing or add new
-    const newItemsToAdd: GroceryItem[] = [];
-    let addedCount = 0;
-    let updatedCount = 0;
-
-    for (const [ingredientKey, data] of ingredientMap.entries()) {
-      try {
-        // Find the original ingredient name (with proper capitalization)
-        const originalIngredient = Object.values(weeklyMealPlan)
-          .flatMap((dayPlan: any) => 
-            ['breakfast', 'lunch', 'dinner', 'snacks'].flatMap(mealType =>
-              dayPlan[mealType]?.flatMap((meal: any) => 
-                meal.recipe?.ingredients || []
-              ) || []
+      for (const [ingredientKey, data] of ingredientMap.entries()) {
+        try {
+          // Find the original ingredient name (with proper capitalization)
+          const originalIngredient = Object.values(weeklyMealPlan)
+            .flatMap((dayPlan: any) =>
+              ['breakfast', 'lunch', 'dinner', 'snacks'].flatMap(mealType =>
+                dayPlan[mealType]?.flatMap((meal: any) =>
+                  meal.recipe?.ingredients || []
+                ) || []
+              )
             )
-          )
-          .find((ing: string) => ing.toLowerCase().trim() === ingredientKey);
+            .find((ing: string) => ing.toLowerCase().trim() === ingredientKey);
 
-        const quantity = data.count === 1 ? '1 serving' : `${data.count} servings`;
-        
-        // Use the first recipe as primary source, but could show multiple sources
-        const primarySource = data.sources[0];
-        const sourceText = data.sources.length > 1 
-          ? `${primarySource} (+${data.sources.length - 1} more)`
-          : primarySource;
+          const quantity = data.count === 1 ? '1 serving' : `${data.count} servings`;
 
-        const existingItem = existingItemsMap.get(ingredientKey);
+          // Use the first recipe as primary source, but could show multiple sources
+          const primarySource = data.sources[0];
+          const sourceText = data.sources.length > 1
+            ? `${primarySource} (+${data.sources.length - 1} more)`
+            : primarySource;
 
-        if (existingItem) {
-          // Update existing item quantity and source
-          console.log(`🔄 Updating existing item ${existingItem.name} to ${quantity}`);
-          
-          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${existingItem.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              name: originalIngredient || existingItem.name,
-              quantity: quantity,
-              source: sourceText,
-            }),
-          });
+          const existingItem = existingItemsMap.get(ingredientKey);
 
-          console.log(`📥 Update API Response for ${ingredientKey}:`, response.status, response.ok);
+          if (existingItem) {
+            // Update existing item quantity and source
+            const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${existingItem.id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                name: originalIngredient || existingItem.name,
+                quantity: quantity,
+                source: sourceText,
+              }),
+            });
 
-          if (response.ok) {
-            const updatedItem = await response.json();
-            console.log(`✅ Successfully updated item:`, updatedItem);
-            
-            // Update frontend state for this item
-            setGroceryLists(prev => prev.map(list => 
-              list.id === selectedListId ? {
-                ...list,
-                items: list.items.map(item => 
+            if (response.ok) {
+              const updatedItem = await response.json();
+
+              // Update frontend state for this item
+              setGroceryList(prev => prev ? {
+                ...prev,
+                items: prev.items.map(item =>
                   item.id === existingItem.id ? updatedItem : item
                 )
-              } : list
-            ));
-            updatedCount++;
+              } : null);
+              updatedCount++;
+            }
           } else {
-            const errorText = await response.text();
-            console.error(`❌ Update API Error for ${ingredientKey}:`, errorText);
+            // Add new item
+            const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                name: originalIngredient || ingredientKey,
+                quantity: quantity,
+                source: sourceText,
+              }),
+            });
+
+            if (response.ok) {
+              const newItem = await response.json();
+              newItemsToAdd.push(newItem);
+              addedCount++;
+            }
           }
-        } else {
-          // Add new item
-          console.log(`📤 Adding new ingredient to API:`, {
-            name: originalIngredient || ingredientKey,
-            quantity: quantity,
-            source: sourceText,
-            count: data.count,
-            sources: data.sources,
-            recipeIds: Array.from(data.recipeIds)
-          });
-
-          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${selectedListId}/items`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              name: originalIngredient || ingredientKey,
-              quantity: quantity,
-              source: sourceText,
-            }),
-          });
-
-          console.log(`📥 Add API Response for ${ingredientKey}:`, response.status, response.ok);
-
-          if (response.ok) {
-            const newItem = await response.json();
-            console.log(`✅ Successfully added item:`, newItem);
-            newItemsToAdd.push(newItem);
-            addedCount++;
-          } else {
-            const errorText = await response.text();
-            console.error(`❌ Add API Error for ${ingredientKey}:`, errorText);
-          }
+        } catch (itemError) {
+          console.error(`Failed to process ingredient: ${ingredientKey}`, itemError);
         }
-      } catch (itemError) {
-        console.error(`❌ Failed to process ingredient: ${ingredientKey}`, itemError);
       }
+
+      // Add new items to frontend state
+      if (addedCount > 0) {
+        setGroceryList(prev => prev ? {
+          ...prev,
+          items: [...prev.items, ...newItemsToAdd]
+        } : null);
+      }
+
+      if (addedCount > 0 || updatedCount > 0) {
+        setError(null);
+      }
+
+    } catch (err) {
+      console.error('Error in generateFromMealPlan:', err);
+      setError('Failed to generate grocery list from meal plan');
     }
-
-    console.log(`📊 Summary: ${addedCount} new items, ${updatedCount} updated items`);
-
-    // Add new items to frontend state
-    if (addedCount > 0) {
-      setGroceryLists(prev => prev.map(list => 
-        list.id === selectedListId ? {
-          ...list,
-          items: [...list.items, ...newItemsToAdd]
-        } : list
-      ));
-    }
-
-    if (addedCount > 0 || updatedCount > 0) {
-      setError(null);
-      console.log(`✅ Successfully processed ${addedCount + updatedCount} items from meal plan`);
-    }
-
-  } catch (err) {
-    console.error('❌ Error in generateFromMealPlan:', err);
-    setError('Failed to generate grocery list from meal plan');
-  }
-};
+  };
 
   // Add ingredients from pending recipe
-  // Add ingredients from pending recipe
-  const addRecipeIngredients = async (listId: string) => {
-    if (!pendingRecipe?.recipe?.ingredients) return;
+  const addRecipeIngredients = async () => {
+    if (!pendingRecipe?.recipe?.ingredients || !groceryList) return;
 
     const ingredients: string[] = pendingRecipe.recipe.ingredients;
 
     try {
       // Get current grocery list to check for existing items
-      const currentList = groceryLists.find(list => list.id === listId);
-      const existingItemNames = currentList?.items.map(item =>
+      const existingItemNames = groceryList.items.map(item =>
         item.name.toLowerCase().trim()
-      ) || [];
+      );
 
       // Filter out ingredients that already exist
       const newIngredients = ingredients.filter(ingredient =>
@@ -463,7 +466,7 @@ const generateFromMealPlan = async () => {
       let addedCount = 0;
       for (const ingredient of newIngredients) {
         try {
-          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${listId}/items`, {
+          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -483,9 +486,9 @@ const generateFromMealPlan = async () => {
         }
       }
 
-      // Refresh the grocery lists to show new items
+      // Refresh the grocery list to show new items
       if (addedCount > 0) {
-        await fetchGroceryLists();
+        await fetchCurrentWeekGroceryList();
       }
 
     } catch (err) {
@@ -498,11 +501,14 @@ const generateFromMealPlan = async () => {
     const name = itemName.toLowerCase();
 
     if (name.includes('apple') || name.includes('banana') || name.includes('lettuce') ||
-      name.includes('tomato') || name.includes('onion') || name.includes('carrot')) {
+      name.includes('tomato') || name.includes('onion') || name.includes('carrot') ||
+      name.includes('cucumber') || name.includes('avocado') || name.includes('berries') ||
+      name.includes('vegetable') || name.includes('fruit')) {
       return 'Produce';
     }
     if (name.includes('chicken') || name.includes('beef') || name.includes('pork') ||
-      name.includes('fish') || name.includes('meat')) {
+      name.includes('fish') || name.includes('meat') || name.includes('salmon') ||
+      name.includes('tofu') || name.includes('egg')) {
       return 'Meat';
     }
     if (name.includes('milk') || name.includes('cheese') || name.includes('yogurt') ||
@@ -510,14 +516,17 @@ const generateFromMealPlan = async () => {
       return 'Dairy';
     }
     if (name.includes('flour') || name.includes('sugar') || name.includes('salt') ||
-      name.includes('oil') || name.includes('spice') || name.includes('sauce')) {
+      name.includes('oil') || name.includes('spice') || name.includes('sauce') ||
+      name.includes('rice') || name.includes('bread') || name.includes('pasta') ||
+      name.includes('oat') || name.includes('honey') || name.includes('nuts') || name.includes('granola')) {
       return 'Pantry';
     }
 
     return 'Other';
   };
 
-  // Group items by category
+
+  // Add groupItemsByCategory function
   const groupItemsByCategory = (items: GroceryItem[]) => {
     const grouped: { [key: string]: GroceryItem[] } = {};
 
@@ -534,30 +543,29 @@ const generateFromMealPlan = async () => {
 
   useEffect(() => {
     if (isOpen && user?.firebaseUid) {
-      fetchGroceryLists();
+      fetchCurrentWeekGroceryList();
     }
   }, [isOpen, user?.firebaseUid]);
 
   // Auto-add pending recipe ingredients when modal opens with a recipe
   useEffect(() => {
-    if (isOpen && pendingRecipe && selectedListId) {
-      addRecipeIngredients(selectedListId);
+    if (isOpen && pendingRecipe && groceryList) {
+      addRecipeIngredients();
     }
-  }, [isOpen, pendingRecipe, selectedListId]);
+  }, [isOpen, pendingRecipe, groceryList]);
 
   if (!isOpen) return null;
 
-  const selectedList = groceryLists.find(list => list.id === selectedListId);
-  const checkedItems = selectedList?.items.filter(item => item.checked) || [];
-  const uncheckedItems = selectedList?.items.filter(item => !item.checked) || [];
-  const groupedItems = selectedList ? groupItemsByCategory(uncheckedItems) : {};
+  const checkedItems = groceryList?.items.filter(item => item.checked) || [];
+  const uncheckedItems = groceryList?.items.filter(item => !item.checked) || [];
+  const groupedItems = groceryList ? groupItemsByCategory(uncheckedItems) : {};
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={styles.modalHeader}>
-          <h2 className={styles.modalTitle}>Grocery Lists</h2>
+          <h2 className={styles.modalTitle}>Grocery List</h2>
           <button className={styles.modalCloseButton} onClick={onClose}>
             ×
           </button>
@@ -569,7 +577,7 @@ const generateFromMealPlan = async () => {
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>⏳</div>
               <div className={styles.emptyTitle}>Loading...</div>
-              <div className={styles.emptyText}>Fetching your grocery lists</div>
+              <div className={styles.emptyText}>Fetching your grocery list</div>
             </div>
           )}
 
@@ -579,7 +587,7 @@ const generateFromMealPlan = async () => {
               <div className={styles.emptyTitle}>Error</div>
               <div className={styles.emptyText}>{error}</div>
               <button
-                onClick={fetchGroceryLists}
+                onClick={fetchCurrentWeekGroceryList}
                 className={styles.generateButton}
                 style={{ marginTop: '1rem' }}
               >
@@ -588,64 +596,18 @@ const generateFromMealPlan = async () => {
             </div>
           )}
 
-          {selectedList && !loading && !error && (
+          {groceryList && !loading && !error && (
             <>
               {/* Header Section */}
               <div className={styles.header}>
                 <div>
-                  <h1 className={styles.title}>
-                    {editingListName ? (
-                      <input
-                        type="text"
-                        value={tempListName}
-                        onChange={(e) => setTempListName(e.target.value)}
-                        className={styles.addInput}
-                        style={{ fontSize: '1.25rem', fontWeight: 600 }}
-                        onKeyDown={async (e) => {
-                          if (e.key === 'Enter') {
-                            await fetch(`${API_BASE_URL}/grocery/grocery-lists/${selectedList.id}`, {
-                              method: 'PUT',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ name: tempListName.trim() }),
-                            });
-                            setGroceryLists(prev => prev.map(list =>
-                              list.id === selectedList.id ? { ...list, name: tempListName.trim() } : list
-                            ));
-                            setEditingListName(false);
-                          }
-                          if (e.key === 'Escape') setEditingListName(false);
-                        }}
-                        autoFocus
-                      />
-                    ) : (
-                      <span onClick={() => {
-                        setEditingListName(true);
-                        setTempListName(selectedList.name);
-                      }}>
-                        {selectedList.name}
-                      </span>
-                    )}
-                  </h1>
+                  <h1 className={styles.title}>{groceryList.name}</h1>
                   <p className={styles.subtitle}>
-                    {selectedList.items.length} items • {checkedItems.length} completed
+                    {groceryList.items.length} items • {checkedItems.length} completed
                   </p>
                 </div>
 
                 <div className={styles.headerActions}>
-                  {groceryLists.length > 1 && (
-                    <select
-                      value={selectedListId || ''}
-                      onChange={(e) => setSelectedListId(e.target.value)}
-                      className={styles.dateRangeButton}
-                    >
-                      {groceryLists.map(list => (
-                        <option key={list.id} value={list.id}>
-                          {list.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
                   <button
                     onClick={generateFromMealPlan}
                     className={styles.generateButton}
@@ -659,16 +621,6 @@ const generateFromMealPlan = async () => {
                   >
                     + Add Item
                   </button>
-
-                  <button
-                    onClick={() => {
-                      const name = prompt('New list name:');
-                      if (name?.trim()) createGroceryList(name.trim());
-                    }}
-                    className={styles.addButton}
-                  >
-                    + New List
-                  </button>
                 </div>
               </div>
 
@@ -681,7 +633,7 @@ const generateFromMealPlan = async () => {
                     value={newItemName}
                     onChange={(e) => setNewItemName(e.target.value)}
                     className={styles.addInput}
-                    onKeyDown={(e) => e.key === 'Enter' && addGroceryItem(selectedList.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && addGroceryItem()}
                   />
                   <input
                     type="text"
@@ -690,10 +642,10 @@ const generateFromMealPlan = async () => {
                     onChange={(e) => setNewItemQuantity(e.target.value)}
                     className={styles.addInput}
                     style={{ flex: '0 0 120px' }}
-                    onKeyDown={(e) => e.key === 'Enter' && addGroceryItem(selectedList.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && addGroceryItem()}
                   />
                   <button
-                    onClick={() => addGroceryItem(selectedList.id)}
+                    onClick={addGroceryItem}
                     disabled={!newItemName.trim() || !newItemQuantity.trim()}
                     className={styles.addSubmitButton}
                   >
@@ -714,16 +666,16 @@ const generateFromMealPlan = async () => {
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`${styles.categoryButton} ${selectedCategory === category ? styles.categoryButtonActive : ''
-                      }`}
+                    className={`${styles.categoryButton} ${selectedCategory === category ? styles.categoryButtonActive : ''}`}
                   >
                     {category}
                   </button>
                 ))}
               </div>
 
+
               {/* Items Container */}
-              {selectedList.items.length === 0 ? (
+              {groceryList && groceryList.items.length === 0 ? (
                 <div className={styles.emptyState}>
                   <div className={styles.emptyIcon}>🛒</div>
                   <div className={styles.emptyTitle}>No items yet</div>
@@ -778,7 +730,7 @@ const generateFromMealPlan = async () => {
               {checkedItems.length > 0 && (
                 <div className={styles.footer}>
                   <button
-                    onClick={() => clearCheckedItems(selectedList.id)}
+                    onClick={clearCheckedItems}
                     className={styles.clearButton}
                   >
                     🗑️ Clear Completed Items
