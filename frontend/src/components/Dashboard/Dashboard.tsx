@@ -294,6 +294,7 @@ function MealContent({
   const [showAddToPlanModal, setShowAddToPlanModal] = React.useState(false)
   const [mealToAdd, setMealToAdd] = React.useState<any>(null)
   const { user } = useAuth();
+  const [isGeneratingRecipe, setIsGeneratingRecipe] = React.useState(false); // Add this line
   const [selectedFilters, setSelectedFilters] = React.useState({
     category: "All",
     maxTime: 60,
@@ -743,16 +744,21 @@ function MealContent({
         <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
       )}
 
-      {showAddToPlanModal && mealToAdd && (
+      {showAddToPlanModal && mealToAdd && !isGeneratingRecipe && (
         <AddToPlanModal
           isOpen={showAddToPlanModal}
-          onClose={() => setShowAddToPlanModal(false)}
+          onClose={() => {
+            setShowAddToPlanModal(false);
+            setIsGeneratingRecipe(false);
+          }}
           onAddToPlan={async (dateString, mealType) => {
             if (!user?.firebaseUid) {
               alert('Please log in to save meals');
               setShowAddToPlanModal(false);
               return;
             }
+
+            setIsGeneratingRecipe(true);
 
             try {
               const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
@@ -878,15 +884,26 @@ function MealContent({
                 console.log('[Dashboard] Updated meal plan from modal:', newPlan);
                 return newPlan;
               });
-
+              setIsGeneratingRecipe(false);
               setShowAddToPlanModal(false);
             } catch (error) {
               console.error('[Dashboard] Error adding meal from modal:', error);
+              setIsGeneratingRecipe(false);
               alert('Failed to add meal. Please try again.');
             }
           }}
           mealTitle={mealToAdd.title || mealToAdd.name}
         />
+      )}
+
+      {isGeneratingRecipe && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.loadingModal}>
+            <div className={styles.spinner}></div>
+            <p className={styles.loadingMessage}>Generating enhanced recipe with AI...</p>
+            <p className={styles.loadingSubtext}>This may take a few moments</p>
+          </div>
+        </div>
       )}
     </div>
   )

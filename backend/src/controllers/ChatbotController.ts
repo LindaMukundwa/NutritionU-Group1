@@ -105,35 +105,35 @@ export const generateChatbotPrompts = async (req: Request, res: Response) => {
   try {
     const { message } = req.body;
     console.log(message);
-    // const completion = await openai.chat.completions.create({
-    //   model: "gpt-3.5-turbo",
-    //   messages: [
-    //     {
-    //       role: "system",
-    //       content: `
-    //       System / Instruction Prompt:
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `
+          System / Instruction Prompt:
 
-    //       You are a prompt generator that creates short, clear, and meaningful prompts for a nutrition assistant chatbot.
-    //       Your job is to:
+          You are a prompt generator that creates short, clear, and meaningful prompts for a nutrition assistant chatbot.
+          Your job is to:
 
-    //       Generate a concise, actionable prompt (for the assistant to use next), and
+          Generate a concise, actionable prompt (for the assistant to use next), and
 
-    //       Guidelines:
+          Guidelines:
 
-    //       Generate 3 prompts (questions to ask) under 10 words based on the history of the conversation denoted in message. 
+          Generate 3 prompts (questions to ask) under 10 words based on the history of the conversation denoted in message. 
 
-    //       It should be from the point of view of the user asking the chatbot. Don't include numbered bullets.
+          It should be from the point of view of the user asking the chatbot. Don't include numbered bullets.
 
-    //       Remove list indicators (number indicators) and quotes surrounding the question.
-    //       `
-    //     },
-    //     ...message,
-    //   ],
+          Remove list indicators (number indicators) and quotes surrounding the question.
+          `
+        },
+        ...message,
+      ],
 
-    // });
-    // res.json({
-    //   reply: completion.choices[0].message?.content?.split('\n').filter(line => line.trim() !== '') || []
-    // });
+    });
+    res.json({
+      reply: completion.choices[0].message?.content?.split('\n').filter(line => line.trim() !== '') || []
+    });
 
   } catch (error) {
     console.error('OpenAI API error:', error);
