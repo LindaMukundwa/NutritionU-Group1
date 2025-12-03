@@ -70,56 +70,69 @@
 /* Modal Body */
 .modalBody {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Meal Title Section - Centered */
+.mealTitleSection {
+  text-align: center;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
 .mealTitle {
   font-size: 1rem;
   font-weight: 600;
-  color: #374151;
-  margin: 0 0 24px 0;
-  padding: 12px;
-  background: #f9fafb;
-  border-radius: 8px;
-  text-align: center;
+  color: #111827;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Selection Container - Stacked Vertically */
+.selectionContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .section {
-  margin-bottom: 24px;
-}
-
-.section:last-child {
-  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .sectionLabel {
-  display: block;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #374151;
-  margin-bottom: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* Date Navigation */
+/* Date Navigation - Compact Horizontal */
 .dateNavigation {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   background: #f9fafb;
-  padding: 8px;
-  border-radius: 12px;
+  padding: 6px;
+  border-radius: 10px;
   border: 1px solid #e5e7eb;
 }
 
 .navButton {
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
   color: #6b7280;
   cursor: pointer;
   transition: all 0.2s;
@@ -137,14 +150,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
+  padding: 8px 12px;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  flex: 1;
   cursor: pointer;
   transition: all 0.2s;
-  min-height: 40px;
+  flex: 1;
+  min-height: 34px;
 }
 
 .dateDisplay:hover {
@@ -153,7 +166,7 @@
 }
 
 .dateText {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #374151;
   text-align: center;
@@ -185,26 +198,27 @@
   cursor: pointer;
 }
 
-/* Meal Type Selection Grid */
+/* Meal Type Selection Grid - 2x2 */
 .mealTypeGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
 .mealTypeButton {
-  padding: 16px;
+  padding: 8px 10px;
   background: #f9fafb;
   border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 0.875rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #374151;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  justify-content: center;
 }
 
 .mealTypeButton:hover {
@@ -289,8 +303,10 @@
     }
   }
 
-  .dayGrid {
-    grid-template-columns: repeat(4, 1fr);
+  /* Stack sections vertically on mobile */
+  .selectionContainer {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .mealTypeGrid {

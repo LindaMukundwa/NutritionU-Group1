@@ -16,32 +16,16 @@ function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-// Helper function to format date for full display
+// Helper function to format date for display (matches nutrition tab format)
 function formatFullDate(dateString: string): string {
   const date = new Date(dateString + 'T00:00:00');
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const todayString = getDateString(today);
-  const tomorrowString = getDateString(tomorrow);
-
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   };
-  const fullDate = date.toLocaleDateString('en-US', options);
-
-  // Show "Today" or "Tomorrow" with the date in parentheses
-  if (dateString === todayString) {
-    return `Today (${fullDate})`;
-  } else if (dateString === tomorrowString) {
-    return `Tomorrow (${fullDate})`;
-  }
-
-  return fullDate;
+  return date.toLocaleDateString('en-US', options);
 }
 
 const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
@@ -99,49 +83,57 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
         ) : (
           <>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>Add to Meal Plan</h3>
+              <h3 className={styles.modalTitle}>{mealTitle}</h3>
               <button className={styles.closeButton} onClick={onClose}>
                 <Icon name="close" size={20} />
               </button>
             </div>
 
             <div className={styles.modalBody}>
-              <p className={styles.mealTitle}>{mealTitle}</p>
-
-              {/* Date Navigation */}
-              <div className={styles.dateNavigation}>
-                <button onClick={goToPreviousDay} className={styles.navButton}>
-                  <Icon name="chevron-left" size={20} />
-                </button>
-                <input
-                  type="date"
-                  value={selectedDay}
-                  onChange={handleDateChange}
-                  className={styles.dateInput}
-                />
-                <button onClick={goToNextDay} className={styles.navButton}>
-                  <Icon name="chevron-right" size={20} />
-                </button>
-              </div>
-
-              {/* Meal Type Selection */}
-              <div className={styles.mealTypeSection}>
-                <label className={styles.sectionLabel}>Select Meal Type</label>
-                <div className={styles.mealTypeGrid}>
-                  {mealTypes.map((type) => (
-                    <button
-                      key={type.value}
-                      className={`${styles.mealTypeButton} ${selectedMealType === type.value ? styles.selected : ''
-                        }`}
-                      style={{
-                        borderColor: selectedMealType === type.value ? type.color : '#ddd',
-                        backgroundColor: selectedMealType === type.value ? `${type.color}20` : 'white',
-                      }}
-                      onClick={() => setSelectedMealType(type.value)}
-                    >
-                      {type.label}
+              {/* Date and Meal Type Stacked */}
+              <div className={styles.selectionContainer}>
+                {/* Date Selection */}
+                <div className={styles.section}>
+                  <label className={styles.sectionLabel}>Date</label>
+                  <div className={styles.dateNavigation}>
+                    <button onClick={goToPreviousDay} className={styles.navButton} aria-label="Previous day">
+                      <Icon name="chevron-left" size={16} />
                     </button>
-                  ))}
+                    <div className={styles.dateDisplay}>
+                      <input
+                        type="date"
+                        value={selectedDay}
+                        onChange={handleDateChange}
+                        className={styles.datePicker}
+                      />
+                      <span className={styles.dateText}>{formatFullDate(selectedDay)}</span>
+                    </div>
+                    <button onClick={goToNextDay} className={styles.navButton} aria-label="Next day">
+                      <Icon name="chevron-right" size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Meal Type Selection */}
+                <div className={styles.section}>
+                  <label className={styles.sectionLabel}>Meal Type</label>
+                  <div className={styles.mealTypeGrid}>
+                    {mealTypes.map((type) => (
+                      <button
+                        key={type.value}
+                        className={`${styles.mealTypeButton} ${
+                          selectedMealType === type.value ? styles.mealTypeButtonActive : ''
+                        }`}
+                        style={{
+                          borderColor: selectedMealType === type.value ? type.color : '#e5e7eb',
+                          backgroundColor: selectedMealType === type.value ? `${type.color}15` : '#f9fafb',
+                        }}
+                        onClick={() => setSelectedMealType(type.value)}
+                      >
+                        {type.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -166,4 +158,3 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
   };
   
   export default AddToPlanModal;
-
