@@ -52,10 +52,22 @@
   background-color: var(--bg-light);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.summaryCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    0 12px 24px rgba(0, 0, 0, 0.12),
+    0 20px 32px rgba(0, 0, 0, 0.08);
 }
 
 .cardHeader {
@@ -155,21 +167,44 @@
   border: none;
   outline: none;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: color 0.3s ease;
   text-align: center;
   margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.tabButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-light);
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .tabButton:hover {
   color: var(--text);
-  background-color: var(--bg);
+}
+
+.tabButton:hover::before {
+  opacity: 0.5;
 }
 
 .tabButton.active {
-  background-color: var(--bg-light);
   color: var(--text);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   font-weight: 600;
+}
+
+.tabButton.active::before {
+  opacity: 1;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .tabButton:focus,
@@ -181,8 +216,12 @@
   background: var(--bg-light);
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.04);
   min-height: 400px;
+  transition: all 0.3s ease;
 }
 
 /* Added filter chips styling */
@@ -852,6 +891,8 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -860,13 +901,14 @@
 }
 
 .modalContent {
-  background-color: var(--bg-light);
-  border-radius: 16px;
+  background: white;
+  border-radius: 20px;
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+  overflow-x: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modalHeader {
@@ -877,7 +919,7 @@
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background-color: var(--bg-light);
+  background: white;
   z-index: 10;
 }
 
@@ -1023,6 +1065,28 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Skeleton Loader Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #f8f8f8 50%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 8px;
 }
 
 .loadingMessage {
