@@ -165,7 +165,15 @@ function DateNavigation({
 
 type DashboardProps = {}
 
-function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) {
+function RecipeModal({
+  recipe,
+  onClose,
+  onAddToGroceryList
+}: {
+  recipe: any;
+  onClose: () => void;
+  onAddToGroceryList?: (recipe: any) => void;
+}) {
   if (!recipe) return null
 
   return (
@@ -263,7 +271,14 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
           </div>
 
           <div className={styles.modalActions}>
-            <button className={styles.primaryButton}>
+            <button
+              className={styles.primaryButton}
+              onClick={() => {
+                if (onAddToGroceryList) {
+                  onAddToGroceryList(recipe);
+                }
+              }}
+            >
               <Icon name="shopping-cart" size={18} />
               <span style={{ marginLeft: '6px' }}>Add to Grocery List</span>
             </button>
@@ -281,9 +296,13 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
 function MealContent({
   weeklyMealPlan,
   setWeeklyMealPlan,
+  setPendingRecipeForGrocery,
+  setShowGroceryList,
 }: {
   weeklyMealPlan: WeeklyMealPlan;
   setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>;
+  setPendingRecipeForGrocery: React.Dispatch<React.SetStateAction<any>>;
+  setShowGroceryList: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [recipesFromApi, setRecipesFromApi] = React.useState<any[] | null>(null)
@@ -741,7 +760,15 @@ function MealContent({
       )}
 
       {showRecipeModal && selectedRecipe && (
-        <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
+        <RecipeModal
+          recipe={selectedRecipe}
+          onClose={() => setShowRecipeModal(false)}
+          onAddToGroceryList={(recipe) => {
+            setPendingRecipeForGrocery(recipe);
+            setShowGroceryList(true);
+            setShowRecipeModal(false);
+          }}
+        />
       )}
 
       {showAddToPlanModal && mealToAdd && !isGeneratingRecipe && (
@@ -915,14 +942,18 @@ function PlannerContent({
   weeklyMealPlan,
   setWeeklyMealPlan,
   availableMeals,
-  onOpenGroceryList
+  onOpenGroceryList,
+  setPendingRecipeForGrocery,
+  setShowGroceryList,
 }: {
-  selectedDay: string
-  setSelectedDay: React.Dispatch<React.SetStateAction<string>>
-  weeklyMealPlan: WeeklyMealPlan
-  setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>
-  availableMeals: any[]
-  onOpenGroceryList: () => void
+  selectedDay: string;
+  setSelectedDay: React.Dispatch<React.SetStateAction<string>>;
+  weeklyMealPlan: WeeklyMealPlan;
+  setWeeklyMealPlan: React.Dispatch<React.SetStateAction<WeeklyMealPlan>>;
+  availableMeals: any[];
+  onOpenGroceryList: () => void;
+  setPendingRecipeForGrocery: React.Dispatch<React.SetStateAction<any>>;
+  setShowGroceryList: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { user } = useAuth();
   const [selectedRecipe, setSelectedRecipe] = useState<Meal | null>(null)
@@ -1355,7 +1386,15 @@ function PlannerContent({
       </div>
 
       {showRecipeModal && selectedRecipe && (
-        <RecipeModal recipe={selectedRecipe} onClose={() => setShowRecipeModal(false)} />
+        <RecipeModal
+          recipe={selectedRecipe}
+          onClose={() => setShowRecipeModal(false)}
+          onAddToGroceryList={(recipe) => {
+            setPendingRecipeForGrocery(recipe);
+            setShowGroceryList(true);
+            setShowRecipeModal(false);
+          }}
+        />
       )}
 
       {showAddMealModal && (
@@ -1538,6 +1577,10 @@ function DashboardContentSwitcher({
   const [selectedDay, setSelectedDay] = useState<string>(getDateString(new Date()));
 
   // Shared sample meals for both Meals tab and Planner modal
+
+  // State for adding ingredients for an individual recipe
+  const [pendingRecipeForGrocery, setPendingRecipeForGrocery] = useState<any>(null);
+
   const sampleMeals = [
     {
       id: 1,
@@ -1805,6 +1848,8 @@ function DashboardContentSwitcher({
           <MealContent
             weeklyMealPlan={weeklyMealPlan}
             setWeeklyMealPlan={setWeeklyMealPlan}
+            setPendingRecipeForGrocery={setPendingRecipeForGrocery}
+            setShowGroceryList={setShowGroceryList}
           />
         )}
         {activeTab === "planner" && (
@@ -1815,6 +1860,8 @@ function DashboardContentSwitcher({
             setWeeklyMealPlan={setWeeklyMealPlan}
             availableMeals={sampleMeals}
             onOpenGroceryList={() => setShowGroceryList(true)}
+            setPendingRecipeForGrocery={setPendingRecipeForGrocery}
+            setShowGroceryList={setShowGroceryList}
           />
         )}
         {activeTab === "nutrition" && (
@@ -1832,7 +1879,11 @@ function DashboardContentSwitcher({
       <GroceryList
         weeklyMealPlan={weeklyMealPlan}
         isOpen={showGroceryList}
-        onClose={() => setShowGroceryList(false)}
+        onClose={() => {
+          setShowGroceryList(false);
+          setPendingRecipeForGrocery(null);
+        }}
+        pendingRecipe={pendingRecipeForGrocery}
       />
     </div>
   );
