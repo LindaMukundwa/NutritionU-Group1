@@ -246,6 +246,9 @@ const GroceryList: React.FC<GroceryListProps> = ({
   };
 
   // Generate grocery list from meal plan
+// Generate grocery list from meal plan
+// Generate grocery list from meal plan
+// Generate grocery list from meal plan
 const generateFromMealPlan = async () => {
   if (!selectedListId || !weeklyMealPlan) return;
 
@@ -304,30 +307,18 @@ const generateFromMealPlan = async () => {
 
     // Get current grocery list to check for existing items
     const currentList = groceryLists.find(list => list.id === selectedListId);
-    const existingItemNames = currentList?.items.map(item => 
-      item.name.toLowerCase().trim()
-    ) || [];
-
-    console.log("🔍 Existing items in grocery list:", existingItemNames);
-
-    // Filter out ingredients that already exist in the grocery list
-    const newIngredients = Array.from(ingredientMap.entries()).filter(([ingredientKey]) => 
-      !existingItemNames.includes(ingredientKey)
+    const existingItemsMap = new Map(
+      (currentList?.items || []).map(item => [item.name.toLowerCase().trim(), item])
     );
 
-    console.log("🆕 New ingredients to add:", newIngredients);
+    console.log("🔍 Existing items in grocery list:", Array.from(existingItemsMap.keys()));
 
-    // Silently skip if no new ingredients
-    if (newIngredients.length === 0) {
-      console.log("⚠️ No new ingredients to add");
-      return;
-    }
-
-    // Collect all the new items that will be added
+    // Process all ingredients - update existing or add new
     const newItemsToAdd: GroceryItem[] = [];
     let addedCount = 0;
+    let updatedCount = 0;
 
-    for (const [ingredientKey, data] of newIngredients) {
+    for (const [ingredientKey, data] of ingredientMap.entries()) {
       try {
         // Find the original ingredient name (with proper capitalization)
         const originalIngredient = Object.values(weeklyMealPlan)
@@ -348,46 +339,87 @@ const generateFromMealPlan = async () => {
           ? `${primarySource} (+${data.sources.length - 1} more)`
           : primarySource;
 
-        console.log(`📤 Adding ingredient to API:`, {
-          name: originalIngredient || ingredientKey,
-          quantity: quantity,
-          source: sourceText,
-          count: data.count,
-          sources: data.sources,
-          recipeIds: Array.from(data.recipeIds)
-        });
+        const existingItem = existingItemsMap.get(ingredientKey);
 
-        const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${selectedListId}/items`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        if (existingItem) {
+          // Update existing item quantity and source
+          console.log(`🔄 Updating existing item ${existingItem.name} to ${quantity}`);
+          
+          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${existingItem.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: originalIngredient || existingItem.name,
+              quantity: quantity,
+              source: sourceText,
+            }),
+          });
+
+          console.log(`📥 Update API Response for ${ingredientKey}:`, response.status, response.ok);
+
+          if (response.ok) {
+            const updatedItem = await response.json();
+            console.log(`✅ Successfully updated item:`, updatedItem);
+            
+            // Update frontend state for this item
+            setGroceryLists(prev => prev.map(list => 
+              list.id === selectedListId ? {
+                ...list,
+                items: list.items.map(item => 
+                  item.id === existingItem.id ? updatedItem : item
+                )
+              } : list
+            ));
+            updatedCount++;
+          } else {
+            const errorText = await response.text();
+            console.error(`❌ Update API Error for ${ingredientKey}:`, errorText);
+          }
+        } else {
+          // Add new item
+          console.log(`📤 Adding new ingredient to API:`, {
             name: originalIngredient || ingredientKey,
             quantity: quantity,
             source: sourceText,
-          }),
-        });
+            count: data.count,
+            sources: data.sources,
+            recipeIds: Array.from(data.recipeIds)
+          });
 
-        console.log(`📥 API Response for ${ingredientKey}:`, response.status, response.ok);
+          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${selectedListId}/items`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: originalIngredient || ingredientKey,
+              quantity: quantity,
+              source: sourceText,
+            }),
+          });
 
-        if (response.ok) {
-          const newItem = await response.json();
-          console.log(`✅ Successfully added item:`, newItem);
-          newItemsToAdd.push(newItem);
-          addedCount++;
-        } else {
-          const errorText = await response.text();
-          console.error(`❌ API Error for ${ingredientKey}:`, errorText);
+          console.log(`📥 Add API Response for ${ingredientKey}:`, response.status, response.ok);
+
+          if (response.ok) {
+            const newItem = await response.json();
+            console.log(`✅ Successfully added item:`, newItem);
+            newItemsToAdd.push(newItem);
+            addedCount++;
+          } else {
+            const errorText = await response.text();
+            console.error(`❌ Add API Error for ${ingredientKey}:`, errorText);
+          }
         }
       } catch (itemError) {
-        console.error(`❌ Failed to add ingredient: ${ingredientKey}`, itemError);
+        console.error(`❌ Failed to process ingredient: ${ingredientKey}`, itemError);
       }
     }
 
-    console.log(`📊 Total items to add to frontend: ${newItemsToAdd.length}`);
+    console.log(`📊 Summary: ${addedCount} new items, ${updatedCount} updated items`);
 
-    // Update the frontend state immediately with the new items
+    // Add new items to frontend state
     if (addedCount > 0) {
       setGroceryLists(prev => prev.map(list => 
         list.id === selectedListId ? {
@@ -395,8 +427,11 @@ const generateFromMealPlan = async () => {
           items: [...list.items, ...newItemsToAdd]
         } : list
       ));
+    }
+
+    if (addedCount > 0 || updatedCount > 0) {
       setError(null);
-      console.log(`✅ Successfully added ${addedCount} items from meal plan to frontend`);
+      console.log(`✅ Successfully processed ${addedCount + updatedCount} items from meal plan`);
     }
 
   } catch (err) {
@@ -405,6 +440,7 @@ const generateFromMealPlan = async () => {
   }
 };
 
+  // Add ingredients from pending recipe
   // Add ingredients from pending recipe
   const addRecipeIngredients = async (listId: string) => {
     if (!pendingRecipe?.recipe?.ingredients) return;
