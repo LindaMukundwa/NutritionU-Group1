@@ -12,51 +12,6 @@ import { useEffect } from 'react';
 import { Icon } from '../ui/Icon';
 
 
-/**
- * The `OnboardingPage` component is a multi-step form designed to collect user information 
- * for setting up a personalized profile. This information is used to generate tailored 
- * meal plans and nutritional recommendations. The onboarding process includes six steps:
- * 
- * 1. **Personal Information**: Collects age, height, weight, units (imperial/metric), 
- *    and activity level.
- * 2. **Cooking Experience**: Gathers the user's cooking skill level and meal prep preferences.
- * 3. **Budget**: Allows the user to specify their weekly food budget.
- * 4. **Dietary Preferences**: Captures lifestyle diets, medical restrictions, and cultural diets.
- * 5. **Goals**: Identifies the user's goals (e.g., save money, eat healthier, lose weight).
- * 6. **Macro Recommendations**: Provides AI-generated macro suggestions and allows manual adjustments.
- * 
- * The component includes:
- * - **State Management**: Tracks the current step, form data, loading states, and errors.
- * - **Dynamic Navigation**: Handles transitions between steps, including API calls for macro suggestions.
- * - **Error Handling**: Displays error messages and retry options for failed macro generation.
- * - **Customization**: Allows users to manually adjust macros and dietary preferences.
- * - **Final Submission**: Sends the collected data to the backend and navigates to the dashboard.
- * 
- * @component
- * @returns {JSX.Element} The rendered onboarding page.
- * 
- * @remarks
- * - The component uses `useState` for state management and `useNavigate` for navigation.
- * - API calls are made to fetch macro suggestions and save user data.
- * - The progress bar dynamically updates based on the current step.
- * - The component includes accessibility features such as keyboard navigation and labels.
- * 
- * @dependencies
- * - React hooks: `useState`, `useNavigate`
- * - External components: `Card`, `CardContent`, `Progress`, `Badge`, `Button`
- * - Utility functions: `toggleArrayItem`, `incrementMacro`
- * 
- * @example
- * ```tsx
- * import OnboardingPage from './OnboardingPage';
- * 
- * function App() {
- *   return <OnboardingPage />;
- * }
- * 
- * export default App;
- * ```
- */
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -107,7 +62,6 @@ export default function OnboardingPage() {
   const { refreshUser } = useAuth();
 
   const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
-
 
   const handleComplete = async () => {
     // Finalize onboarding: send profile to backend and navigate to dashboard

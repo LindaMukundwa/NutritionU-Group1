@@ -44,14 +44,15 @@ interface GroceryListProps {
   weeklyMealPlan: WeeklyMealPlan;
   isOpen: boolean;
   onClose: () => void;
+  pendingRecipe?: any;
 }
 
-const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClose }) => {
+const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClose, pendingRecipe }) => {
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [manualEntry, setManualEntry] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showAddForm, setShowAddForm] = useState(false);
-  
+
   // Date range selection state
   const [startDate, setStartDate] = useState<string>(() => {
     const today = new Date();
@@ -66,6 +67,40 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
   const [showDateRangePicker, setShowDateRangePicker] = useState(false);
 
   const categories = ['all', 'produce', 'protein', 'dairy', 'grains', 'pantry', 'other'];
+  useEffect(() => {
+    if (pendingRecipe && isOpen) {
+      if (!pendingRecipe || !pendingRecipe.recipe || !pendingRecipe.recipe.ingredients) return;
+
+      const newItems: GroceryItem[] = pendingRecipe.recipe.ingredients.map((ingredient: string, index: number) => {
+        // Parse ingredient to separate quantity and name if needed
+        const parts = ingredient.trim().split(' ');
+        let quantity = '';
+        let name = ingredient;
+
+        // Try to extract quantity (first 1-2 words that might be numbers/measurements)
+        if (parts.length > 2) {
+          const potentialQuantity = parts.slice(0, 2).join(' ');
+          if (/\d/.test(potentialQuantity)) {
+            quantity = potentialQuantity;
+            name = parts.slice(2).join(' ');
+          }
+        }
+
+        return {
+          id: `recipe-${Date.now()}-${index}`,
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          quantity,
+          category: categorizeIngredient(name),
+          checked: false,
+          source: 'manual' as const,
+          meals: [pendingRecipe.name]
+        };
+      });
+
+      setGroceryItems((prev) => [...prev, ...newItems]);
+    }
+  }, [pendingRecipe, isOpen]);
+
 
   // Auto-update grocery list when meal plan changes
   useEffect(() => {
@@ -275,177 +310,177 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
           </button>
         </div>
         <div className={styles.groceryList}>
-      <div className={styles.header}>
-        <div>
-          <p>
-            
-          </p>
-          <p className={styles.subtitle}>
-            {checkedItems} of {totalItems} items checked • {plannedItems} from meal plan
-          </p>
-        </div>
-        <div className={styles.headerActions}>
-          <button 
-            className={styles.dateRangeButton} 
-            onClick={() => setShowDateRangePicker(!showDateRangePicker)}
-          >
-            <Icon name="calendar" size={16} />
-            <span style={{ marginLeft: '6px' }}>{formatDateRange()}</span>
-          </button>
-          <button className={styles.generateButton} onClick={generateFromPlannedMeals}>
-            <Icon name="sparkles" size={16} />
-            <span style={{ marginLeft: '6px' }}>Generate</span>
-          </button>
-          <button className={styles.addButton} onClick={() => setShowAddForm(!showAddForm)}>
-            <Icon name="plus" size={16} />
-            <span style={{ marginLeft: '6px' }}>Add Item</span>
-          </button>
-        </div>
-      </div>
+          <div className={styles.header}>
+            <div>
+              <p>
 
-      {showDateRangePicker && (
-        <div className={styles.dateRangePicker}>
-          <div className={styles.dateRangeHeader}>
-            <h3>Select Date Range</h3>
-            <button onClick={() => setShowDateRangePicker(false)} className={styles.closePicker}>
-              <Icon name="close" size={18} />
-            </button>
-          </div>
-          <div className={styles.dateRangePresets}>
-            <button onClick={() => setDateRangePreset(7)} className={styles.presetButton}>
-              This Week (7 days)
-            </button>
-            <button onClick={() => setDateRangePreset(14)} className={styles.presetButton}>
-              2 Weeks
-            </button>
-            <button onClick={() => setDateRangePreset(30)} className={styles.presetButton}>
-              This Month
-            </button>
-          </div>
-          <div className={styles.dateRangeInputs}>
-            <div className={styles.dateInputGroup}>
-              <label>Start Date</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className={styles.dateInput}
-              />
+              </p>
+              <p className={styles.subtitle}>
+                {checkedItems} of {totalItems} items checked • {plannedItems} from meal plan
+              </p>
             </div>
-            <div className={styles.dateInputGroup}>
-              <label>End Date</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate}
-                className={styles.dateInput}
-              />
+            <div className={styles.headerActions}>
+              <button
+                className={styles.dateRangeButton}
+                onClick={() => setShowDateRangePicker(!showDateRangePicker)}
+              >
+                <Icon name="calendar" size={16} />
+                <span style={{ marginLeft: '6px' }}>{formatDateRange()}</span>
+              </button>
+              <button className={styles.generateButton} onClick={generateFromPlannedMeals}>
+                <Icon name="sparkles" size={16} />
+                <span style={{ marginLeft: '6px' }}>Generate</span>
+              </button>
+              <button className={styles.addButton} onClick={() => setShowAddForm(!showAddForm)}>
+                <Icon name="plus" size={16} />
+                <span style={{ marginLeft: '6px' }}>Add Item</span>
+              </button>
             </div>
           </div>
-          <div className={styles.dateRangeActions}>
-            <button onClick={() => setShowDateRangePicker(false)} className={styles.applyButton}>
-              Apply
-            </button>
-          </div>
-        </div>
-      )}
 
-      {showAddForm && (
-        <div className={styles.addForm}>
-          <input
-            type="text"
-            className={styles.addInput}
-            placeholder="Item name, quantity (e.g., Milk, 1 gallon)"
-            value={manualEntry}
-            onChange={(e) => setManualEntry(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleAddManualItem()}
-          />
-          <button className={styles.addSubmitButton} onClick={handleAddManualItem}>
-            Add
-          </button>
-          <button className={styles.cancelButton} onClick={() => setShowAddForm(false)}>
-            Cancel
-          </button>
-        </div>
-      )}
-
-      <div className={styles.categoryFilter}>
-        {categories.map((category) => (
-          <button
-            key={category}
-            className={`${styles.categoryButton} ${selectedCategory === category ? styles.categoryButtonActive : ''}`}
-            onClick={() => setSelectedCategory(category)}
-          >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {groceryItems.length === 0 ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>
-            <Icon name="shopping-cart" size={48} color="#9ca3af" />
-          </div>
-          <h3 className={styles.emptyTitle}>Your grocery list is empty</h3>
-          <p className={styles.emptyText}>
-            Generate a list from your meal plan or add items manually
-          </p>
-        </div>
-      ) : (
-        <div className={styles.itemsContainer}>
-          {Object.entries(itemsByCategory).map(([category, items]) => (
-            <div key={category} className={styles.categorySection}>
-              <h3 className={styles.categoryTitle}>
-                {category.charAt(0).toUpperCase() + category.slice(1)} ({items.length})
-              </h3>
-              <div className={styles.itemsList}>
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`${styles.groceryItem} ${item.checked ? styles.checkedItem : ''}`}
-                  >
-                    <label className={styles.itemCheckbox}>
-                      <input
-                        type="checkbox"
-                        checked={item.checked}
-                        onChange={() => toggleItemChecked(item.id)}
-                      />
-                      <span className={styles.checkboxCustom}></span>
-                    </label>
-                    <div className={styles.itemContent}>
-                      <div className={styles.itemName}>{item.name}</div>
-                      {item.quantity && <div className={styles.itemQuantity}>{item.quantity}</div>}
-                      {item.meals && item.meals.length > 0 && (
-                        <div className={styles.itemMeals}>
-                          From: {item.meals.slice(0, 2).join(', ')}
-                          {item.meals.length > 2 && ` +${item.meals.length - 2} more`}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={() => deleteItem(item.id)}
-                      title="Delete item"
-                    >
-                      <Icon name="close" size={16} />
-                    </button>
-                  </div>
-                ))}
+          {showDateRangePicker && (
+            <div className={styles.dateRangePicker}>
+              <div className={styles.dateRangeHeader}>
+                <h3>Select Date Range</h3>
+                <button onClick={() => setShowDateRangePicker(false)} className={styles.closePicker}>
+                  <Icon name="close" size={18} />
+                </button>
+              </div>
+              <div className={styles.dateRangePresets}>
+                <button onClick={() => setDateRangePreset(7)} className={styles.presetButton}>
+                  This Week (7 days)
+                </button>
+                <button onClick={() => setDateRangePreset(14)} className={styles.presetButton}>
+                  2 Weeks
+                </button>
+                <button onClick={() => setDateRangePreset(30)} className={styles.presetButton}>
+                  This Month
+                </button>
+              </div>
+              <div className={styles.dateRangeInputs}>
+                <div className={styles.dateInputGroup}>
+                  <label>Start Date</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className={styles.dateInput}
+                  />
+                </div>
+                <div className={styles.dateInputGroup}>
+                  <label>End Date</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate}
+                    className={styles.dateInput}
+                  />
+                </div>
+              </div>
+              <div className={styles.dateRangeActions}>
+                <button onClick={() => setShowDateRangePicker(false)} className={styles.applyButton}>
+                  Apply
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {checkedItems > 0 && (
-        <div className={styles.footer}>
-          <button className={styles.clearButton} onClick={clearCheckedItems}>
-            <Icon name="trash" size={16} />
-            <span style={{ marginLeft: '6px' }}>Clear Checked Items ({checkedItems})</span>
-          </button>
-        </div>
-      )}
+          {showAddForm && (
+            <div className={styles.addForm}>
+              <input
+                type="text"
+                className={styles.addInput}
+                placeholder="Item name, quantity (e.g., Milk, 1 gallon)"
+                value={manualEntry}
+                onChange={(e) => setManualEntry(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddManualItem()}
+              />
+              <button className={styles.addSubmitButton} onClick={handleAddManualItem}>
+                Add
+              </button>
+              <button className={styles.cancelButton} onClick={() => setShowAddForm(false)}>
+                Cancel
+              </button>
+            </div>
+          )}
+
+          <div className={styles.categoryFilter}>
+            {categories.map((category) => (
+              <button
+                key={category}
+                className={`${styles.categoryButton} ${selectedCategory === category ? styles.categoryButtonActive : ''}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {groceryItems.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>
+                <Icon name="shopping-cart" size={48} color="#9ca3af" />
+              </div>
+              <h3 className={styles.emptyTitle}>Your grocery list is empty</h3>
+              <p className={styles.emptyText}>
+                Generate a list from your meal plan or add items manually
+              </p>
+            </div>
+          ) : (
+            <div className={styles.itemsContainer}>
+              {Object.entries(itemsByCategory).map(([category, items]) => (
+                <div key={category} className={styles.categorySection}>
+                  <h3 className={styles.categoryTitle}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)} ({items.length})
+                  </h3>
+                  <div className={styles.itemsList}>
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`${styles.groceryItem} ${item.checked ? styles.checkedItem : ''}`}
+                      >
+                        <label className={styles.itemCheckbox}>
+                          <input
+                            type="checkbox"
+                            checked={item.checked}
+                            onChange={() => toggleItemChecked(item.id)}
+                          />
+                          <span className={styles.checkboxCustom}></span>
+                        </label>
+                        <div className={styles.itemContent}>
+                          <div className={styles.itemName}>{item.name}</div>
+                          {item.quantity && <div className={styles.itemQuantity}>{item.quantity}</div>}
+                          {item.meals && item.meals.length > 0 && (
+                            <div className={styles.itemMeals}>
+                              From: {item.meals.slice(0, 2).join(', ')}
+                              {item.meals.length > 2 && ` +${item.meals.length - 2} more`}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          className={styles.deleteButton}
+                          onClick={() => deleteItem(item.id)}
+                          title="Delete item"
+                        >
+                          <Icon name="close" size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {checkedItems > 0 && (
+            <div className={styles.footer}>
+              <button className={styles.clearButton} onClick={clearCheckedItems}>
+                <Icon name="trash" size={16} />
+                <span style={{ marginLeft: '6px' }}>Clear Checked Items ({checkedItems})</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

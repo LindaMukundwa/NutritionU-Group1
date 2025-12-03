@@ -3,7 +3,6 @@ import User from '../models/UserModel.ts';
 import prisma from '../lib/prisma.ts';
 import Recipe from '../models/RecipeModel.ts';
 
-
 // Create a new user - updated to work with new schema (no Profile model)
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -451,6 +450,7 @@ export const patchUserGoals = async (req: Request, res: Response) => {
 
 // Patch user's onboarding/profile data - supports both Prisma ID and Firebase UID
 export const patchUserProfile = async (req: Request, res: Response) => {
+
     try {
         const { id } = req.params;
         const profile = req.body;
@@ -481,6 +481,8 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                     weight: profile.weight,
                     bmi: profile.bmi,
                     units: profile.units || user.units,
+                    goals: profile.goals,
+                    cookingLevel: profile.cookingLevel,
                     activityLevel: profile.activityLevel,
                     onboardingCompleted: true,
                     medicalRestrictions: profile.medicalRestrictions,
@@ -494,6 +496,8 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                     }
                 }
             });
+
+            console.log('[patchUserProfile] ✅ User profile updated:', updatedUser);
 
             return res.status(200).json(updatedUser);
         }

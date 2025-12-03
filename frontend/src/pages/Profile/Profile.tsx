@@ -90,6 +90,8 @@ export default function Profile() {
     if (!user) return;
     const profileData = (user as any)?.profile || {};
 
+    console.log(user);
+
     setProfileForm({
       displayName: user.displayName || profileData.displayName || '',
       units: (profileData.units || user.units || 'imperial') as Units,
@@ -97,13 +99,13 @@ export default function Profile() {
       height: profileData.height != null ? String(profileData.height) : (user.height != null ? String(user.height) : ''),
       weight: profileData.weight != null ? String(profileData.weight) : (user.weight != null ? String(user.weight) : ''),
       activityLevel: (profileData.activityLevel || user.activityLevel || 'moderately_active') as ActivityLevel,
-      budget: typeof profileData.budget === 'number' ? profileData.budget : 100,
-      cookingLevel: profileData.cookingLevel || '',
-      mealPrep: profileData.mealPrep || '',
-      lifestyleDiets: Array.isArray(profileData.lifestyleDiets) ? profileData.lifestyleDiets : [],
-      medicalRestrictions: Array.isArray(profileData.medicalRestrictions) ? profileData.medicalRestrictions : [],
-      culturalDiets: Array.isArray(profileData.culturalDiets) ? profileData.culturalDiets : [],
-      goals: Array.isArray(profileData.goals) ? profileData.goals : [],
+      budget: user.budget.value || 0,
+      cookingLevel: user.cookingLevel || "none", // TODO: Add cooking level to database
+      mealPrep: user.mealPlans?.length != null ? String(user.mealPlans.length) : '',
+      lifestyleDiets: Array.isArray(user.lifestyleDiets) ? user.lifestyleDiets : [],
+      medicalRestrictions: Array.isArray(user.medicalRestrictions) ? user.medicalRestrictions : [],
+      culturalDiets: Array.isArray(user.culturalDiets) ? user.culturalDiets : [],
+      goals: Array.isArray(user.goals) ? user.goals : [],
     });
   }, [user]);
 
