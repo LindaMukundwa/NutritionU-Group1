@@ -58,19 +58,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  background-color: var(--bg);
-  border: 1px solid var(--border);
+  padding: 10px 20px;
+  background-color: var(--primary);
+  border: none;
   border-radius: 8px;
-  color: var(--text);
+  color: var(--bg-light);
   font-weight: 500;
+  font-size: 0.9375rem;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
 
 .groceryListButton:hover {
-  background-color: var(--bg-dark);
-  border-color: var(--border-muted);
+  background-color: var(--info);
+  box-shadow: 0 4px 12px rgba(92, 107, 204, 0.3);
 }
 
 .groceryCount {
@@ -85,26 +86,30 @@
 
 .hamburgerButton {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 8px;
-  background: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  color: var(--text-muted);
 }
 
 .hamburgerButton:hover {
-  background-color: var(--bg);
+  background-color: var(--bg-dark);
   border-color: var(--border-muted);
+  color: var(--text);
 }
 
-.hamburgerLine {
-  width: 18px;
-  height: 2px;
-  background-color: var(--text-muted);
-  transition: all 0.2s ease-in-out;
+.hamburgerButton > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 }
 
 /* Dropdown Menu */

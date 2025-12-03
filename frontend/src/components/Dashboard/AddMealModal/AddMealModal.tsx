@@ -27,6 +27,8 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
 
   console.log('isAddingMeal:', isAddingMeal);
 
@@ -205,8 +207,8 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
                     dietaryTags={meal.tags}
                     onAddToPlan={() => handleAddMealClick(meal)}
                     onViewRecipe={() => {
-                      // Optional: could open recipe modal here
-                      console.log('View recipe:', meal);
+                      setSelectedRecipe(meal);
+                      setShowRecipeModal(true);
                     }}
                   />
                 </div>
@@ -215,6 +217,120 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Recipe Modal */}
+      {showRecipeModal && selectedRecipe && (
+        <div className={styles.recipeModalOverlay} onClick={() => setShowRecipeModal(false)}>
+          <div className={styles.recipeModalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.recipeModalHeader}>
+              <div>
+                <h2 className={styles.recipeModalTitle}>{selectedRecipe.name || selectedRecipe.title}</h2>
+                <div className={styles.recipeModalMeta}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Icon name="clock" size={13} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '1rem', fontWeight: '500' }}>{selectedRecipe.time || selectedRecipe.cookTime}</span>
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '1rem', fontWeight: '500' }}>
+                      {selectedRecipe.cost || selectedRecipe.price}
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <button className={styles.recipeModalCloseButton} onClick={() => setShowRecipeModal(false)}>
+                <Icon name="close" size={20} />
+              </button>
+            </div>
+
+            <div className={styles.recipeModalBody}>
+              {/* Nutrition Grid */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '16px',
+                padding: '16px',
+                backgroundColor: '#f8fafc',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                marginBottom: '24px'
+              }}>
+                <div style={{ textAlign: 'center', padding: '8px' }}>
+                  <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                    {selectedRecipe.calories}
+                  </p>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                    Calories
+                  </p>
+                </div>
+                <div style={{ textAlign: 'center', padding: '8px' }}>
+                  <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                    {selectedRecipe.recipe?.nutrition?.protein || 0}g
+                  </p>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                    Protein
+                  </p>
+                </div>
+                <div style={{ textAlign: 'center', padding: '8px' }}>
+                  <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                    {selectedRecipe.recipe?.nutrition?.carbs || 0}g
+                  </p>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                    Carbs
+                  </p>
+                </div>
+                <div style={{ textAlign: 'center', padding: '8px' }}>
+                  <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#5c6bcc', margin: '0 0 4px 0' }}>
+                    {selectedRecipe.recipe?.nutrition?.fat || 0}g
+                  </p>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0', fontWeight: '500', textTransform: 'uppercase' }}>
+                    Fat
+                  </p>
+                </div>
+              </div>
+
+              {/* Ingredients */}
+              <div className={styles.recipeSection}>
+                <h3 className={styles.recipeSectionTitle}>Ingredients</h3>
+                <ul className={styles.ingredientsList}>
+                  {selectedRecipe.recipe?.ingredients?.map((ingredient: string, index: number) => (
+                    <li key={index} className={styles.ingredientItem}>
+                      <span className={styles.bullet}>•</span>
+                      <span>{ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Instructions */}
+              <div className={styles.recipeSection}>
+                <h3 className={styles.recipeSectionTitle}>Instructions</h3>
+                <ol className={styles.instructionsList}>
+                  {selectedRecipe.recipe?.instructions?.map((instruction: string, index: number) => (
+                    <li key={index} className={styles.instructionItem}>
+                      <span className={styles.stepNumber}>{index + 1}</span>
+                      <span>{instruction}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {/* Actions */}
+              <div className={styles.recipeModalActions}>
+                <button
+                  className={styles.primaryButton}
+                  onClick={() => {
+                    handleAddMealClick(selectedRecipe);
+                    setShowRecipeModal(false);
+                  }}
+                >
+                  <Icon name="plus" size={18} />
+                  <span style={{ marginLeft: '6px' }}>Add to Plan</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
