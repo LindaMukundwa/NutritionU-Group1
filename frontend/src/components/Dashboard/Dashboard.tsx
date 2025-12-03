@@ -795,19 +795,76 @@ function MealContent({
               const savedRecipe = await recipeResponse.json();
               console.log('[Dashboard] ✅ Recipe saved from AddToPlanModal:', savedRecipe);
 
-              // Step 2: Create meal with recipeId
+              // Step 2: Generate enhanced instructions and ingredients via chatbot
+              let enhancedIngredients = mealToAdd.recipe.ingredients;
+              let enhancedInstructions = mealToAdd.recipe.instructions;
+
+              try {
+                const chatbotResponse = await fetch(`${API_BASE}/api/chatbot/instructions-ingredients`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    query: `${mealToAdd.name || mealToAdd.title} with approximately ${mealToAdd.calories} calories, ${mealToAdd.recipe.nutrition.protein}g protein, ${mealToAdd.recipe.nutrition.carbs}g carbs, and ${mealToAdd.recipe.nutrition.fat}g fat.`
+                  }),
+                });
+
+                if (chatbotResponse.ok) {
+                  const data = await chatbotResponse.json() as { ingredients?: string[]; instructions?: string[] };
+                  console.log('[Dashboard] ✅ Chatbot generated content:', data);
+
+                  if (data.ingredients && data.ingredients.length > 0) {
+                    enhancedIngredients = data.ingredients;
+                  }
+                  if (data.instructions && data.instructions.length > 0) {
+                    enhancedInstructions = data.instructions;
+                  }
+
+                  // Step 3: Update recipe with enhanced content
+                  const updateResponse = await fetch(`${API_BASE}/api/recipes/${savedRecipe.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      ingredients: enhancedIngredients.map((ing: string) => ({
+                        name: ing,
+                        amount: 1,
+                        unit: { type: 'metric', value: 'serving' },
+                      })),
+                      instructions: enhancedInstructions.map((inst: string, idx: number) => ({
+                        stepNumber: idx + 1,
+                        instruction: inst,
+                        equipment: [],
+                      })),
+                    }),
+                  });
+
+                  if (updateResponse.ok) {
+                    console.log('[Dashboard] ✅ Recipe updated with chatbot content');
+                  }
+                } else {
+                  console.log('[Dashboard] ⚠️ Chatbot API failed, using original content');
+                }
+              } catch (chatbotError) {
+                console.error('[Dashboard] Chatbot error:', chatbotError);
+                console.log('[Dashboard] Using original recipe content');
+              }
+
+              // Step 4: Create meal with recipeId and enhanced content
               const plannerMeal: Meal = {
                 recipeId: savedRecipe.id,
                 name: mealToAdd.name || mealToAdd.title,
                 calories: mealToAdd.calories,
                 time: typeof mealToAdd.time === 'string' ? mealToAdd.time : `${mealToAdd.time} min`,
                 cost: mealToAdd.cost || mealToAdd.price,
-                recipe: mealToAdd.recipe,
+                recipe: {
+                  ingredients: enhancedIngredients,
+                  instructions: enhancedInstructions,
+                  nutrition: mealToAdd.recipe.nutrition,
+                },
               };
 
-              console.log('[Dashboard] Created planner meal with recipeId:', plannerMeal);
+              console.log('[Dashboard] Created planner meal with enhanced content:', plannerMeal);
 
-              // Step 3: Update local state (auto-save will persist to backend)
+              // Step 5: Update local state (auto-save will persist to backend)
               const mealTypeKey = mealType as keyof DayMealPlan;
               setWeeklyMealPlan((prev) => {
                 const dayPlan = getOrCreateDayPlan(prev, dateString);
