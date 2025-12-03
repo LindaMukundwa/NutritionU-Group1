@@ -12,29 +12,6 @@ export default function Settings() {
     return savedTheme;
   });
 
-  useEffect(() => {
-    if (!user) return;
-    const profileData = (user as any)?.profile || {};
-
-    console.log(user);
-
-    setProfileForm({
-      displayName: user.displayName || profileData.displayName || '',
-      units: (profileData.units || user.units || 'imperial') as Units,
-      age: profileData.age != null ? String(profileData.age) : (user.age != null ? String(user.age) : ''),
-      height: profileData.height != null ? String(profileData.height) : (user.height != null ? String(user.height) : ''),
-      weight: profileData.weight != null ? String(profileData.weight) : (user.weight != null ? String(user.weight) : ''),
-      activityLevel: (profileData.activityLevel || user.activityLevel || 'moderately_active') as ActivityLevel,
-      budget: user.budget.value || 0,
-      cookingLevel: user.cookingLevel || "none", // TODO: Add cooking level to database
-      mealPrep: user.mealPlans?.length != null ? String(user.mealPlans.length) : '',
-      lifestyleDiets: Array.isArray(user.lifestyleDiets) ? user.lifestyleDiets : [],
-      medicalRestrictions: Array.isArray(user.medicalRestrictions) ? user.medicalRestrictions : [],
-      culturalDiets: Array.isArray(user.culturalDiets) ? user.culturalDiets : [],
-      goals: Array.isArray(user.goals) ? user.goals : [],
-    });
-  }, [user]);
-
   // Apply theme on mount and when theme changes
   useEffect(() => {
     const root = document.documentElement;
