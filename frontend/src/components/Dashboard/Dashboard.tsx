@@ -177,7 +177,7 @@ function RecipeModal({ recipe, onClose }: { recipe: any; onClose: () => void }) 
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
             <div className={styles.modalMeta}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Icon name="clock" size={13} style={{ flexShrink: 0 }} /> 
+                <Icon name="clock" size={13} style={{ flexShrink: 0 }} />
                 <span style={{ fontSize: '1rem', fontWeight: '500' }}>{recipe.time || recipe.cookTime}</span>
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -293,6 +293,7 @@ function MealContent({
   const [showRecipeModal, setShowRecipeModal] = React.useState(false)
   const [showAddToPlanModal, setShowAddToPlanModal] = React.useState(false)
   const [mealToAdd, setMealToAdd] = React.useState<any>(null)
+  const { user } = useAuth();
   const [selectedFilters, setSelectedFilters] = React.useState({
     category: "All",
     maxTime: 60,
@@ -746,35 +747,86 @@ function MealContent({
         <AddToPlanModal
           isOpen={showAddToPlanModal}
           onClose={() => setShowAddToPlanModal(false)}
-          onAddToPlan={(dateString, mealType) => {
-            console.log('[Dashboard] Adding meal from modal:', mealToAdd);
-            console.log('[Dashboard] Meal database ID:', mealToAdd.id);
-            
-            const plannerMeal: Meal = {
-              recipeId: typeof mealToAdd.id === 'string' ? parseInt(mealToAdd.id) : mealToAdd.id,
-              name: mealToAdd.name || mealToAdd.title,
-              calories: mealToAdd.calories,
-              time: typeof mealToAdd.time === 'string' ? mealToAdd.time : `${mealToAdd.time} min`,
-              cost: mealToAdd.cost || mealToAdd.price,
-              recipe: mealToAdd.recipe,
-            };
+          onAddToPlan={async (dateString, mealType) => {
+            if (!user?.firebaseUid) {
+              alert('Please log in to save meals');
+              setShowAddToPlanModal(false);
+              return;
+            }
 
-            console.log('[Dashboard] Created planner meal with recipeId:', plannerMeal);
+            try {
+              const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
-            const mealTypeKey = mealType as keyof DayMealPlan;
-
-            setWeeklyMealPlan((prev) => {
-              const dayPlan = getOrCreateDayPlan(prev, dateString);
-              const newPlan = {
-                ...prev,
-                [dateString]: {
-                  ...dayPlan,
-                  [mealTypeKey]: [...dayPlan[mealTypeKey], plannerMeal],
+              // Step 1: Save recipe to backend
+              const recipeData = {
+                title: mealToAdd.name || mealToAdd.title,
+                description: mealToAdd.description || `Delicious ${mealToAdd.name || mealToAdd.title}`,
+                totalTime: parseInt(mealToAdd.time) || 0,
+                estimatedCostPerServing: parseFloat(mealToAdd.price?.replace('$', '') || mealToAdd.cost?.replace('$', '')) || 0,
+                nutritionInfo: {
+                  calories: mealToAdd.calories,
+                  protein: mealToAdd.recipe.nutrition.protein,
+                  carbs: mealToAdd.recipe.nutrition.carbs,
+                  fat: mealToAdd.recipe.nutrition.fat,
+                  fiber: mealToAdd.recipe.nutrition.fiber,
                 },
+                ingredients: mealToAdd.recipe.ingredients.map((ing: string) => ({
+                  name: ing,
+                  amount: 1,
+                  unit: { type: 'metric', value: 'serving' },
+                })),
+                instructions: mealToAdd.recipe.instructions.map((inst: string, idx: number) => ({
+                  stepNumber: idx + 1,
+                  instruction: inst,
+                  equipment: [],
+                })),
               };
-              console.log('[Dashboard] Updated meal plan from modal:', newPlan);
-              return newPlan;
-            });
+
+              const recipeResponse = await fetch(`${API_BASE}/api/recipes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(recipeData),
+              });
+
+              if (!recipeResponse.ok) {
+                throw new Error('Failed to save recipe');
+              }
+
+              const savedRecipe = await recipeResponse.json();
+              console.log('[Dashboard] ✅ Recipe saved from AddToPlanModal:', savedRecipe);
+
+              // Step 2: Create meal with recipeId
+              const plannerMeal: Meal = {
+                recipeId: savedRecipe.id,
+                name: mealToAdd.name || mealToAdd.title,
+                calories: mealToAdd.calories,
+                time: typeof mealToAdd.time === 'string' ? mealToAdd.time : `${mealToAdd.time} min`,
+                cost: mealToAdd.cost || mealToAdd.price,
+                recipe: mealToAdd.recipe,
+              };
+
+              console.log('[Dashboard] Created planner meal with recipeId:', plannerMeal);
+
+              // Step 3: Update local state (auto-save will persist to backend)
+              const mealTypeKey = mealType as keyof DayMealPlan;
+              setWeeklyMealPlan((prev) => {
+                const dayPlan = getOrCreateDayPlan(prev, dateString);
+                const newPlan = {
+                  ...prev,
+                  [dateString]: {
+                    ...dayPlan,
+                    [mealTypeKey]: [...dayPlan[mealTypeKey], plannerMeal],
+                  },
+                };
+                console.log('[Dashboard] Updated meal plan from modal:', newPlan);
+                return newPlan;
+              });
+
+              setShowAddToPlanModal(false);
+            } catch (error) {
+              console.error('[Dashboard] Error adding meal from modal:', error);
+              alert('Failed to add meal. Please try again.');
+            }
           }}
           mealTitle={mealToAdd.title || mealToAdd.name}
         />
@@ -817,7 +869,7 @@ function PlannerContent({
     const mealTypeKey = mealType as keyof DayMealPlan;
     const dayPlan = getOrCreateDayPlan(weeklyMealPlan, dateString);
     const mealToDelete = dayPlan[mealTypeKey][mealIndex];
-    
+
     // If meal has an itemId, delete it via API first
     if (mealToDelete.recipeId) {
       try {
@@ -828,7 +880,7 @@ function PlannerContent({
         return;
       }
     }
-    
+
     // Update local state
     setWeeklyMealPlan((prev) => {
       const dayPlan = getOrCreateDayPlan(prev, dateString);
@@ -866,10 +918,10 @@ function PlannerContent({
     }
 
     setIsAddingMeal(true);
-    
+
     try {
       const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
-      
+
       // Step 1: Save recipe to backend to get its ID
       const recipeData = {
         title: meal.name,
@@ -908,7 +960,7 @@ function PlannerContent({
       const savedRecipe = await recipeResponse.json();
       console.log('[Dashboard] ✅ Recipe saved to backend:', savedRecipe);
       console.log('[Dashboard] Recipe ID:', savedRecipe.id);
-      
+
       // Step 2: Optionally enhance with chatbot-generated content
       let enhancedMeal = meal;
       try {
@@ -919,10 +971,10 @@ function PlannerContent({
             query: `${meal.name} with approximately ${meal.calories} calories, ${meal.recipe.nutrition.protein}g protein, ${meal.recipe.nutrition.carbs}g carbs, and ${meal.recipe.nutrition.fat}g fat.`
           }),
         });
-      
+
         if (chatbotResponse.ok) {
           const data = await chatbotResponse.json() as { ingredients?: string[]; instructions?: string[] };
-          
+
           // Update the recipe in the database with generated content
           const updateResponse = await fetch(`${API_BASE}/api/recipes/${savedRecipe.id}`, {
             method: 'PUT',
@@ -932,11 +984,11 @@ function PlannerContent({
               instructions: data.instructions
             }),
           });
-      
+
           if (updateResponse.ok) {
             console.log('[Dashboard] ✅ Recipe updated with generated content');
           }
-      
+
           enhancedMeal = {
             ...meal,
             recipe: {
@@ -960,7 +1012,7 @@ function PlannerContent({
       console.log('[Dashboard] Adding meal to planner:', mealWithRecipeId);
       console.log('[Dashboard] Selected day:', selectedDay);
       console.log('[Dashboard] Meal type:', addMealType);
-      
+
       setWeeklyMealPlan((prev) => {
         const dayPlan = getOrCreateDayPlan(prev, selectedDay);
         const newPlan = {
@@ -968,7 +1020,7 @@ function PlannerContent({
           [selectedDay]: {
             ...dayPlan,
             [mealTypeKey]: [
-              ...dayPlan[mealTypeKey], 
+              ...dayPlan[mealTypeKey],
               mealWithRecipeId
             ],
           },
@@ -990,11 +1042,11 @@ function PlannerContent({
   const handleGenerateMealPlan = (startDate: string, endDate: string, preferences: any) => {
     // This is a mock implementation - in production this would call an API
     // that uses AI to generate optimal meals based on nutritional goals
-    
+
     const start = new Date(startDate + 'T00:00:00')
     const end = new Date(endDate + 'T00:00:00')
     const newPlan: WeeklyMealPlan = { ...weeklyMealPlan }
-    
+
     // Sample meals that match different nutritional profiles
     const breakfastOptions: Meal[] = [
       {
@@ -1020,7 +1072,7 @@ function PlannerContent({
         },
       },
     ]
-    
+
     const lunchOptions: Meal[] = [
       {
         name: 'Mediterranean Chickpea Bowl',
@@ -1045,7 +1097,7 @@ function PlannerContent({
         },
       },
     ]
-    
+
     const dinnerOptions: Meal[] = [
       {
         name: 'Teriyaki Chicken Bowl',
@@ -1070,7 +1122,7 @@ function PlannerContent({
         },
       },
     ]
-    
+
     const snackOptions: Meal[] = [
       {
         name: 'Trail Mix Energy Bites',
@@ -1084,16 +1136,16 @@ function PlannerContent({
         },
       },
     ]
-    
+
     // Generate meals for each day in the range
     let currentDate = new Date(start)
     let breakfastIdx = 0
     let lunchIdx = 0
     let dinnerIdx = 0
-    
+
     while (currentDate <= end) {
       const dateString = getDateString(currentDate)
-      
+
       // Rotate through available meals to provide variety
       const dayPlan: DayMealPlan = {
         breakfast: [breakfastOptions[breakfastIdx % breakfastOptions.length]],
@@ -1101,18 +1153,18 @@ function PlannerContent({
         dinner: [dinnerOptions[dinnerIdx % dinnerOptions.length]],
         snacks: preferences.mealsPerDay === 4 ? [snackOptions[0]] : [],
       }
-      
+
       newPlan[dateString] = dayPlan
-      
+
       // Increment indices for variety
       breakfastIdx++
       lunchIdx++
       dinnerIdx++
-      
+
       // Move to next day
       currentDate.setDate(currentDate.getDate() + 1)
     }
-    
+
     setWeeklyMealPlan(newPlan)
   }
 
@@ -1654,9 +1706,9 @@ function DashboardContentSwitcher({
 
       {/* Error notification (optional) */}
       {error && (
-        <div style={{ 
-          backgroundColor: '#fee', 
-          padding: '0.5rem', 
+        <div style={{
+          backgroundColor: '#fee',
+          padding: '0.5rem',
           marginBottom: '1rem',
           borderRadius: '4px',
           display: 'flex',
@@ -1717,7 +1769,7 @@ const Dashboard: FC<DashboardProps> = () => {
   const [showGroceryList, setShowGroceryList] = useState(false);
   // Get meal plan data and the count method
   const { getTotalMealsCount } = useMealPlan(user?.firebaseUid);
-    
+
   // Call the method to get total meals
   const totalMeals = getTotalMealsCount();
 
@@ -1727,11 +1779,11 @@ const Dashboard: FC<DashboardProps> = () => {
   const dashboardSummary: SummaryCardData[] = [
     {
       title: "Weekly Budget",
-      value: user?.budget?.default ?? 100,
+      value: user?.budget?.value ?? 100,
       subtext: "",
       icon: "circle-dollar",
       progressBar: {
-        current: 50,
+        current: 75, // TODO: Make dynamic
         total: user?.budget?.value ?? 100,
       },
     },
@@ -1765,7 +1817,7 @@ const Dashboard: FC<DashboardProps> = () => {
   const renderSummaryCard = (card: SummaryCardData) => {
     // Determine if icon is a lucide icon name or a simple string (like "$")
     const isLucideIcon = card.icon !== "$";
-    
+
     return (
       <div key={card.title} className={styles.summaryCard}>
         <div className={styles.cardHeader}>
