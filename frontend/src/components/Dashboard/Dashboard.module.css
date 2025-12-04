@@ -22,7 +22,7 @@
 }
 
 .greeting {
-  font-size: 2rem;
+  font-size: 2.5rem;
   padding: 10px;  /*better spacing*/
   font-weight: 700;
   color: var(--text);
@@ -377,7 +377,7 @@
 .tabButton {
   padding: 12px 20px;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   color: var(--text-muted);
   background: transparent;
   border: none;
