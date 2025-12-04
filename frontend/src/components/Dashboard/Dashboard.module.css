@@ -1098,6 +1098,16 @@
   color: var(--text-muted);
 }
 
+/* Simple nutrition progress bars */
+.nutritionItem .progressBarContainer {
+  background-color: #e5e7eb;
+  margin-top: 12px;
+}
+
+.nutritionItem .progressBarFill {
+  transition: width 0.3s ease-in-out;
+}
+
 /* Modal Styles */
 .modalOverlay {
   position: fixed;
