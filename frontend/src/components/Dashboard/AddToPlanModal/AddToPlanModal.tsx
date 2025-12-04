@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './AddToPlanModal.module.css';
 import { Icon } from '../../ui/Icon';
+import { DatePicker } from '../../ui/DatePicker';
 
 interface AddToPlanModalProps {
   isOpen: boolean;
@@ -95,23 +96,10 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
                 {/* Date Selection */}
                 <div className={styles.section}>
                   <label className={styles.sectionLabel}>Date</label>
-                  <div className={styles.dateNavigation}>
-                    <button onClick={goToPreviousDay} className={styles.navButton} aria-label="Previous day">
-                      <Icon name="chevron-left" size={16} />
-                    </button>
-                    <div className={styles.dateDisplay}>
-                      <input
-                        type="date"
-                        value={selectedDay}
-                        onChange={handleDateChange}
-                        className={styles.datePicker}
-                      />
-                      <span className={styles.dateText}>{formatFullDate(selectedDay)}</span>
-                    </div>
-                    <button onClick={goToNextDay} className={styles.navButton} aria-label="Next day">
-                      <Icon name="chevron-right" size={16} />
-                    </button>
-                  </div>
+                  <DatePicker
+                    value={selectedDay}
+                    onChange={setSelectedDay}
+                  />
                 </div>
 
                 {/* Meal Type Selection */}
