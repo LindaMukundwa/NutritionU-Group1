@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import prisma from '../lib/prisma.ts';
+import FatSecretService from '../services/fatSecretService.ts';
 
 /**
  * Create a new meal plan for a user
@@ -378,5 +379,356 @@ export const getMealPlansByDateRange = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error fetching meal plans by date range:', error);
         res.status(500).json({ error: 'Failed to fetch meal plans' });
+    }
+};
+
+/**
+ * Generate AI meal plan using FatSecret API
+ * POST /api/users/:userId/meal-plans/generate
+ * Body: { startDate, endDate, preferences: { dailyCalories, proteinGoal, carbsGoal, fatGoal, mealsPerDay, dietaryRestrictions } }
+ */
+export const generateMealPlan = async (req: Request, res: Response) => {
+    try {
+        const { userId } = req.params;
+        const { startDate, endDate, preferences } = req.body;
+
+        console.log('[generateMealPlan] 🚀 Starting meal plan generation');
+        console.log('[generateMealPlan] Request params:', { userId, startDate, endDate });
+        console.log('[generateMealPlan] Preferences:', preferences);
+
+        // Find user by firebaseUid
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { id: isNaN(Number(userId)) ? undefined : Number(userId) },
+                    { firebaseUid: userId }
+                ]
+            }
+        });
+
+        if (!user) {
+            console.log('[generateMealPlan] ❌ User not found:', userId);
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        console.log('[generateMealPlan] ✅ User found:', { id: user.id, firebaseUid: user.firebaseUid });
+
+        // Calculate date range
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const dates: string[] = [];
+
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            dates.push(d.toISOString().split('T')[0]);
+        }
+
+        console.log('[generateMealPlan] 📅 Date range calculated:', { dates, totalDays: dates.length });
+
+        // Define meal types based on preferences
+        const mealTypes = ['breakfast', 'lunch', 'dinner'];
+        if (preferences.mealsPerDay === 4) {
+            mealTypes.push('snacks');
+        }
+
+        console.log('[generateMealPlan] 🍽️ Meal types:', mealTypes);
+
+        // Calculate macro targets per meal type
+        const macroTargetsPerMeal = {
+            breakfast: {
+                calories: Math.round(preferences.dailyCalories * 0.25),
+                protein: Math.round(preferences.proteinGoal * 0.25),
+                carbs: Math.round(preferences.carbsGoal * 0.25),
+                fat: Math.round(preferences.fatGoal * 0.25)
+            },
+            lunch: {
+                calories: Math.round(preferences.dailyCalories * 0.35),
+                protein: Math.round(preferences.proteinGoal * 0.35),
+                carbs: Math.round(preferences.carbsGoal * 0.35),
+                fat: Math.round(preferences.fatGoal * 0.35)
+            },
+            dinner: {
+                calories: Math.round(preferences.dailyCalories * 0.35),
+                protein: Math.round(preferences.proteinGoal * 0.35),
+                carbs: Math.round(preferences.carbsGoal * 0.35),
+                fat: Math.round(preferences.fatGoal * 0.35)
+            },
+            snacks: {
+                calories: Math.round(preferences.dailyCalories * 0.15),
+                protein: Math.round(preferences.proteinGoal * 0.15),
+                carbs: Math.round(preferences.carbsGoal * 0.15),
+                fat: Math.round(preferences.fatGoal * 0.15)
+            }
+        };
+
+        console.log('[generateMealPlan] 🎯 Macro targets per meal:', macroTargetsPerMeal);
+
+        // Generate search queries based on meal type and dietary restrictions
+        const generateSearchQuery = (mealType: string): string => {
+            const baseQueries = {
+                breakfast: ['oatmeal', 'eggs', 'yogurt', 'smoothie', 'pancakes'],
+                lunch: ['salad', 'sandwich', 'bowl', 'soup', 'wrap'],
+                dinner: ['chicken', 'fish', 'pasta', 'stir fry', 'rice'],
+                snacks: ['nuts', 'fruit', 'energy balls', 'crackers', 'cheese']
+            };
+
+            const queries = baseQueries[mealType as keyof typeof baseQueries] || baseQueries.dinner;
+
+            // Add dietary restriction filters
+            let query = queries[Math.floor(Math.random() * queries.length)];
+            if (preferences.dietaryRestrictions?.includes('Vegetarian')) {
+                query += ' vegetarian';
+            }
+            if (preferences.dietaryRestrictions?.includes('Vegan')) {
+                query += ' vegan';
+            }
+            if (preferences.dietaryRestrictions?.includes('Gluten-Free')) {
+                query += ' gluten free';
+            }
+
+            return query;
+        };
+
+        // Fetch recipes from FatSecret for each meal type
+        const recipesByMealType: Record<string, any[]> = {};
+
+        console.log('[generateMealPlan] 🔍 Starting recipe search for each meal type...');
+
+        for (const mealType of mealTypes) {
+            try {
+                const searchQuery = generateSearchQuery(mealType);
+                console.log(`[generateMealPlan] 🔍 Searching ${mealType} with query: "${searchQuery}"`);
+
+                const fatSecretRecipes = await FatSecretService.searchRecipes(searchQuery, 10);
+                console.log(`[generateMealPlan] 📦 FatSecret returned ${fatSecretRecipes.length} recipes for ${mealType}`);
+
+                if (fatSecretRecipes.length === 0) {
+                    console.warn(`[generateMealPlan] ⚠️ No recipes found for ${mealType} with query "${searchQuery}"`);
+                    recipesByMealType[mealType] = [];
+                    continue;
+                }
+
+                // Convert FatSecret recipes to our format
+                console.log(`[generateMealPlan] 🔄 Converting ${fatSecretRecipes.length} recipes for ${mealType}...`);
+                const convertedRecipes = fatSecretRecipes.map((recipe, index) => {
+                    try {
+                        const converted = FatSecretService.convertToRecipeModel(recipe);
+                        console.log(`[generateMealPlan] ✅ Converted recipe ${index + 1}: ${converted.title} (${converted.nutritionInfo.calories} cal)`);
+                        return converted;
+                    } catch (conversionError) {
+                        console.error(`[generateMealPlan] ❌ Error converting recipe ${index + 1}:`, conversionError);
+                        return null;
+                    }
+                }).filter(recipe => recipe !== null);
+
+                console.log(`[generateMealPlan] ✅ Successfully converted ${convertedRecipes.length} recipes for ${mealType}`);
+
+                // Filter by macro targets
+                const targets = macroTargetsPerMeal[mealType as keyof typeof macroTargetsPerMeal];
+                console.log(`[generateMealPlan] 🎯 Filtering ${mealType} recipes with targets:`, targets);
+
+                // Replace the macro filtering section with this more flexible approach:
+
+                const filteredRecipes = convertedRecipes.filter(recipe => {
+                    const calories = recipe.nutritionInfo.calories;
+                    const targets = macroTargetsPerMeal[mealType as keyof typeof macroTargetsPerMeal];
+
+                    let minCal, maxCal;
+
+                    if (calories < targets.calories * 0.3) {
+                        minCal = 0;
+                        maxCal = targets.calories * 2; 
+                    } else {
+                        minCal = targets.calories * 0.5;
+                        maxCal = targets.calories * 1.5;
+                    }
+
+                    const withinRange = calories >= minCal && calories <= maxCal;
+
+                    console.log(`[generateMealPlan] 🔍 Recipe "${recipe.title}": ${calories} cal (range: ${minCal}-${maxCal}) - ${withinRange ? '✅ PASS' : '❌ FAIL'}`);
+                    return withinRange;
+                });
+
+                console.log(`[generateMealPlan] 📊 ${filteredRecipes.length}/${convertedRecipes.length} recipes passed macro filter for ${mealType}`);
+                recipesByMealType[mealType] = filteredRecipes;
+
+            } catch (error) {
+                console.error(`[generateMealPlan] ❌ Error fetching recipes for ${mealType}:`, error);
+                recipesByMealType[mealType] = [];
+            }
+        }
+
+        console.log('[generateMealPlan] 📋 Recipe collection summary:');
+        Object.entries(recipesByMealType).forEach(([mealType, recipes]) => {
+            console.log(`  - ${mealType}: ${recipes.length} recipes available`);
+        });
+
+        // Generate meal plan items for each date
+        const mealPlanItems: any[] = [];
+
+        console.log('[generateMealPlan] 🏗️ Building meal plan items...');
+
+        for (const dateString of dates) {
+            console.log(`[generateMealPlan] 📅 Processing date: ${dateString}`);
+
+            for (const mealType of mealTypes) {
+                const availableRecipes = recipesByMealType[mealType];
+                console.log(`[generateMealPlan] 🍽️ Processing ${mealType} - ${availableRecipes.length} recipes available`);
+
+                if (availableRecipes.length > 0) {
+                    // Select a random recipe for variety
+                    const selectedRecipe = availableRecipes[Math.floor(Math.random() * availableRecipes.length)];
+                    console.log(`[generateMealPlan] 🎲 Selected recipe for ${mealType} on ${dateString}: "${selectedRecipe.title}"`);
+
+                    try {
+                        // Save recipe to database first
+                        const recipeData = {
+                            title: selectedRecipe.title,
+                            description: selectedRecipe.description || `Delicious ${selectedRecipe.title}`,
+                            totalTime: selectedRecipe.totalTime || 30,
+                            estimatedCostPerServing: selectedRecipe.estimatedCostPerServing || 5.0,
+                            nutritionInfo: {
+                                calories: selectedRecipe.nutritionInfo.calories,
+                                protein: selectedRecipe.nutritionInfo.protein,
+                                carbs: selectedRecipe.nutritionInfo.carbs,
+                                fat: selectedRecipe.nutritionInfo.fat,
+                                fiber: selectedRecipe.nutritionInfo.fiber || 0,
+                                sugar: selectedRecipe.nutritionInfo.sugar || 0,
+                                sodium: selectedRecipe.nutritionInfo.sodium || 0
+                            },
+                            ingredients: selectedRecipe.ingredients || [],
+                            instructions: selectedRecipe.instructions || [],
+        
+                        };
+
+                        console.log(`[generateMealPlan] 💾 Saving recipe to database: "${selectedRecipe.title}"`);
+                        const savedRecipe = await prisma.recipe.create({
+                            data: recipeData
+                        });
+                        console.log(`[generateMealPlan] ✅ Recipe saved with ID: ${savedRecipe.id}`);
+
+                        // Add to meal plan items
+                        mealPlanItems.push({
+                            recipeId: savedRecipe.id,
+                            date: new Date(dateString),
+                            mealType: mealType
+                        });
+                        console.log(`[generateMealPlan] ✅ Added meal plan item: ${mealType} on ${dateString}`);
+
+                    } catch (saveError) {
+                        console.error(`[generateMealPlan] ❌ Error saving recipe "${selectedRecipe.title}":`, saveError);
+                    }
+                } else {
+                    console.warn(`[generateMealPlan] ⚠️ No recipes available for ${mealType} on ${dateString}`);
+                }
+            }
+        }
+
+        console.log(`[generateMealPlan] 📊 Total meal plan items created: ${mealPlanItems.length}`);
+        console.log('[generateMealPlan] Meal plan items breakdown:');
+        mealPlanItems.forEach((item, index) => {
+            console.log(`  ${index + 1}. ${item.mealType} on ${item.date.toISOString().split('T')[0]} - Recipe ID: ${item.recipeId}`);
+        });
+
+        if (mealPlanItems.length === 0) {
+            console.error('[generateMealPlan] ❌ No meal plan items were created! Check recipe search and filtering logic.');
+            return res.status(500).json({
+                error: 'No meals could be generated',
+                details: 'Recipe search returned no suitable results',
+                recipesByMealType
+            });
+        }
+
+        // Create or update meal plan
+        console.log('[generateMealPlan] 🔍 Checking for existing meal plan...');
+        const existingPlan = await prisma.mealPlan.findFirst({
+            where: {
+                userId: user.id,
+                startDate: new Date(startDate)
+            }
+        });
+
+        let mealPlan;
+
+        if (existingPlan) {
+            console.log(`[generateMealPlan] 🔄 Updating existing meal plan ID: ${existingPlan.id}`);
+
+            // Delete existing items
+            await prisma.mealPlanItem.deleteMany({
+                where: { mealPlanId: existingPlan.id }
+            });
+            console.log('[generateMealPlan] 🗑️ Deleted existing meal plan items');
+
+            mealPlan = await prisma.mealPlan.update({
+                where: { id: existingPlan.id },
+                data: {
+                    endDate: new Date(endDate),
+                    items: {
+                        create: mealPlanItems
+                    },
+                    updatedAt: new Date()
+                },
+                include: {
+                    items: {
+                        include: {
+                            recipe: true
+                        }
+                    }
+                }
+            });
+            console.log('[generateMealPlan] ✅ Updated existing meal plan');
+        } else {
+            console.log('[generateMealPlan] 🆕 Creating new meal plan');
+
+            mealPlan = await prisma.mealPlan.create({
+                data: {
+                    userId: user.id,
+                    startDate: new Date(startDate),
+                    endDate: new Date(endDate),
+                    items: {
+                        create: mealPlanItems
+                    }
+                },
+                include: {
+                    items: {
+                        include: {
+                            recipe: true
+                        }
+                    }
+                }
+            });
+            console.log(`[generateMealPlan] ✅ Created new meal plan with ID: ${mealPlan.id}`);
+        }
+
+        // Return summary statistics
+        const totalMealsGenerated = mealPlanItems.length;
+        const dailyCaloriesGenerated = mealPlan.items
+            .filter(item => item.date.toISOString().split('T')[0] === dates[0])
+            .reduce((sum, item) => sum + ((item.recipe.nutritionInfo as any)?.calories || 0), 0);
+
+        const response = {
+            mealPlan,
+            summary: {
+                totalMealsGenerated,
+                daysPlanned: dates.length,
+                averageDailyCalories: dailyCaloriesGenerated,
+                mealsPerDay: mealTypes.length
+            }
+        };
+
+        console.log('[generateMealPlan] 📊 Final summary:', response.summary);
+        console.log('[generateMealPlan] ✅ Meal plan generation completed successfully');
+
+        res.status(201).json(response);
+
+    } catch (error) {
+        console.error('[generateMealPlan] ❌ Fatal error generating meal plan:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        console.error('[generateMealPlan] Stack trace:', errorStack);
+        res.status(500).json({
+            error: 'Failed to generate meal plan',
+            details: errorMessage,
+            stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+        });
     }
 };
