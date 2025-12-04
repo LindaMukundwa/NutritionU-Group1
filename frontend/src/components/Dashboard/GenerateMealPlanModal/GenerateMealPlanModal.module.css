@@ -349,6 +349,16 @@
   }
 }
 
+/* Override DatePicker styling to match modal */
+.modalContent :global(.datePickerContainer) button {
+  background-color: #f9fafb !important;
+  border-color: #e5e7eb !important;
+}
+
+.modalContent :global(.datePickerContainer) button:hover {
+  background-color: #f3f4f6 !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .modalContent {

@@ -7,6 +7,7 @@ interface DatePickerProps {
   value: string; // YYYY-MM-DD format
   onChange: (date: string) => void;
   className?: string;
+  buttonStyle?: React.CSSProperties;
 }
 
 const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
