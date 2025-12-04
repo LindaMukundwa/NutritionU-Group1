@@ -84,11 +84,17 @@
 .modalBody {
   padding: 2rem;
   overflow-y: auto;
+  overflow-x: visible;
   flex: 1;
 }
 
 .section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .section:last-child {
@@ -96,10 +102,15 @@
 }
 
 .sectionTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--text);
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.875rem;
 }
 
 /* Date Range Section */
@@ -135,8 +146,8 @@
 }
 
 .dateInputs {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-bottom: 1rem;
 }
@@ -145,12 +156,23 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
 }
 
 .dateInputGroup label {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text);
+}
+
+.dateInputGroup :global(.datePickerContainer) {
+  width: 100%;
+}
+
+.dateInputGroup :global(.datePickerContainer) button {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
 }
 
 .dateInput {
@@ -187,67 +209,88 @@
 .goalsGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-top: 16px;
+  gap: 12px;
+  margin-top: 0;
 }
 
 .goalCard {
-  background-color: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
+  background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg) 100%);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 10px;
   text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.goalCard:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .goalValue {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.375rem;
+  font-weight: 800;
   color: var(--primary);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  line-height: 1;
 }
 
 .goalLabel {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .restrictions {
-  padding: 12px;
-  background-color: var(--bg);
-  border-radius: 8px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg) 100%);
+  border-radius: 10px;
   color: var(--text);
   font-size: 0.875rem;
-  border-left: 3px solid var(--primary);
+  border-left: 4px solid var(--primary);
   margin-top: 16px;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Meal Options */
 .checkboxLabel {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-size: 0.9375rem;
   color: var(--text);
   cursor: pointer;
-  padding: 12px;
-  background-color: var(--bg);
-  border-radius: 8px;
+  padding: 14px 16px;
+  background-color: var(--bg-light);
+  border: 2px solid var(--border);
+  border-radius: 10px;
   transition: all 0.2s ease-in-out;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.checkboxLabel:last-child {
+  margin-bottom: 0;
 }
 
 .checkboxLabel:hover {
   background-color: var(--bg-dark);
+  border-color: var(--primary);
+  transform: translateX(2px);
 }
 
 .checkbox {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
   border: 2px solid var(--border);
   cursor: pointer;
   accent-color: var(--primary);
+  flex-shrink: 0;
 }
 
 /* Info Box */

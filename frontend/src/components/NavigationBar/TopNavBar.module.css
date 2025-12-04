@@ -38,12 +38,14 @@
 
 .logoText {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text);
+  font-family: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .logoAccent {
-  color: var(--text-muted); 
+  color: var(--primary);
 }
 
 /* Right Section */
