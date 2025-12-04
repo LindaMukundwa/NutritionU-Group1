@@ -49,99 +49,72 @@
   margin-bottom: 0;
 }
 
-/* Richly blended gradient base - using purple palette with NO animation */
+/* Soft mesh gradient base - using purple-blue palette (260-272°) */
 .topSectionWrapper::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  right: -50%;
-  bottom: -50%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: 
     radial-gradient(
-      circle at 20% 30%,
-      oklch(0.88 0.15 264) 0%,
-      oklch(0.90 0.12 264 / 0.6) 35%,
-      transparent 60%
+      circle at 0% 0%,
+      oklch(0.92 0.08 268) 0%,
+      transparent 50%
     ),
     radial-gradient(
-      circle at 80% 40%,
-      oklch(0.87 0.16 268) 0%,
-      oklch(0.89 0.13 268 / 0.5) 35%,
-      transparent 60%
+      circle at 100% 0%,
+      oklch(0.90 0.10 264) 0%,
+      transparent 50%
     ),
     radial-gradient(
-      circle at 50% 70%,
-      oklch(0.89 0.14 272) 0%,
-      oklch(0.91 0.11 272 / 0.6) 35%,
-      transparent 60%
+      circle at 100% 100%,
+      oklch(0.91 0.09 270) 0%,
+      transparent 50%
     ),
     radial-gradient(
-      circle at 30% 80%,
-      oklch(0.88 0.13 260) 0%,
-      oklch(0.90 0.10 260 / 0.5) 40%,
-      transparent 65%
-    ),
-    radial-gradient(
-      circle at 70% 20%,
-      oklch(0.86 0.14 266) 0%,
-      oklch(0.88 0.11 266 / 0.4) 40%,
-      transparent 65%
+      circle at 0% 100%,
+      oklch(0.93 0.06 266) 0%,
+      transparent 50%
     ),
     linear-gradient(
       135deg,
-      oklch(0.93 0.08 264),
-      oklch(0.94 0.06 268),
-      oklch(0.93 0.07 272),
-      oklch(0.94 0.06 260)
+      oklch(0.95 0.04 264),
+      oklch(0.94 0.05 268),
+      oklch(0.95 0.04 272)
     );
-  filter: blur(70px);
+  filter: blur(80px);
   z-index: 0;
 }
 
-/* Additional blended color orbs - NO animation, just beautiful static blending */
+/* Additional soft color layer for depth */
 .topSectionWrapper::after {
   content: '';
   position: absolute;
-  top: -40%;
-  left: -40%;
-  right: -40%;
-  bottom: -40%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: 
     radial-gradient(
-      ellipse 500px 400px at 15% 25%,
-      oklch(0.85 0.18 264 / 0.8) 0%,
-      oklch(0.88 0.14 264 / 0.4) 30%,
-      transparent 55%
+      ellipse 600px 600px at 30% 30%,
+      oklch(0.94 0.06 260) 0%,
+      transparent 60%
     ),
     radial-gradient(
-      ellipse 450px 500px at 85% 60%,
-      oklch(0.86 0.17 268 / 0.75) 0%,
-      oklch(0.89 0.13 268 / 0.35) 30%,
-      transparent 55%
+      ellipse 700px 500px at 70% 60%,
+      oklch(0.92 0.08 268) 0%,
+      transparent 60%
     ),
     radial-gradient(
-      ellipse 480px 420px at 45% 80%,
-      oklch(0.87 0.16 272 / 0.7) 0%,
-      oklch(0.90 0.12 272 / 0.3) 30%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse 420px 480px at 60% 15%,
-      oklch(0.88 0.15 260 / 0.65) 0%,
-      oklch(0.91 0.11 260 / 0.3) 30%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle 380px at 50% 50%,
-      oklch(0.89 0.14 266 / 0.5) 0%,
-      oklch(0.92 0.10 266 / 0.2) 35%,
-      transparent 55%
+      ellipse 500px 600px at 50% 80%,
+      oklch(0.93 0.07 272) 0%,
+      transparent 60%
     );
-  filter: blur(60px);
+  filter: blur(100px);
   z-index: 0;
-  mix-blend-mode: normal;
-  opacity: 0.95;
+  opacity: 0.7;
 }
 
 /* Summary Grid */
@@ -153,32 +126,66 @@
   z-index: 1;
 }
 
-/* Summary Card Styling with subtle color themes */
+/* Summary Card Styling with liquid glass effect (visionOS-style) */
 .summaryCard {
   flex: 1;
   min-width: 280px;
-  border-radius: 12px;
+  border-radius: 24px;
   padding: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 4px 8px rgba(0, 0, 0, 0.08),
-    0 8px 16px rgba(0, 0, 0, 0.05);
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Subtle background tints for each card - all using purple family for cohesion */
-.summaryCard:nth-child(1) {
-  background: linear-gradient(135deg, oklch(0.95 0.02 264) 0%, oklch(0.96 0.015 260) 100%);
+/* Liquid glass shimmer effect */
+.summaryCard::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 45%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 55%,
+    transparent 100%
+  );
+  transform: rotate(45deg);
+  pointer-events: none;
 }
 
-.summaryCard:nth-child(2) {
-  background: linear-gradient(135deg, oklch(0.95 0.02 268) 0%, oklch(0.96 0.015 272) 100%);
-}
-
-.summaryCard:nth-child(3) {
-  background: linear-gradient(135deg, oklch(0.95 0.02 260) 0%, oklch(0.96 0.015 268) 100%);
+.summaryCard:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    inset 0 2px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 2px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .cardHeader {
@@ -299,25 +306,47 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0px;
-  background-color: var(--bg-dark);
-  padding: 4px;
-  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 6px;
+  border-radius: 16px;
   margin-bottom: 0;
   position: relative;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.15);
 }
 
-/* Morphing blob background indicator */
+/* Liquid glass morphing blob indicator */
 .tabNav::before {
   content: '';
   position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
-  width: calc(25% - 4px);
-  background-color: var(--bg-light);
-  border-radius: 6px;
-  transition: transform 0.25s ease-out;
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc(25% - 8px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.85) 100%
+  );
+  backdrop-filter: blur(12px) saturate(200%);
+  -webkit-backdrop-filter: blur(12px) saturate(200%);
+  border-radius: 12px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.5);
   z-index: 0;
 }
 
