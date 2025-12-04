@@ -1,12 +1,78 @@
 .landing-page {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Soft mesh gradient background - matching dashboard */
+.landing-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(
+      circle at 0% 0%,
+      oklch(0.92 0.08 268) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 0%,
+      oklch(0.90 0.10 264) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      oklch(0.91 0.09 270) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      oklch(0.93 0.06 266) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      oklch(0.95 0.04 264),
+      oklch(0.94 0.05 268),
+      oklch(0.95 0.04 272)
+    );
+  filter: blur(80px);
+  z-index: 0;
+}
+
+/* Additional soft color layer for depth */
+.landing-page::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(
+      ellipse 600px 600px at 30% 30%,
+      oklch(0.94 0.06 260) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 70% 60%,
+      oklch(0.92 0.08 268) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 500px 600px at 50% 80%,
+      oklch(0.93 0.07 272) 0%,
+      transparent 60%
+    );
+  filter: blur(100px);
+  z-index: 0;
+  opacity: 0.7;
 }
 
 /* Navigation Styles */
@@ -14,8 +80,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0 0.5rem 0;
-  border-bottom: 1px solid var(--border);
+  padding: 3px 40px;
+  background: linear-gradient(
+    180deg,
+    var(--primary) 0%,
+    oklch(0.62 0.16 268) 100%
+  );
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   flex-shrink: 0;
 }
 
@@ -23,13 +102,17 @@
   display: flex;
   align-items: center;
   margin: 0;
+  gap: 8px;
 }
 
 .logo h2 {
   margin: 0;
-  color: var(--text);
-  font-size: 1.5rem;
+  color: white;
+  font-size: 1.65rem;
   line-height: 1;
+  font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .auth-buttons {
@@ -39,82 +122,117 @@
 }
 
 .sign-in-btn {
-  background: none;
-  border: none;
-  color: var(--text);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
   font-weight: 500;
   cursor: pointer;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  transition: background-color 0.2s;
+  padding: 8px 20px;
+  border-radius: 7px;
+  transition: all 0.2s ease-in-out;
+  font-size: 1rem;
 }
 
 .sign-in-btn:hover {
-  background-color: var(--bg-dark);
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
 }
 
 .sign-in-btn:active,
 .sign-in-btn:focus {
-  background-color: var(--secondary);
-  color: var(--bg-light);
+  background: rgba(255, 255, 255, 0.35);
   outline: none;
 }
 
 .get-started-btn {
-  background: var(--secondary);
-  color: var(--bg-light);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.90) 100%
+  );
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  color: var(--primary);
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  padding: 8px 24px;
+  border-radius: 7px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
 }
 
 .get-started-btn:hover {
-  background: var(--primary);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
 }
 
 .get-started-btn:active,
 .get-started-btn:focus {
-  background: var(--secondary);
+  background: rgba(255, 255, 255, 0.9);
   outline: none;
 }
 
 /* Hero Section Styles */
 .hero-section {
   text-align: center;
-  padding: 1.5rem 0 2rem 0;
-  max-width: 800px;
+  padding: 2rem 2rem;
+  max-width: 900px;
   margin: 0 auto;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-subtitle {
-  color: var(--text-muted);
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+  color: oklch(0.60 0.18 266);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
+  background: linear-gradient(
+    135deg,
+    oklch(0.60 0.18 266) 0%,
+    oklch(0.62 0.18 268) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .hero-title {
-  font-size: 3.5rem;
-  font-weight: 700;
+  font-size: 4rem;
+  font-weight: 800;
   line-height: 1.1;
   color: var(--text);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .hero-description {
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .cta-buttons {
@@ -125,64 +243,127 @@
 }
 
 .primary-btn {
-  background: var(--secondary);
-  color: var(--bg-light);
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    oklch(0.62 0.16 268) 100%
+  );
+  color: white;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
+  padding: 1.125rem 2.5rem;
+  border-radius: 12px;
   font-size: 1.125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 
+    0 8px 24px rgba(92, 107, 204, 0.3),
+    0 4px 12px rgba(92, 107, 204, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.primary-btn:hover::before {
+  transform: translateX(100%);
 }
 
 .primary-btn:hover {
-  background: var(--primary);
+  background: linear-gradient(
+    135deg,
+    oklch(0.60 0.17 264) 0%,
+    oklch(0.64 0.17 270) 100%
+  );
+  box-shadow: 
+    0 12px 32px rgba(92, 107, 204, 0.4),
+    0 6px 16px rgba(92, 107, 204, 0.3);
+  transform: translateY(-2px);
 }
 
 .primary-btn:active,
 .primary-btn:focus {
-  background: var(--secondary);
+  transform: translateY(0);
   outline: none;
 }
 
 .secondary-btn {
-  background: none;
-  border: 1px solid var(--border-muted);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   color: var(--text);
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
+  padding: 1.125rem 2.5rem;
+  border-radius: 12px;
   font-size: 1.125rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .secondary-btn:hover {
-  border-color: var(--secondary);
-  color: var(--secondary);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.75) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
 }
 
 .secondary-btn:active,
 .secondary-btn:focus {
-  background: var(--secondary);
-  color: var(--bg-light);
-  border-color: var(--secondary);
+  transform: translateY(0);
   outline: none;
-}
-
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 0.75rem 0;
-  flex-shrink: 0;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
-    flex-direction: column;
-    gap: 1rem;
+    padding: 12px 20px;
+  }
+  
+  .auth-buttons {
+    gap: 0.5rem;
+  }
+  
+  .sign-in-btn {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+  }
+  
+  .get-started-btn {
+    padding: 8px 20px;
+    font-size: 0.875rem;
+  }
+  
+  .hero-section {
+    padding: 3rem 1.5rem;
   }
   
   .hero-title {
@@ -201,5 +382,6 @@
   .secondary-btn {
     width: 100%;
     text-align: center;
+    padding: 1rem 2rem;
   }
 }
