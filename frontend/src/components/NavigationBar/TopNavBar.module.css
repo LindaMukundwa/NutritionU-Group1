@@ -71,8 +71,8 @@
   padding: 10px 20px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
+    rgba(255, 255, 255, 0.90) 0%,
+    rgba(255, 255, 255, 0.90) 100%
   );
   backdrop-filter: blur(20px) saturate(120%);
   -webkit-backdrop-filter: blur(20px) saturate(120%);
@@ -91,8 +91,8 @@
 .groceryListButton:hover {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.95) 100%
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 100%
   );
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.12),
