@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from './GenerateMealPlanModal.module.css';
 import { Icon } from '../../ui/Icon';
 import { DatePicker } from '../../ui/DatePicker';
-
+import { useAuth } from '../../../contexts/AuthContext';
 interface GenerateMealPlanModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,6 +24,8 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
   onClose,
   onGenerate,
 }) => {
+  const { user } = useAuth();
+  console.log("USER", user);
   // Mock user preferences (these would come from the backend/onboarding in production)
   const [userPreferences] = useState<UserPreferences>({
     dailyCalories: 2000,
@@ -159,31 +161,27 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
             </h3>
             <div className={styles.goalsGrid}>
               <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.dailyCalories}</div>
+                <div className={styles.goalValue}>{user?.nutritionGoals.calories}</div>
                 <div className={styles.goalLabel}>Calories</div>
               </div>
               <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.proteinGoal}g</div>
+                <div className={styles.goalValue}>{user?.nutritionGoals.protein}g</div>
                 <div className={styles.goalLabel}>Protein</div>
               </div>
               <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.carbsGoal}g</div>
+                <div className={styles.goalValue}>{user?.nutritionGoals.carbs}g</div>
                 <div className={styles.goalLabel}>Carbs</div>
               </div>
               <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.fatGoal}g</div>
+                <div className={styles.goalValue}>{user?.nutritionGoals.fats}g</div>
                 <div className={styles.goalLabel}>Fat</div>
-              </div>
-              <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.fiberGoal}g</div>
-                <div className={styles.goalLabel}>Fiber</div>
               </div>
             </div>
             {userPreferences.dietaryRestrictions.length > 0 && (
-              <div className={styles.restrictions}>
-                <strong>Dietary Restrictions:</strong>{' '}
-                {userPreferences.dietaryRestrictions.join(', ')}
-              </div>
+                <div className={styles.restrictions}>
+                  <strong>Dietary Restrictions:</strong>{' '}
+                  {user?.medicalRestrictions ? Object.values(user.medicalRestrictions).filter(Boolean).join(', ') || 'None' : 'None'}
+                </div>
             )}
           </div>
 
