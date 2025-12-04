@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './GroceryList.module.css';
 import { Icon } from '../../ui/Icon';
+import { DatePicker } from '../../ui/DatePicker';
 
 interface Meal {
   name: string;
@@ -360,21 +361,16 @@ const GroceryList: React.FC<GroceryListProps> = ({ weeklyMealPlan, isOpen, onClo
               <div className={styles.dateRangeInputs}>
                 <div className={styles.dateInputGroup}>
                   <label>Start Date</label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className={styles.dateInput}
+                    onChange={setStartDate}
                   />
                 </div>
                 <div className={styles.dateInputGroup}>
                   <label>End Date</label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    min={startDate}
-                    className={styles.dateInput}
+                    onChange={setEndDate}
                   />
                 </div>
               </div>

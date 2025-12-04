@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './DatePicker.module.css';
 import { Icon } from './Icon';
 
@@ -17,15 +18,53 @@ const MONTHS = [
 export function DatePicker({ value, onChange, className }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState(new Date(value + 'T00:00:00'));
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Update dropdown position when opened and on scroll
+  useEffect(() => {
+    const updatePosition = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const dropdownWidth = 280;
+        // Center the dropdown under the button
+        const centerLeft = rect.left + (rect.width / 2) - (dropdownWidth / 2);
+        
+        setDropdownPosition({
+          top: rect.bottom + 8,
+          left: centerLeft
+        });
+      }
+    };
+
+    if (isOpen) {
+      updatePosition();
+      // Update position smoothly on scroll and resize
+      let rafId: number;
+      const handleUpdate = () => {
+        rafId = requestAnimationFrame(updatePosition);
+      };
+      
+      window.addEventListener('scroll', handleUpdate, true);
+      window.addEventListener('resize', handleUpdate);
+      
+      return () => {
+        window.removeEventListener('scroll', handleUpdate, true);
+        window.removeEventListener('resize', handleUpdate);
+        if (rafId) cancelAnimationFrame(rafId);
+      };
+    }
+  }, [isOpen]);
 
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        !containerRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -133,8 +172,17 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
         <Icon name="calendar" size={16} />
       </button>
 
-      {isOpen && (
-        <div className={styles.calendarDropdown} ref={dropdownRef}>
+      {isOpen && createPortal(
+        <div 
+          className={styles.calendarDropdown} 
+          ref={dropdownRef}
+          style={{
+            position: 'fixed',
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: '280px'
+          }}
+        >
           <div className={styles.calendarHeader}>
             <button
               className={styles.navButton}
@@ -182,7 +230,8 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

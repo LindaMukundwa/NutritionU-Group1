@@ -12,7 +12,7 @@
   background-color: var(--bg-light);
   border: 1px solid var(--border);
   border-radius: 8px;
-  min-width: 280px;
+  width: 280px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   font-family: inherit;
@@ -31,27 +31,25 @@
 }
 
 .calendarDropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
+  /* Position is now set via inline styles in Portal */
   background: var(--bg-light);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  z-index: 1000;
-  animation: slideDown 0.15s cubic-bezier(0.34, 1.2, 0.64, 1);
+  z-index: 10000;
+  animation: slideDown 0.15s ease-out;
+  box-sizing: border-box;
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(0.95);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -69,13 +67,12 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 2px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s ease-in-out;
-  flex-shrink: 0;
 }
 
 .navButton:hover {
@@ -87,6 +84,8 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text);
+  text-align: center;
+  flex: 1;
 }
 
 .calendarBody {
@@ -99,7 +98,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .dayName {
@@ -107,7 +106,7 @@
   font-size: 0.625rem;
   font-weight: 600;
   color: var(--text-muted);
-  padding: 2px;
+  padding: 4px;
 }
 
 .daysGrid {
@@ -129,7 +128,7 @@
   border: none;
   background: none;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--text);
   cursor: pointer;
@@ -137,9 +136,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
-  padding: 0;
-  line-height: 1;
+  padding: 8px;
 }
 
 .dayButton:hover {
