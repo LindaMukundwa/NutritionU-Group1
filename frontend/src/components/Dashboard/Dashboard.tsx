@@ -1987,16 +1987,19 @@ const Dashboard: FC<DashboardProps> = () => {
         onOpenGroceryList={() => setShowGroceryList(true)}
       />
 
-      {/* Header/Greeting Section */}
-      <div className={styles.header}>
-        <h1 className={styles.greeting}>
-          Good morning, {displayName}
-        </h1>
-        <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
-      </div>
+      {/* Top Section with Gradient Background - includes Header + Summary Cards */}
+      <div className={styles.topSectionWrapper}>
+        {/* Header/Greeting Section */}
+        <div className={styles.header}>
+          <h1 className={styles.greeting}>
+            Good morning, {displayName}
+          </h1>
+          <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
+        </div>
 
-      {/* Summary Cards Section */}
-      <div className={styles.summaryGrid}>{dashboardSummary.map(renderSummaryCard)}</div>
+        {/* Summary Cards Section */}
+        <div className={styles.summaryGrid}>{dashboardSummary.map(renderSummaryCard)}</div>
+      </div>
 
       {/* Dashboard Content Switcher Section */}
       <DashboardContentSwitcher
