@@ -61,10 +61,10 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
   };
 
   const mealTypes = [
-    { value: 'breakfast', label: 'Breakfast', color: '#FFB084' },
-    { value: 'lunch', label: 'Lunch', color: '#7FD8A4' },
-    { value: 'dinner', label: 'Dinner', color: '#84C9FF' },
-    { value: 'snacks', label: 'Snacks', color: '#FFD88D' },
+    { value: 'breakfast', label: 'Breakfast', color: 'oklch(0.7 0.05 264)' },
+    { value: 'lunch', label: 'Lunch', color: 'oklch(0.70 0.10 180)' },
+    { value: 'dinner', label: 'Dinner', color: 'oklch(0.60 0.15 260)' },
+    { value: 'snacks', label: 'Snacks', color: 'oklch(0.70 0.12 150)' },
   ];
 
   const handleAdd = () => {
@@ -114,7 +114,11 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
                         }`}
                         style={{
                           borderColor: selectedMealType === type.value ? type.color : '#e5e7eb',
-                          backgroundColor: selectedMealType === type.value ? `${type.color}15` : '#f9fafb',
+                          backgroundColor: selectedMealType === type.value 
+                            ? (type.color.includes('oklch') 
+                                ? type.color.replace(')', ' / 0.15)') 
+                                : `${type.color}15`)
+                            : '#f9fafb',
                         }}
                         onClick={() => setSelectedMealType(type.value)}
                       >

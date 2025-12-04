@@ -1342,7 +1342,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="breakfast"
           meals={currentDayPlan.breakfast}
-          color="#FFB084"
+          color="oklch(0.7 0.05 264)"
           label="Breakfast"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1352,7 +1352,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="lunch"
           meals={currentDayPlan.lunch}
-          color="#7FD8A4"
+          color="oklch(0.70 0.10 180)"
           label="Lunch"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1362,7 +1362,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="dinner"
           meals={currentDayPlan.dinner}
-          color="#84C9FF"
+          color="oklch(0.60 0.15 260)"
           label="Dinner"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1372,7 +1372,7 @@ function PlannerContent({
         <PlannerMealCard
           mealType="snacks"
           meals={currentDayPlan.snacks}
-          color="#FFD88D"
+          color="oklch(0.70 0.12 150)"
           label="Snacks"
           selectedDay={selectedDay}
           onMealClick={handleMealClick}
@@ -1515,7 +1515,7 @@ function NutritionContent({
               {nutritionData.calories.consumed} / {nutritionData.calories.target}
             </span>
           </div>
-          {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "#FFB084")}
+          {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "oklch(0.7 0.05 264)")}
         </div>
 
         <div className={styles.nutritionItem}>
@@ -1530,7 +1530,7 @@ function NutritionContent({
               {nutritionData.protein.consumed}g / {nutritionData.protein.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "#84C9FF")}
+          {renderProgressBar(nutritionData.protein.consumed, nutritionData.protein.target, "oklch(0.60 0.15 260)")}
         </div>
 
         <div className={styles.nutritionItem}>
@@ -1545,7 +1545,7 @@ function NutritionContent({
               {nutritionData.carbs.consumed}g / {nutritionData.carbs.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "#7FD8A4")}
+          {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "oklch(0.70 0.10 180)")}
         </div>
 
         <div className={styles.nutritionItem}>
@@ -1560,7 +1560,7 @@ function NutritionContent({
               {nutritionData.fat.consumed}g / {nutritionData.fat.target}g
             </span>
           </div>
-          {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "#FFD88D")}
+          {renderProgressBar(nutritionData.fat.consumed, nutritionData.fat.target, "oklch(0.70 0.12 150)")}
         </div>
       </div>
     </div>

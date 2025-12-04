@@ -64,7 +64,14 @@ export default function PlannerMealCard({
             <div
               key={index}
               className={styles.mealCard}
-              style={{ backgroundColor: `${color}40`, borderColor: `${color}80` }}
+              style={{ 
+                backgroundColor: color.includes('oklch') 
+                  ? color.replace(')', ' / 0.15)') 
+                  : `${color}40`,
+                borderColor: color.includes('oklch')
+                  ? color.replace(')', ' / 0.5)')
+                  : `${color}80`
+              }}
               onClick={() => onMealClick(meal)}
             >
               <div className={styles.mealCardContent}>
