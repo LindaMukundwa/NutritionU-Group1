@@ -41,7 +41,13 @@ export default function PlannerMealCard({
   onAddMeal,
 }: PlannerMealCardProps) {
   return (
-    <div className={styles.mealSection}>
+    <div 
+      className={styles.mealSection}
+      style={{ 
+        '--meal-color': color,
+        borderLeftColor: color
+      } as React.CSSProperties}
+    >
       <div className={styles.mealSectionHeader}>
         <h3 className={styles.mealSectionTitle}>
           <div className={styles.mealColorDot} style={{ backgroundColor: color }} />
