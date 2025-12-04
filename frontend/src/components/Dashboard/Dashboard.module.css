@@ -172,6 +172,7 @@
   );
   transform: rotate(45deg);
   pointer-events: none;
+  z-index: 0;
 }
 
 .summaryCard:hover {
@@ -194,6 +195,8 @@
   font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .cardBody {
@@ -201,24 +204,28 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .cardValue {
   font-size: 2rem;
   font-weight: 700;
+  position: relative;
+  z-index: 1;
 }
 
-/* Color the main values to match card themes - all purple for cohesion */
+/* Color the main values to match card themes - rich saturated purple-blue */
 .summaryCard:nth-child(1) .cardValue {
-  color: var(--primary);
+  color: oklch(0.60 0.18 266);
 }
 
 .summaryCard:nth-child(2) .cardValue {
-  color: oklch(0.58 0.15 268);
+  color: oklch(0.62 0.18 268);
 }
 
 .summaryCard:nth-child(3) .cardValue {
-  color: var(--info);
+  color: oklch(0.64 0.18 270);
 }
 
 .iconBackground {
@@ -237,20 +244,20 @@
   margin: auto;
 }
 
-/* Colored icon backgrounds with matching colors - all purple for cohesion */
+/* Colored icon backgrounds with matching colors - rich saturated purple-blue */
 .summaryCard:nth-child(1) .iconBackground {
   background: linear-gradient(135deg, oklch(0.92 0.04 264), oklch(0.90 0.05 260));
-  color: var(--primary);
+  color: oklch(0.60 0.18 266);
 }
 
 .summaryCard:nth-child(2) .iconBackground {
   background: linear-gradient(135deg, oklch(0.92 0.04 268), oklch(0.90 0.05 272));
-  color: oklch(0.58 0.15 268);
+  color: oklch(0.62 0.18 268);
 }
 
 .summaryCard:nth-child(3) .iconBackground {
   background: linear-gradient(135deg, oklch(0.92 0.04 260), oklch(0.90 0.05 268));
-  color: var(--info);
+  color: oklch(0.64 0.18 270);
 }
 
 .cardSubtext {
@@ -309,21 +316,20 @@
   gap: 0px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.35) 0%,
-    rgba(255, 255, 255, 0.15) 100%
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.3) 100%
   );
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: none;
   padding: 6px;
-  border-radius: 16px;
+  border-radius: 16px 16px 0 0;
   margin-bottom: 0;
   position: relative;
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.04),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.15);
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Liquid glass morphing blob indicator */
