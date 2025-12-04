@@ -290,6 +290,20 @@
   height: 100%;
   border-radius: 4px;
   transition: width 0.3s ease-in-out;
+  
+  /* Progress bar growth animation - fills from left to right */
+  animation: progressGrow 1.2s ease-out forwards;
+  transform-origin: left;
+}
+
+/* Progress Bar Growth Animation - Left to Right Fill */
+@keyframes progressGrow {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
 }
 
 /* Colored progress fills - all purple for cohesion */

@@ -1,4 +1,4 @@
-import { type FC, useState } from "react"
+import { type FC, useState, useEffect, useRef } from "react"
 import styles from "./MealContentCard.module.css"
 import React from 'react'
 import { Icon } from '../../ui/Icon'
@@ -35,6 +35,37 @@ const MealContentCard: FC<MealContentCardProps> = ({
 }) => {
   // For demo purposes start cards as favorited so they can be filtered/shown as favorites
   const [isLiked, setIsLiked] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for scroll animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            // Once visible, stop observing
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of card is visible
+        rootMargin: '50px', // Start animation slightly before card enters viewport
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, []);
 
   const handleLikeToggle = () => {
     setIsLiked(!isLiked);
@@ -54,7 +85,10 @@ const MealContentCard: FC<MealContentCardProps> = ({
   };
 
   return (
-    <div className={styles.MealContentCard}>
+    <div 
+      ref={cardRef}
+      className={`${styles.MealContentCard} ${isVisible ? styles.visible : ''}`}
+    >
       {/* Image Section */}
       <div className={styles.imageContainer}>
         {imageUrl ? (

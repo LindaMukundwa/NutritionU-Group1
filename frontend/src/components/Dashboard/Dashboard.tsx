@@ -13,6 +13,7 @@ import GenerateMealPlanModal from "./GenerateMealPlanModal/GenerateMealPlanModal
 import type { Recipe } from '../../../../shared/types/recipe';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMealPlan } from '../../hooks/useMealPlan';
+import { useCountUp } from '../../hooks/useCountUp';
 import type { User } from "firebase/auth"
 import { mealPlanService } from "../../../services/mealPlanService"
 import { Icon } from '../ui/Icon';
@@ -1950,9 +1951,18 @@ const Dashboard: FC<DashboardProps> = () => {
     )
   }
 
-  const renderSummaryCard = (card: SummaryCardData) => {
+  const renderSummaryCard = (card: SummaryCardData, index: number) => {
     // Determine if icon is a lucide icon name or a simple string (like "$")
     const isLucideIcon = card.icon !== "$";
+    
+    // Use counter animation for numeric values with slight delay per card
+    const animatedValue = useCountUp(
+      typeof card.value === 'number' ? card.value : 0,
+      1200,
+      0
+    );
+    
+    const displayValue = typeof card.value === 'number' ? animatedValue : card.value;
 
     return (
       <div key={card.title} className={styles.summaryCard}>
@@ -1960,7 +1970,7 @@ const Dashboard: FC<DashboardProps> = () => {
           <div className={styles.cardTitle}>{card.title}</div>
         </div>
         <div className={styles.cardBody}>
-          <div className={styles.cardValue}>{card.value}</div>
+          <div className={styles.cardValue}>{displayValue}</div>
           <div className={styles.iconBackground}>
             {isLucideIcon ? (
               <Icon name={card.icon as any} size={20} />
@@ -1998,7 +2008,7 @@ const Dashboard: FC<DashboardProps> = () => {
         </div>
 
         {/* Summary Cards Section */}
-        <div className={styles.summaryGrid}>{dashboardSummary.map(renderSummaryCard)}</div>
+        <div className={styles.summaryGrid}>{dashboardSummary.map((card, index) => renderSummaryCard(card, index))}</div>
       </div>
 
       {/* Dashboard Content Switcher Section */}

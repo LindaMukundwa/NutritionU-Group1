@@ -8,8 +8,18 @@
   min-width: 280px;
   max-width: 350px;
   margin: 8px;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, opacity 0.6s ease, transform 0.6s ease;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+  
+  /* Initial state for scroll animation */
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* Visible state when card is in viewport */
+.MealContentCard.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .MealContentCard:hover {
@@ -85,6 +95,20 @@
     rgba(255, 255, 255, 0.75) 100%
   );
   border-color: rgba(255, 255, 255, 1);
+  animation: heartBeat 0.6s ease-in-out;
+}
+
+/* Heart Beat Animation - Subtle version */
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.15);
+  }
+  50% {
+    transform: scale(1);
+  }
 }
 
 /* Content Section */
