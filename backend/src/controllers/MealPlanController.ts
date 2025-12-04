@@ -392,7 +392,7 @@ export const generateMealPlan = async (req: Request, res: Response) => {
         const { userId } = req.params;
         const { startDate, endDate, preferences } = req.body;
 
-        console.log('[generateMealPlan] 🚀 Starting meal plan generation');
+        console.log('[generateMealPlan] Starting meal plan generation');
         console.log('[generateMealPlan] Request params:', { userId, startDate, endDate });
         console.log('[generateMealPlan] Preferences:', preferences);
 
@@ -407,11 +407,11 @@ export const generateMealPlan = async (req: Request, res: Response) => {
         });
 
         if (!user) {
-            console.log('[generateMealPlan] ❌ User not found:', userId);
+            console.log('[generateMealPlan] User not found:', userId);
             return res.status(404).json({ error: 'User not found' });
         }
 
-        console.log('[generateMealPlan] ✅ User found:', { id: user.id, firebaseUid: user.firebaseUid });
+        console.log('[generateMealPlan] User found:', { id: user.id, firebaseUid: user.firebaseUid });
 
         // Calculate date range
         const start = new Date(startDate);
@@ -422,7 +422,7 @@ export const generateMealPlan = async (req: Request, res: Response) => {
             dates.push(d.toISOString().split('T')[0]);
         }
 
-        console.log('[generateMealPlan] 📅 Date range calculated:', { dates, totalDays: dates.length });
+        console.log('[generateMealPlan]  Date range calculated:', { dates, totalDays: dates.length });
 
         // Define meal types based on preferences
         const mealTypes = ['breakfast', 'lunch', 'dinner'];
@@ -430,7 +430,7 @@ export const generateMealPlan = async (req: Request, res: Response) => {
             mealTypes.push('snacks');
         }
 
-        console.log('[generateMealPlan] 🍽️ Meal types:', mealTypes);
+        console.log('[generateMealPlan] Meal types:', mealTypes);
 
         // Calculate macro targets per meal type
         const macroTargetsPerMeal = {
@@ -499,7 +499,7 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                 console.log(`[generateMealPlan] 🔍 Searching ${mealType} with query: "${searchQuery}"`);
 
                 const fatSecretRecipes = await FatSecretService.searchRecipes(searchQuery, 10);
-                console.log(`[generateMealPlan] 📦 FatSecret returned ${fatSecretRecipes.length} recipes for ${mealType}`);
+                console.log(`[generateMealPlan] FatSecret returned ${fatSecretRecipes.length} recipes for ${mealType}`);
 
                 if (fatSecretRecipes.length === 0) {
                     console.warn(`[generateMealPlan] ⚠️ No recipes found for ${mealType} with query "${searchQuery}"`);
@@ -508,11 +508,11 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                 }
 
                 // Convert FatSecret recipes to our format
-                console.log(`[generateMealPlan] 🔄 Converting ${fatSecretRecipes.length} recipes for ${mealType}...`);
+                console.log(`[generateMealPlan] Converting ${fatSecretRecipes.length} recipes for ${mealType}...`);
                 const convertedRecipes = fatSecretRecipes.map((recipe, index) => {
                     try {
                         const converted = FatSecretService.convertToRecipeModel(recipe);
-                        console.log(`[generateMealPlan] ✅ Converted recipe ${index + 1}: ${converted.title} (${converted.nutritionInfo.calories} cal)`);
+                        console.log(`[generateMealPlan] Converted recipe ${index + 1}: ${converted.title} (${converted.nutritionInfo.calories} cal)`);
                         return converted;
                     } catch (conversionError) {
                         console.error(`[generateMealPlan] ❌ Error converting recipe ${index + 1}:`, conversionError);
@@ -520,39 +520,64 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                     }
                 }).filter(recipe => recipe !== null);
 
-                console.log(`[generateMealPlan] ✅ Successfully converted ${convertedRecipes.length} recipes for ${mealType}`);
+                console.log(`[generateMealPlan] Successfully converted ${convertedRecipes.length} recipes for ${mealType}`);
 
                 // Filter by macro targets
                 const targets = macroTargetsPerMeal[mealType as keyof typeof macroTargetsPerMeal];
-                console.log(`[generateMealPlan] 🎯 Filtering ${mealType} recipes with targets:`, targets);
+                console.log(`[generateMealPlan] Filtering ${mealType} recipes with targets:`, targets);
 
                 // Replace the macro filtering section with this more flexible approach:
 
-                const filteredRecipes = convertedRecipes.filter(recipe => {
+                const processedRecipes = convertedRecipes.map(recipe => {
                     const calories = recipe.nutritionInfo.calories;
-                    const targets = macroTargetsPerMeal[mealType as keyof typeof macroTargetsPerMeal];
-
-                    let minCal, maxCal;
-
-                    if (calories < targets.calories * 0.3) {
-                        minCal = 0;
-                        maxCal = targets.calories * 2; 
-                    } else {
-                        minCal = targets.calories * 0.5;
-                        maxCal = targets.calories * 1.5;
+                    
+                    // Calculate how many servings needed to meet target
+                    let servings = 1;
+                    let adjustedNutrition = { ...recipe.nutritionInfo };
+                    
+                    if (calories < targets.calories * 0.8) {
+                        // If recipe is too small, calculate servings needed
+                        servings = Math.ceil(targets.calories / calories);
+                        
+                        // Cap at reasonable serving size (max 3 servings for practicality)
+                        if (servings > 3) {
+                            servings = 3;
+                        }
+                        
+                        // Adjust all nutrition values
+                        adjustedNutrition = {
+                            calories: recipe.nutritionInfo.calories * servings,
+                            protein: recipe.nutritionInfo.protein * servings,
+                            carbs: recipe.nutritionInfo.carbs * servings,
+                            fat: recipe.nutritionInfo.fat * servings,
+                            fiber: (recipe.nutritionInfo.fiber || 0) * servings,
+                            sugar: (recipe.nutritionInfo.sugar || 0) * servings,
+                            sodium: (recipe.nutritionInfo.sodium || 0) * servings
+                        };
                     }
+                    
+                    // Accept recipe if adjusted calories are close to target (within 20% range)
+                    const adjustedCalories = adjustedNutrition.calories;
+                    const withinRange = (
+                        adjustedCalories >= targets.calories * 0.8 && 
+                        adjustedCalories <= targets.calories * 1.3
+                    );
+                    
+                    console.log(`[generateMealPlan] 🔍 Recipe "${recipe.title}": ${calories} cal x${servings} = ${adjustedCalories} cal (target: ${targets.calories}) - ${withinRange ? '✅ PASS' : '❌ FAIL'}`);
+                    
+                    return {
+                        ...recipe,
+                        servingMultiplier: servings,
+                        adjustedNutrition,
+                        withinRange
+                    };
+                }).filter(recipe => recipe.withinRange);
 
-                    const withinRange = calories >= minCal && calories <= maxCal;
-
-                    console.log(`[generateMealPlan] 🔍 Recipe "${recipe.title}": ${calories} cal (range: ${minCal}-${maxCal}) - ${withinRange ? '✅ PASS' : '❌ FAIL'}`);
-                    return withinRange;
-                });
-
-                console.log(`[generateMealPlan] 📊 ${filteredRecipes.length}/${convertedRecipes.length} recipes passed macro filter for ${mealType}`);
-                recipesByMealType[mealType] = filteredRecipes;
+                console.log(`[generateMealPlan] 📊 ${processedRecipes.length}/${convertedRecipes.length} recipes passed macro filter for ${mealType}`);
+                recipesByMealType[mealType] = processedRecipes;
 
             } catch (error) {
-                console.error(`[generateMealPlan] ❌ Error fetching recipes for ${mealType}:`, error);
+                console.error(`[generateMealPlan] Error fetching recipes for ${mealType}:`, error);
                 recipesByMealType[mealType] = [];
             }
         }
@@ -568,43 +593,46 @@ export const generateMealPlan = async (req: Request, res: Response) => {
         console.log('[generateMealPlan] 🏗️ Building meal plan items...');
 
         for (const dateString of dates) {
-            console.log(`[generateMealPlan] 📅 Processing date: ${dateString}`);
+            console.log(`[generateMealPlan] Processing date: ${dateString}`);
 
             for (const mealType of mealTypes) {
                 const availableRecipes = recipesByMealType[mealType];
-                console.log(`[generateMealPlan] 🍽️ Processing ${mealType} - ${availableRecipes.length} recipes available`);
+                console.log(`[generateMealPlan] Processing ${mealType} - ${availableRecipes.length} recipes available`);
 
                 if (availableRecipes.length > 0) {
                     // Select a random recipe for variety
                     const selectedRecipe = availableRecipes[Math.floor(Math.random() * availableRecipes.length)];
-                    console.log(`[generateMealPlan] 🎲 Selected recipe for ${mealType} on ${dateString}: "${selectedRecipe.title}"`);
+                    console.log(`[generateMealPlan] Selected recipe for ${mealType} on ${dateString}: "${selectedRecipe.title}"`);
 
                     try {
                         // Save recipe to database first
                         const recipeData = {
-                            title: selectedRecipe.title,
-                            description: selectedRecipe.description || `Delicious ${selectedRecipe.title}`,
+                            title: selectedRecipe.servingMultiplier > 1 
+                                ? `${selectedRecipe.title} (${selectedRecipe.servingMultiplier} servings)`
+                                : selectedRecipe.title,
+                            description: selectedRecipe.description || `Nutritious ${selectedRecipe.title.toLowerCase()}`,
                             totalTime: selectedRecipe.totalTime || 30,
-                            estimatedCostPerServing: selectedRecipe.estimatedCostPerServing || 5.0,
-                            nutritionInfo: {
-                                calories: selectedRecipe.nutritionInfo.calories,
-                                protein: selectedRecipe.nutritionInfo.protein,
-                                carbs: selectedRecipe.nutritionInfo.carbs,
-                                fat: selectedRecipe.nutritionInfo.fat,
-                                fiber: selectedRecipe.nutritionInfo.fiber || 0,
-                                sugar: selectedRecipe.nutritionInfo.sugar || 0,
-                                sodium: selectedRecipe.nutritionInfo.sodium || 0
-                            },
-                            ingredients: selectedRecipe.ingredients || [],
-                            instructions: selectedRecipe.instructions || [],
-        
+                            estimatedCostPerServing: (selectedRecipe.estimatedCostPerServing || 5.0) * selectedRecipe.servingMultiplier,
+                            nutritionInfo: selectedRecipe.adjustedNutrition, // Use the scaled nutrition values
+                            ingredients: selectedRecipe.ingredients.map((ing: any) => ({
+                                name: ing.name,
+                                amount: ing.amount * selectedRecipe.servingMultiplier, // Scale ingredient amounts
+                                unit: ing.unit
+                            })),
+                            instructions: selectedRecipe.instructions.map((inst: any, idx: number) => ({
+                                stepNumber: idx + 1,
+                                instruction: selectedRecipe.servingMultiplier > 1 && idx === 0
+                                    ? `This recipe serves ${selectedRecipe.servingMultiplier} portions. ${inst.instruction}`
+                                    : inst.instruction,
+                                equipment: inst.equipment || []
+                            }))
                         };
 
                         console.log(`[generateMealPlan] 💾 Saving recipe to database: "${selectedRecipe.title}"`);
                         const savedRecipe = await prisma.recipe.create({
                             data: recipeData
                         });
-                        console.log(`[generateMealPlan] ✅ Recipe saved with ID: ${savedRecipe.id}`);
+                        console.log(`[generateMealPlan] Recipe saved with ID: ${savedRecipe.id}`);
 
                         // Add to meal plan items
                         mealPlanItems.push({
@@ -612,13 +640,13 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                             date: new Date(dateString),
                             mealType: mealType
                         });
-                        console.log(`[generateMealPlan] ✅ Added meal plan item: ${mealType} on ${dateString}`);
+                        console.log(`[generateMealPlan] Added meal plan item: ${mealType} on ${dateString}`);
 
                     } catch (saveError) {
-                        console.error(`[generateMealPlan] ❌ Error saving recipe "${selectedRecipe.title}":`, saveError);
+                        console.error(`[generateMealPlan] Error saving recipe "${selectedRecipe.title}":`, saveError);
                     }
                 } else {
-                    console.warn(`[generateMealPlan] ⚠️ No recipes available for ${mealType} on ${dateString}`);
+                    console.warn(`[generateMealPlan] No recipes available for ${mealType} on ${dateString}`);
                 }
             }
         }
@@ -630,7 +658,7 @@ export const generateMealPlan = async (req: Request, res: Response) => {
         });
 
         if (mealPlanItems.length === 0) {
-            console.error('[generateMealPlan] ❌ No meal plan items were created! Check recipe search and filtering logic.');
+            console.error('[generateMealPlan] No meal plan items were created! Check recipe search and filtering logic.');
             return res.status(500).json({
                 error: 'No meals could be generated',
                 details: 'Recipe search returned no suitable results',
