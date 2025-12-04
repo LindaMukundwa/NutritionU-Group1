@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './GenerateMealPlanModal.module.css';
 import { Icon } from '../../ui/Icon';
+import { DatePicker } from '../../ui/DatePicker';
 
 interface GenerateMealPlanModalProps {
   isOpen: boolean;
@@ -126,27 +127,22 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
             <div className={styles.dateInputs}>
               <div className={styles.dateInputGroup}>
                 <label>Start Date</label>
-                <input
-                  type="date"
+                <DatePicker
                   value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
+                  onChange={(value) => {
+                    setStartDate(value);
                     setSelectedPreset(0); // Clear preset selection when manually changing date
                   }}
-                  className={styles.dateInput}
                 />
               </div>
               <div className={styles.dateInputGroup}>
                 <label>End Date</label>
-                <input
-                  type="date"
+                <DatePicker
                   value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
+                  onChange={(value) => {
+                    setEndDate(value);
                     setSelectedPreset(0); // Clear preset selection when manually changing date
                   }}
-                  min={startDate}
-                  className={styles.dateInput}
                 />
               </div>
             </div>

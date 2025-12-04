@@ -63,9 +63,7 @@ export function TopNavBar({ userEmail = "Linda.Mukundwa1@marist.edu", onOpenGroc
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
-            <span className={styles.hamburgerLine}></span>
-            <span className={styles.hamburgerLine}></span>
-            <span className={styles.hamburgerLine}></span>
+            <Icon name="menu" size={20} />
           </button>
 
           {/* Dropdown Menu */}

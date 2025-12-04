@@ -1,6 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import styles from './GroceryList.module.css';
+import { Icon } from '../../ui/Icon';
+import { DatePicker } from '../../ui/DatePicker';
+
+interface Meal {
+  name: string;
+  calories: number;
+  time: string;
+  cost: string;
+  recipe: {
+    ingredients: string[];
+    instructions: string[];
+    nutrition: {
+      protein: number;
+      carbs: number;
+      fat: number;
+      fiber: number;
+    };
+  };
+}
+
+interface DayMealPlan {
+  breakfast: Meal[];
+  lunch: Meal[];
+  dinner: Meal[];
+  snacks: Meal[];
+}
+
+interface WeeklyMealPlan {
+  [dateString: string]: DayMealPlan;
+}
+
 
 // Types based on Prisma schema
 interface GroceryItem {
@@ -659,6 +690,48 @@ const GroceryList: React.FC<GroceryListProps> = ({
                   </button>
                 </div>
               )}
+              <div className={styles.dateRangeInputs}>
+                <div className={styles.dateInputGroup}>
+                  <label>Start Date</label>
+                  <DatePicker
+                    value={startDate}
+                    onChange={setStartDate}
+                  />
+                </div>
+                <div className={styles.dateInputGroup}>
+                  <label>End Date</label>
+                  <DatePicker
+                    value={endDate}
+                    onChange={setEndDate}
+                  />
+                </div>
+              </div>
+              <div className={styles.dateRangeActions}>
+                <button onClick={() => setShowDateRangePicker(false)} className={styles.applyButton}>
+                  Apply
+                </button>
+              </div>
+            </div>
+          )}
+
+          {showAddForm && (
+            <div className={styles.addForm}>
+              <input
+                type="text"
+                className={styles.addInput}
+                placeholder="Item name, quantity (e.g., Milk, 1 gallon)"
+                value={manualEntry}
+                onChange={(e) => setManualEntry(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddManualItem()}
+              />
+              <button className={styles.addSubmitButton} onClick={handleAddManualItem}>
+                Add
+              </button>
+              <button className={styles.cancelButton} onClick={() => setShowAddForm(false)}>
+                Cancel
+              </button>
+            </div>
+          )}
 
               {/* Category Filter */}
               <div className={styles.categoryFilter}>

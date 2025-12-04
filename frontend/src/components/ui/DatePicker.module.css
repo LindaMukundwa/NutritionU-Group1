@@ -1,0 +1,159 @@
+.datePickerContainer {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.dateButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-family: inherit;
+}
+
+.dateButton:hover {
+  border-color: var(--primary);
+  background-color: var(--bg);
+}
+
+.dateText {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.calendarDropdown {
+  /* Position is now set via inline styles in Portal */
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 10000;
+  animation: slideDown 0.15s ease-out;
+  box-sizing: border-box;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.navButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.navButton:hover {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.monthYear {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  flex: 1;
+}
+
+.calendarBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.daysHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.dayName {
+  text-align: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 4px;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dayCell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dayButton {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.dayButton:hover {
+  background-color: var(--bg);
+}
+
+.dayButton.today {
+  border: 1px solid var(--primary);
+}
+
+.dayButton.selected {
+  background-color: var(--primary);
+  color: var(--bg-light);
+  font-weight: 600;
+}
+
+.dayButton.selected:hover {
+  background-color: var(--info);
+}

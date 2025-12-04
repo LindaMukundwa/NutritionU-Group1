@@ -16,6 +16,7 @@ import { useMealPlan } from '../../hooks/useMealPlan';
 import type { User } from "firebase/auth"
 import { mealPlanService } from "../../../services/mealPlanService"
 import { Icon } from '../ui/Icon';
+import { DatePicker } from '../ui/DatePicker';
 
 interface SummaryCardData {
   title: string;
@@ -135,27 +136,12 @@ function DateNavigation({
     setSelectedDay(getDateString(currentDate));
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value) {
-      setSelectedDay(e.target.value);
-    }
-  };
-
   return (
     <div className={styles.dateNavigation}>
       <button className={styles.navButton} onClick={goToPreviousDay} title="Previous day">
         ‹
       </button>
-      <div className={styles.dateDisplay}>
-        <span className={styles.dateText}>{formatDisplayDate(selectedDay)}</span>
-        <input
-          type="date"
-          value={selectedDay}
-          onChange={handleDateChange}
-          className={styles.datePicker}
-          title="Select a date"
-        />
-      </div>
+      <DatePicker value={selectedDay} onChange={setSelectedDay} />
       <button className={styles.navButton} onClick={goToNextDay} title="Next day">
         ›
       </button>
@@ -320,6 +306,31 @@ function MealContent({
     maxPrice: 10,
     dietary: [] as string[],
   })
+  const filterDropdownRef = React.useRef<HTMLDivElement>(null)
+  const filterButtonRef = React.useRef<HTMLDivElement>(null)
+
+  // Click-outside handler for filter dropdown
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Check if click is outside both dropdown and button
+      if (
+        filterDropdownRef.current && 
+        !filterDropdownRef.current.contains(event.target as Node) &&
+        filterButtonRef.current &&
+        !filterButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowFilters(false)
+      }
+    }
+
+    if (showFilters) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showFilters])
 
   const sampleMeals = [
     {
@@ -635,7 +646,7 @@ function MealContent({
       <h2 className={styles.greeting}>Meal Recommendations</h2>
       <p className={styles.prompt}>Discover delicious recipes tailored to your preferences.</p>
 
-      <div className={styles.searchBarContainer}>
+      <div className={styles.searchBarContainer} ref={filterButtonRef}>
         <SearchBar
           placeholder="Search for Recipes"
           value={searchQuery}
@@ -649,7 +660,7 @@ function MealContent({
         )}
 
         {showFilters && (
-          <div className={styles.filterDropdown}>
+          <div className={styles.filterDropdown} ref={filterDropdownRef}>
             <div className={styles.filterHeader}>
               <h3 className={styles.filterTitle}>Filter Meals</h3>
               <button onClick={handleClearFilters} className={styles.clearButton}>

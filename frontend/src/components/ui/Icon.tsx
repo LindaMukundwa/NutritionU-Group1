@@ -38,6 +38,7 @@ import {
   CircleDollarSign,
   Soup,
   Drumstick,
+  Menu,
 } from 'lucide-react';
 
 export type IconName = 
@@ -78,7 +79,8 @@ export type IconName =
   | 'smile'
   | 'activity'
   | 'sprout'
-  | 'beef';
+  | 'beef'
+  | 'menu';
 
 interface IconProps extends React.HTMLAttributes<HTMLElement> {
   name: IconName;
@@ -127,6 +129,7 @@ const iconMap = {
   'activity': Activity,
   'sprout': Sprout,
   'beef': Beef,
+  'menu': Menu,
 };
 
 export const Icon: React.FC<IconProps> = ({ 
