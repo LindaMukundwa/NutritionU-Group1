@@ -61,7 +61,7 @@ const MealContentCard: FC<MealContentCardProps> = ({
           <img src={imageUrl} alt={title} className={styles.mealImage} />
         ) : (
           <div className={styles.imagePlaceholder}>
-            {title.charAt(0).toUpperCase()}
+            <Icon name="utensils" size={48} />
           </div>
         )}
 

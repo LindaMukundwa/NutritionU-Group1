@@ -104,37 +104,92 @@
 
 /* Tab Navigation */
 .tabNav {
-  display: flex;
-  padding: 0 24px;
-  gap: 8px;
-  background: white;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
-}
-
-.tabButton {
-  padding: 12px 20px;
-  background: none;
-  border: none;
-  color: #6b7280;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: inline-flex;
+  gap: 4px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 4px;
+  margin: 0 24px 16px;
   position: relative;
 }
 
+/* Sliding blob indicator - sized to fit content */
+.tabNav::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  height: auto;
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    oklch(0.62 0.16 268) 100%
+  );
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 2px 4px rgba(92, 107, 204, 0.2),
+    0 1px 2px rgba(92, 107, 204, 0.1);
+  z-index: 0;
+}
+
+/* Position blob for "Search Meals" tab (first child) */
+.tabNav:has(.tabButton:nth-child(1).active)::before {
+  left: 4px;
+  width: 155px;
+  transform: translateX(0);
+}
+
+/* Position blob for "Favorites" tab (second child) */
+.tabNav:has(.tabButton:nth-child(2).active)::before {
+  left: 4px;
+  width: 140px;
+  transform: translateX(165px);
+}
+
+.tabButton {
+  padding: 8px 18px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  outline: none !important;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-align: center;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  border-radius: 8px;
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
 .tabButton:hover {
-  color: #111827;
-  background-color: #f9fafb;
+  color: var(--text);
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .tabButton.active {
-  color: #5c6bcc;
-  background-color: #f9fafb;
+  color: white;
   font-weight: 600;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.tabButton:focus,
+.tabButton:focus-visible,
+.tabButton:focus-within,
+.tabButton:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 /* Search Container */
