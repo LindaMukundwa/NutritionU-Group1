@@ -46,6 +46,8 @@ interface Meal {
       fiber: number;
     };
   };
+  aiEnhanced?: boolean;
+  aiReasoning?: string;
 }
 
 // Helper function to convert Recipe to Meal
@@ -1156,84 +1158,163 @@ function PlannerContent({
   };
 
   const handleGenerateMealPlan = async (startDate: string, endDate: string, preferences: any) => {
-    if (!user?.firebaseUid) {
-      alert('Please log in to generate meal plans');
-      return;
-    }
-  
-    try {
-      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
-      
-      const response = await fetch(`${API_BASE}/api/users/${user.firebaseUid}/meal-plans/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          startDate,
-          endDate,
-          preferences: {
-            dailyCalories: user?.nutritionGoals?.calories || preferences.dailyCalories,
-            proteinGoal: user?.nutritionGoals?.protein || preferences.proteinGoal,
-            carbsGoal: user?.nutritionGoals?.carbs || preferences.carbsGoal,
-            fatGoal: user?.nutritionGoals?.fats || preferences.fatGoal,
-            fiberGoal: preferences.fiberGoal,
-            dietaryRestrictions: user?.medicalRestrictions ? 
-              Object.entries(user.medicalRestrictions)
-                .filter(([_, value]) => value)
-                .map(([key, _]) => key) : 
-              preferences.dietaryRestrictions,
-            mealsPerDay: preferences.mealsPerDay
-          }
-        })
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to generate meal plan');
-      }
-  
-      const result = await response.json();
-      
-      // Convert API response back to frontend format
-      const newPlan: WeeklyMealPlan = {};
-      
-      result.mealPlan.items.forEach((item: any) => {
-        const dateString = item.date.split('T')[0];
-        const meal: Meal = {
-          recipeId: item.recipe.id,
-          name: item.recipe.title,
-          calories: item.recipe.nutritionInfo.calories,
-          time: `${item.recipe.totalTime} min`,
-          cost: `$${item.recipe.estimatedCostPerServing.toFixed(2)}`,
-          recipe: {
-            ingredients: item.recipe.ingredients.map((ing: any) => 
-              `${ing.amount} ${ing.unit.value} ${ing.name}`
-            ),
-            instructions: item.recipe.instructions.map((inst: any) => inst.instruction),
-            nutrition: item.recipe.nutritionInfo
-          }
-        };
-  
-        if (!newPlan[dateString]) {
-          newPlan[dateString] = {
-            breakfast: [],
-            lunch: [],
-            dinner: [],
-            snacks: []
-          };
+  if (!user?.firebaseUid) {
+    alert('Please log in to generate meal plans');
+    return;
+  }
+
+  try {
+    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
+    
+    // Step 1: Generate the meal plan
+    const response = await fetch(`${API_BASE}/api/users/${user.firebaseUid}/meal-plans/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        startDate,
+        endDate,
+        preferences: {
+          dailyCalories: user?.nutritionGoals?.calories || preferences.dailyCalories,
+          proteinGoal: user?.nutritionGoals?.protein || preferences.proteinGoal,
+          carbsGoal: user?.nutritionGoals?.carbs || preferences.carbsGoal,
+          fatGoal: user?.nutritionGoals?.fats || preferences.fatGoal,
+          fiberGoal: preferences.fiberGoal,
+          dietaryRestrictions: user?.medicalRestrictions ? 
+            Object.entries(user.medicalRestrictions)
+              .filter(([_, value]) => value)
+              .map(([key, _]) => key) : 
+            preferences.dietaryRestrictions,
+          mealsPerDay: preferences.mealsPerDay
         }
-  
-        newPlan[dateString][item.mealType as keyof DayMealPlan].push(meal);
-      });
-  
-      setWeeklyMealPlan(newPlan);
-      
-      // Show success message
-      alert(`Successfully generated ${result.summary.totalMealsGenerated} meals for ${result.summary.daysPlanned} days!`);
-      
-    } catch (error) {
-      console.error('Error generating meal plan:', error);
-      alert('Failed to generate meal plan. Please try again.');
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate meal plan');
     }
-  };
+
+    const result = await response.json();
+    console.log('[handleGenerateMealPlan] Initial meal plan generated:', result);
+
+    // Step 2: Enhance recipes with detailed instructions and ingredients using OpenAI
+    const enhancedItems = await Promise.all(
+      result.mealPlan.items.map(async (item: any) => {
+        try {
+          console.log(`[handleGenerateMealPlan] Enhancing recipe: ${item.recipe.title}`);
+          
+          // Create a detailed query for the OpenAI API
+          const recipeQuery = {
+            recipeName: item.recipe.title,
+            description: item.recipe.description,
+            macros: {
+              calories: item.recipe.nutritionInfo.calories,
+              protein: item.recipe.nutritionInfo.protein,
+              carbs: item.recipe.nutritionInfo.carbs,
+              fat: item.recipe.nutritionInfo.fat,
+              fiber: item.recipe.nutritionInfo.fiber
+            },
+            mealType: item.mealType,
+            servings: item.recipe.servings || 1
+          };
+
+          // Call the OpenAI instructions-ingredients endpoint
+          const enhancementResponse = await fetch(`${API_BASE}/api/chatbot/instructions-ingredients`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              query: `${recipeQuery.recipeName} - ${recipeQuery.description}. Target macros: ${recipeQuery.macros.calories} calories, ${recipeQuery.macros.protein}g protein, ${recipeQuery.macros.carbs}g carbs, ${recipeQuery.macros.fat}g fat. Serves ${recipeQuery.servings}.` 
+            })
+          });
+
+          if (enhancementResponse.ok) {
+            const enhancedRecipe = await enhancementResponse.json();
+            console.log(`[handleGenerateMealPlan] ✅ Enhanced recipe: ${item.recipe.title}`);
+            
+            // Update the recipe with AI-generated content
+            return {
+              ...item,
+              recipe: {
+                ...item.recipe,
+                ingredients: enhancedRecipe.ingredients.map((ing: string, index: number) => ({
+                  name: ing,
+                  amount: 1, // AI provides formatted strings like "2 eggs"
+                  unit: { type: 'metric', value: 'serving' }
+                })),
+                instructions: enhancedRecipe.instructions.map((instruction: string, index: number) => ({
+                  stepNumber: index + 1,
+                  instruction: instruction,
+                  equipment: []
+                })),
+                aiEnhanced: true,
+                aiReasoning: enhancedRecipe.reasoning
+              }
+            };
+          } else {
+            console.warn(`[handleGenerateMealPlan] ⚠️ Failed to enhance recipe: ${item.recipe.title}`);
+            return item; // Return original if enhancement fails
+          }
+        } catch (enhancementError) {
+          console.error(`[handleGenerateMealPlan] ❌ Error enhancing recipe ${item.recipe.title}:`, enhancementError);
+          return item; // Return original if enhancement fails
+        }
+      })
+    );
+
+    console.log('[handleGenerateMealPlan] All recipes enhanced with AI-generated instructions and ingredients');
+
+    // Step 3: Convert enhanced API response back to frontend format
+    const newPlan: WeeklyMealPlan = {};
+    
+    enhancedItems.forEach((item: any) => {
+      const dateString = item.date.split('T')[0];
+      const meal: Meal = {
+        recipeId: item.recipe.id,
+        name: item.recipe.title,
+        calories: item.recipe.nutritionInfo.calories,
+        time: `${item.recipe.totalTime} min`,
+        cost: `$${item.recipe.estimatedCostPerServing.toFixed(2)}`,
+        recipe: {
+          ingredients: item.recipe.ingredients.map((ing: any) => 
+            typeof ing === 'string' ? ing : `${ing.amount} ${ing.unit?.value || ''} ${ing.name}`.trim()
+          ),
+          instructions: item.recipe.instructions.map((inst: any) => 
+            typeof inst === 'string' ? inst : inst.instruction
+          ),
+          nutrition: item.recipe.nutritionInfo
+        },
+        // Add AI enhancement metadata
+        aiEnhanced: item.recipe.aiEnhanced || false,
+        aiReasoning: item.recipe.aiReasoning || null
+      };
+
+      if (!newPlan[dateString]) {
+        newPlan[dateString] = {
+          breakfast: [],
+          lunch: [],
+          dinner: [],
+          snacks: []
+        };
+      }
+
+      newPlan[dateString][item.mealType as keyof DayMealPlan].push(meal);
+    });
+
+    setWeeklyMealPlan(newPlan);
+    
+    // Step 4: Show enhanced success message
+    const enhancedCount = enhancedItems.filter(item => item.recipe.aiEnhanced).length;
+    const totalCount = enhancedItems.length;
+    
+    alert(
+      `Successfully generated ${result.summary.totalMealsGenerated} meals for ${result.summary.daysPlanned} days!\n` +
+      `✨ ${enhancedCount}/${totalCount} recipes enhanced with AI-generated instructions and ingredients.`
+    );
+    
+  } catch (error) {
+    console.error('Error generating enhanced meal plan:', error);
+    alert('Failed to generate meal plan. Please try again.');
+  }
+};
 
   // Generate dates for navigation (show 7 days starting from current week)
   const generateWeekDates = () => {

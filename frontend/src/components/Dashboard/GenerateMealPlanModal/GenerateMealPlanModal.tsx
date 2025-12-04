@@ -25,7 +25,6 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
   onGenerate,
 }) => {
   const { user } = useAuth();
-  console.log("USER", user);
   // Mock user preferences (these would come from the backend/onboarding in production)
   const [userPreferences] = useState<UserPreferences>({
     dailyCalories: 2000,
