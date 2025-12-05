@@ -1,5 +1,6 @@
 import React from "react"
 import styles from "../Dashboard.module.css"
+import { Icon } from "../../ui/Icon"
 
 interface Meal {
   name: string
@@ -40,7 +41,13 @@ export default function PlannerMealCard({
   onAddMeal,
 }: PlannerMealCardProps) {
   return (
-    <div className={styles.mealSection}>
+    <div 
+      className={styles.mealSection}
+      style={{ 
+        '--meal-color': color,
+        borderLeftColor: color
+      } as React.CSSProperties}
+    >
       <div className={styles.mealSectionHeader}>
         <h3 className={styles.mealSectionTitle}>
           <div className={styles.mealColorDot} style={{ backgroundColor: color }} />
@@ -57,16 +64,29 @@ export default function PlannerMealCard({
             <div
               key={index}
               className={styles.mealCard}
-              style={{ backgroundColor: `${color}15`, borderColor: `${color}40` }}
+              style={{ 
+                backgroundColor: color.includes('oklch') 
+                  ? color.replace(')', ' / 0.15)') 
+                  : `${color}40`,
+                borderColor: color.includes('oklch')
+                  ? color.replace(')', ' / 0.5)')
+                  : `${color}80`
+              }}
               onClick={() => onMealClick(meal)}
             >
               <div className={styles.mealCardContent}>
                 <div className={styles.mealCardMain}>
                   <h4 className={styles.mealCardTitle}>{meal.name}</h4>
                   <div className={styles.mealCardMeta}>
-                    <span>⏱ {meal.time}</span>
-                    <span>💲 {meal.cost}</span>
-                    <span>⚡ {meal.calories} cal</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Icon name="clock" size={14} /> {meal.time}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {meal.cost}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Icon name="zap" size={14} /> {meal.calories} cal
+                    </span>
                   </div>
                 </div>
                 <button
@@ -76,7 +96,7 @@ export default function PlannerMealCard({
                     onDeleteMeal(selectedDay, mealType, index)
                   }}
                 >
-                  🗑️
+                  <Icon name="trash" size={16} />
                 </button>
               </div>
             </div>

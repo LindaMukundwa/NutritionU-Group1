@@ -24,6 +24,7 @@ const tools = [{
 
 // Generate a response for chatbot
 export const generateChatbotResponse = async (req: Request, res: Response) => {
+  console.log("[CHATBOT]: Generating chatbot response")
   try {
     const { message } = req.body;
 
@@ -86,7 +87,6 @@ export const generateChatbotResponse = async (req: Request, res: Response) => {
             `;
           recipeString += currentRecipe;
         }
-
         res.status(200).json({ reply: recipeString });
       } else {
         res.status(200).json({ reply: responseMessage.content });
@@ -94,6 +94,7 @@ export const generateChatbotResponse = async (req: Request, res: Response) => {
     } else {
       res.status(200).json({ reply: responseMessage.content });
     }
+    console.log("[CHATBOT]: Sending chatbot response");
   } catch (error) {
     console.error('OpenAI API error:', error);
     res.status(500).json({ error: 'Failed to get response from assistant' });
@@ -104,35 +105,35 @@ export const generateChatbotPrompts = async (req: Request, res: Response) => {
   try {
     const { message } = req.body;
     console.log(message);
-    // const completion = await openai.chat.completions.create({
-    //   model: "gpt-3.5-turbo",
-    //   messages: [
-    //     {
-    //       role: "system",
-    //       content: `
-    //       System / Instruction Prompt:
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `
+          System / Instruction Prompt:
 
-    //       You are a prompt generator that creates short, clear, and meaningful prompts for a nutrition assistant chatbot.
-    //       Your job is to:
+          You are a prompt generator that creates short, clear, and meaningful prompts for a nutrition assistant chatbot.
+          Your job is to:
 
-    //       Generate a concise, actionable prompt (for the assistant to use next), and
+          Generate a concise, actionable prompt (for the assistant to use next), and
 
-    //       Guidelines:
+          Guidelines:
 
-    //       Generate 3 prompts (questions to ask) under 10 words based on the history of the conversation denoted in message. 
+          Generate 3 prompts (questions to ask) under 10 words based on the history of the conversation denoted in message. 
 
-    //       It should be from the point of view of the user asking the chatbot. Don't include numbered bullets.
+          It should be from the point of view of the user asking the chatbot. Don't include numbered bullets.
 
-    //       Remove list indicators (number indicators) and quotes surrounding the question.
-    //       `
-    //     },
-    //     ...message,
-    //   ],
+          Remove list indicators (number indicators) and quotes surrounding the question.
+          `
+        },
+        ...message,
+      ],
 
-    // });
-    // res.json({
-    //   reply: completion.choices[0].message?.content?.split('\n').filter(line => line.trim() !== '') || []
-    // });
+    });
+    res.json({
+      reply: completion.choices[0].message?.content?.split('\n').filter(line => line.trim() !== '') || []
+    });
 
   } catch (error) {
     console.error('OpenAI API error:', error);
@@ -147,7 +148,6 @@ export const generateMacros = async (req: Request, res: Response) => {
     const preferences = req.body;
     const preferencesString = JSON.stringify(preferences);
 
-    console.log(preferencesString);
 
     // Build the prompt for OpenAI
     const prompt = `
@@ -223,7 +223,6 @@ export const generateMacros = async (req: Request, res: Response) => {
 
       Reminder: Always reason through user data and macronutrient calculation steps before finalizing and presenting the result in JSON format with rationale.`
 
-    console.log(prompt);
     // Query OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
@@ -238,8 +237,6 @@ export const generateMacros = async (req: Request, res: Response) => {
         }
       ]
     });
-
-    console.log(completion.choices);
 
     const responseMessage = completion.choices[0].message?.content;
     // Parse and return the response
@@ -344,7 +341,6 @@ export const generateInstructionsAndIngredients = async (req: Request, res: Resp
 export const generateIngredientPrices = async (req: Request, res: Response) => {
   try {
     const { query } = req.body;
-    console.log(query);
 
     // Build the prompt for OpenAI
     const prompt = `
@@ -444,5 +440,209 @@ export const generateIngredientPrices = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('OpenAI API error:', error);
     res.status(500).json({ error: 'Failed to generate recipe' });
+  }
+};
+
+/**
+ * Analyze and provide recommendations for FatSecret recipes
+ * POST /api/chatbot/analyze-recipes
+ * Body: { recipes: Recipe[], userContext?: string, mealType?: string }
+ */
+export const analyzeRecipes = async (req: Request, res: Response) => {
+  console.log("[CHATBOT]: Analyzing FatSecret recipes with OpenAI");
+  
+  try {
+    const { recipes, userContext, mealType, userGoals } = req.body;
+
+    if (!recipes || recipes.length === 0) {
+      return res.status(400).json({ error: 'No recipes provided for analysis' });
+    }
+
+    // Format recipes for OpenAI analysis
+    const recipesText = recipes.map((recipe: any, index: number) => `
+      **Recipe ${index + 1}: ${recipe.title}**
+      - Description: ${recipe.description || 'No description available'}
+      - Calories: ${recipe.nutritionInfo.calories}
+      - Protein: ${recipe.nutritionInfo.protein}g
+      - Carbs: ${recipe.nutritionInfo.carbs}g  
+      - Fat: ${recipe.nutritionInfo.fat}g
+      - Fiber: ${recipe.nutritionInfo.fiber || 0}g
+      - Prep Time: ${recipe.totalTime || 'Unknown'} minutes
+      - Cost: $${recipe.estimatedCostPerServing || 'Unknown'}
+    `).join('\n');
+
+    // Build context-aware prompt
+    let analysisPrompt = `Please analyze these ${recipes.length} recipe(s) and provide:
+
+1. **Nutritional Analysis** - Overall nutritional quality and balance
+2. **Best Choice Recommendation** - Which recipe is optimal and why
+3. **Meal Timing Suitability** - How appropriate each recipe is for the intended meal time
+4. **Health Benefits** - Key nutritional benefits of the recommended recipe
+5. **Preparation Tips** - Any suggestions to enhance nutrition or flavor
+
+**Recipes to analyze:**
+${recipesText}`;
+
+    // Add contextual information if provided
+    if (mealType) {
+      analysisPrompt += `\n\n**Meal Context:** These recipes are being considered for ${mealType}.`;
+    }
+
+    if (userContext) {
+      analysisPrompt += `\n\n**User Context:** ${userContext}`;
+    }
+
+    if (userGoals) {
+      analysisPrompt += `\n\n**User Goals:** ${userGoals}`;
+    }
+
+    analysisPrompt += `\n\nProvide your analysis in a clear, structured format using bold headers and bullet points for readability.`;
+
+    // Query OpenAI for recipe analysis
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are a professional nutritionist and culinary expert. " +
+            "Your job is to analyze recipes and provide evidence-based recommendations. " +
+            "Focus on nutritional quality, meal timing appropriateness, health benefits, and practical cooking advice. " +
+            "Be specific about why one recipe might be better than others. " +
+            "Consider macronutrient balance, micronutrient content, and overall dietary quality. " +
+            "Keep your analysis comprehensive but concise. " +
+            "Use bold formatting for headers and structure your response clearly."
+        },
+        {
+          role: "user", 
+          content: analysisPrompt
+        }
+      ],
+      max_tokens: 800,
+      temperature: 0.7
+    });
+
+    const analysisResponse = completion.choices[0].message.content;
+
+    // Also provide a structured recommendation
+    const bestRecipe = recipes.reduce((best: any, current: any) => {
+      // Simple scoring based on nutrition balance and calorie density
+      const bestScore = (best.nutritionInfo.protein * 2) + best.nutritionInfo.fiber - (best.nutritionInfo.calories / 100);
+      const currentScore = (current.nutritionInfo.protein * 2) + current.nutritionInfo.fiber - (current.nutritionInfo.calories / 100);
+      
+      return currentScore > bestScore ? current : best;
+    });
+
+    console.log("[CHATBOT]: Recipe analysis completed");
+    
+    res.status(200).json({ 
+      analysis: analysisResponse,
+      recommendedRecipe: {
+        id: bestRecipe.id || null,
+        title: bestRecipe.title,
+        reason: "Highest protein-to-calorie ratio with good fiber content"
+      },
+      totalRecipesAnalyzed: recipes.length
+    });
+
+  } catch (error) {
+    console.error('OpenAI Recipe Analysis error:', error);
+    res.status(500).json({ error: 'Failed to analyze recipes with AI assistant' });
+  }
+};
+
+/**
+ * Get meal suggestions based on time of day and user preferences  
+ * POST /api/chatbot/meal-suggestions
+ * Body: { preferences?: string, dietaryRestrictions?: string[], currentTime?: string }
+ */
+export const getMealSuggestions = async (req: Request, res: Response) => {
+  console.log("[CHATBOT]: Getting time-based meal suggestions");
+  
+  try {
+    const { preferences, dietaryRestrictions, currentTime } = req.body;
+    
+    // Determine meal type based on time
+    const now = currentTime ? new Date(currentTime) : new Date();
+    const hour = now.getHours();
+    
+    let mealType: string;
+    let mealDescription: string;
+    
+    if (hour >= 6 && hour < 11) {
+      mealType = "breakfast";
+      mealDescription = "morning meal to start your day";
+    } else if (hour >= 11 && hour < 15) {
+      mealType = "lunch"; 
+      mealDescription = "midday meal to fuel your afternoon";
+    } else if (hour >= 17 && hour < 21) {
+      mealType = "dinner";
+      mealDescription = "evening meal to end your day";
+    } else {
+      mealType = "snack";
+      mealDescription = "light snack or late meal";
+    }
+
+    // Build suggestion prompt
+    let suggestionPrompt = `Suggest 3-5 healthy ${mealType} ideas for a ${mealDescription}. 
+
+Consider:
+- Current time: ${now.toLocaleTimeString()}
+- Meal type: ${mealType}
+- Focus on balanced nutrition appropriate for this time of day`;
+
+    if (preferences) {
+      suggestionPrompt += `\n- User preferences: ${preferences}`;
+    }
+
+    if (dietaryRestrictions && dietaryRestrictions.length > 0) {
+      suggestionPrompt += `\n- Dietary restrictions: ${dietaryRestrictions.join(', ')}`;
+    }
+
+    suggestionPrompt += `\n\nFor each suggestion, briefly mention:
+- Why it's good for ${mealType}
+- Key nutritional benefits  
+- Approximate prep time
+
+Format your response with clear headings and bullet points.`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", 
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are a nutritionist specializing in meal timing and circadian nutrition. " +
+            "Provide meal suggestions that are appropriate for the time of day, " +
+            "considering factors like energy needs, digestion, and sleep quality. " +
+            "Keep suggestions practical and achievable for home cooking."
+        },
+        {
+          role: "user",
+          content: suggestionPrompt  
+        }
+      ],
+      max_tokens: 600,
+      temperature: 0.8
+    });
+
+    const suggestions = completion.choices[0].message.content;
+
+    console.log("[CHATBOT]: Meal suggestions generated");
+    
+    res.status(200).json({
+      suggestions,
+      mealType,
+      currentTime: now.toISOString(),
+      contextUsed: {
+        preferences: preferences || null,
+        dietaryRestrictions: dietaryRestrictions || [],
+        timeOfDay: `${hour}:00`
+      }
+    });
+
+  } catch (error) {
+    console.error('Meal suggestions error:', error);
+    res.status(500).json({ error: 'Failed to generate meal suggestions' });
   }
 };

@@ -9,6 +9,8 @@ import { auth } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { Icon } from '../ui/Icon';
+
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -54,7 +56,10 @@ export default function OnboardingPage() {
   const goalOptions = ["Save Money", "Eat Healthier", "Save Time", "Learn to Cook", "Lose Weight", "Gain Muscle"];
 
   const nextStep = () => setStep(Math.min(step + 1, totalSteps));
-  const prevStep = () => setStep(Math.max(step - 1, 1));
+  const prevStep = () => {
+    setMacroError(false); // Reset error when going back
+    setStep(Math.max(step - 1, 1));
+  };
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
@@ -697,7 +702,9 @@ export default function OnboardingPage() {
 
                     <Card className={styles.completionCard}>
                       <CardContent className={styles.completionContent}>
-                        <h3 className={styles.completionTitle}>You're all set! 🎉</h3>
+                        <h3 className={styles.completionTitle}>
+                          You're all set! <Icon name="party" size={24} style={{ display: 'inline-block', marginLeft: '4px' }} />
+                        </h3>
                         <p className={styles.completionText}>
                           We'll use this information to create personalized meal plans just for you.
                         </p>
@@ -719,7 +726,7 @@ export default function OnboardingPage() {
                     Retry
                   </button>
                 </div>
-                <p className={styles.errorHelp}>Or click Continue to enter macros manually</p>
+                <p className={styles.errorHelp}>Or click continue to enter macros manually</p>
               </div>
             )}
 
@@ -748,5 +755,3 @@ export default function OnboardingPage() {
     </div>
   );
 }
-
-

@@ -1,4 +1,4 @@
-import { Recipe } from "./recipe";
+import type { Recipe } from "./recipe";
 
 /**
  * Definining shared user types and interfaces to be used thhroughut application
@@ -23,6 +23,8 @@ export interface User {
   lifestyleDiets: LifestyleDiets;
   culturalDiets: CulturalDiets;
   budget: Budget;
+  goals: string;
+  cookingLevel: string;
 
   // Update on action
   onboardingCompleted: boolean;
@@ -82,8 +84,7 @@ export interface CulturalDiets {
 }
 
 export interface Budget {
-  minimum?: number;
-  maximum?: number;
+  value?: number;
   step: 25; // Increment
   default: 100; // Value if budget is not set
   description: "Weekly food budget in dollars";

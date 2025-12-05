@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styles from './GenerateMealPlanModal.module.css';
-
+import { Icon } from '../../ui/Icon';
+import { DatePicker } from '../../ui/DatePicker';
+import { useAuth } from '../../../contexts/AuthContext';
 interface GenerateMealPlanModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,6 +24,7 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
   onClose,
   onGenerate,
 }) => {
+  const { user } = useAuth();
   // Mock user preferences (these would come from the backend/onboarding in production)
   const [userPreferences] = useState<UserPreferences>({
     dailyCalories: 2000,
@@ -91,14 +94,17 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Generate Meal Plan</h2>
           <button className={styles.closeButton} onClick={onClose}>
-            ✕
+            <Icon name="close" size={20} />
           </button>
         </div>
 
         <div className={styles.modalBody}>
           {/* Date Range Selection */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>📅 Select Date Range</h3>
+            <h3 className={styles.sectionTitle}>
+              <Icon name="calendar" size={20} style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }} />
+              Select Date Range
+            </h3>
             <div className={styles.dateRangePresets}>
               <button 
                 onClick={() => setDateRangePreset(7)} 
@@ -122,27 +128,22 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
             <div className={styles.dateInputs}>
               <div className={styles.dateInputGroup}>
                 <label>Start Date</label>
-                <input
-                  type="date"
+                <DatePicker
                   value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
+                  onChange={(value) => {
+                    setStartDate(value);
                     setSelectedPreset(0); // Clear preset selection when manually changing date
                   }}
-                  className={styles.dateInput}
                 />
               </div>
               <div className={styles.dateInputGroup}>
                 <label>End Date</label>
-                <input
-                  type="date"
+                <DatePicker
                   value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
+                  onChange={(value) => {
+                    setEndDate(value);
                     setSelectedPreset(0); // Clear preset selection when manually changing date
                   }}
-                  min={startDate}
-                  className={styles.dateInput}
                 />
               </div>
             </div>
@@ -153,40 +154,42 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
 
           {/* User Goals Summary */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>🎯 Your Daily Goals</h3>
+            <h3 className={styles.sectionTitle}>
+              <Icon name="target" size={20} style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }} />
+              Your Daily Goals
+            </h3>
             <div className={styles.goalsGrid}>
               <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.dailyCalories}</div>
+                <div className={styles.goalValue}>{user?.nutritionGoals.calories}</div>
                 <div className={styles.goalLabel}>Calories</div>
               </div>
               <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.proteinGoal}g</div>
+                <div className={styles.goalValue}>{user?.nutritionGoals.protein}g</div>
                 <div className={styles.goalLabel}>Protein</div>
               </div>
               <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.carbsGoal}g</div>
+                <div className={styles.goalValue}>{user?.nutritionGoals.carbs}g</div>
                 <div className={styles.goalLabel}>Carbs</div>
               </div>
               <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.fatGoal}g</div>
+                <div className={styles.goalValue}>{user?.nutritionGoals.fats}g</div>
                 <div className={styles.goalLabel}>Fat</div>
-              </div>
-              <div className={styles.goalCard}>
-                <div className={styles.goalValue}>{userPreferences.fiberGoal}g</div>
-                <div className={styles.goalLabel}>Fiber</div>
               </div>
             </div>
             {userPreferences.dietaryRestrictions.length > 0 && (
-              <div className={styles.restrictions}>
-                <strong>Dietary Restrictions:</strong>{' '}
-                {userPreferences.dietaryRestrictions.join(', ')}
-              </div>
+                <div className={styles.restrictions}>
+                  <strong>Dietary Restrictions:</strong>{' '}
+                  {user?.medicalRestrictions ? Object.values(user.medicalRestrictions).filter(Boolean).join(', ') || 'None' : 'None'}
+                </div>
             )}
           </div>
 
           {/* Meal Options */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>🍽️ Meal Options</h3>
+            <h3 className={styles.sectionTitle}>
+              <Icon name="utensils" size={20} style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }} />
+              Meal Options
+            </h3>
             <label className={styles.checkboxLabel}>
               <input
                 type="checkbox"
@@ -200,7 +203,9 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
 
           {/* Info Box */}
           <div className={styles.infoBox}>
-            <div className={styles.infoIcon}>ℹ️</div>
+            <div className={styles.infoIcon}>
+              <Icon name="alert" size={20} color="#3b82f6" />
+            </div>
             <div className={styles.infoText}>
               The meal plan will be automatically generated to meet your daily nutritional goals 
               while respecting your dietary restrictions. Meals will be selected from our recipe 
@@ -225,7 +230,8 @@ const GenerateMealPlanModal: React.FC<GenerateMealPlanModalProps> = ({
               </>
             ) : (
               <>
-                ✨ Generate Meal Plan
+                <Icon name="sparkles" size={18} />
+                <span style={{ marginLeft: '6px' }}>Generate Meal Plan</span>
               </>
             )}
           </button>

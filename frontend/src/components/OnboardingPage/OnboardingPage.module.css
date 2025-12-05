@@ -1,135 +1,316 @@
 /* MAIN CONTAINER & LAYOUT */
 
-/* Main page container - var(--bg-light) background */
+/* Main page container - with mesh gradient background like Dashboard */
 .container {
-  background: var(--bg-light);       
-  padding: 0;
-  /* Override body's flex centering for natural height */
+  position: relative;
+  padding: 15px;
   align-self: flex-start;
   width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Soft mesh gradient base - using purple-blue palette (260-272°) */
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(
+      circle at 0% 0%,
+      oklch(0.92 0.08 268) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 0%,
+      oklch(0.90 0.10 264) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      oklch(0.91 0.09 270) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      oklch(0.93 0.06 266) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      oklch(0.95 0.04 264),
+      oklch(0.94 0.05 268),
+      oklch(0.95 0.04 272)
+    );
+  filter: blur(80px);
+  z-index: 0;
+}
+
+/* Additional soft color layer for depth */
+.container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(
+      ellipse 600px 600px at 30% 30%,
+      oklch(0.94 0.06 260) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 70% 60%,
+      oklch(0.92 0.08 268) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 500px 600px at 50% 80%,
+      oklch(0.93 0.07 272) 0%,
+      transparent 60%
+    );
+  filter: blur(100px);
+  z-index: 0;
+  opacity: 0.7;
 }
 
 /* Content wrapper - centers content with max width */
 .content {
   width: 100%;              
-  max-width: 1400px;        
+  max-width: 1200px;        
   margin: 0 auto;          
-  padding: 1rem;           
-  background: var(--bg-light);     
+  padding: 0;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 /* HEADER SECTION */
 
 /* Main header container - centered with compact spacing */
 .header {
   text-align: center;       
-  margin-bottom: 1rem;     
-  padding: 0.5rem 0;       
+  margin-bottom: 0.5rem;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 /* Main page title - large, bold, dark gray */
 .title {
-  font-size: 1.75rem;      
-  font-weight: 700;        
+  font-size: 1.5rem;      
+  font-weight: 600;        
   color: var(--text);          
-  margin: 0 0 0.5rem 0;    /* Small margin below title */
+  margin: 0 0 0.25rem 0;
 }
 
 /* Subtitle text - smaller, slightly transparent */
 .subtitle {
   color: var(--text);          
   margin: 0;               
-  font-size: 1rem;        
-  opacity: 0.8;           
+  font-size: 0.875rem;        
+  opacity: 0.7;           
 }
 
 /* PROGRESS BAR SECTION */
 
-/* Progress container - light gray background with border */
+/* Progress container - glassmorphism effect like tab navigation */
 .progressContainer {
-  margin-bottom: 1rem;      
-  background: var(--bg);     
-  padding: 0.75rem;           
-  border-radius: 8px;      
-  border: 1px solid var(--border); 
+  margin-bottom: 0.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
 }
 
 /* Progress labels - step counter and percentage */
 .progressLabels {
   display: flex;            
   justify-content: space-between; 
-  font-size: 0.875rem;     
+  font-size: 0.75rem;     
   color: var(--text);          
   margin-bottom: 0.5rem;   
-font-weight: 500;        
+  font-weight: 600;        
 }
 
 /* MAIN CARD & STEP CONTENT */
 
-/* Main content card - var(--bg-light) background with shadow */
+/* Main content card - liquid glass effect like Dashboard summary cards */
 .cardContent {
-  padding: 1.5rem;         
-  background: var(--bg-light);     
-  border: 1px solid var(--border); 
-  border-radius: 12px;     
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15); 
+  padding: 1rem;
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  backdrop-filter: blur(30px) saturate(130%);
+  -webkit-backdrop-filter: blur(30px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 20px 60px rgba(92, 107, 204, 0.08),
+    0 10px 30px rgba(92, 107, 204, 0.05),
+    inset 0 1px 2px rgba(255, 255, 255, 1),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.7);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Liquid glass shimmer effect */
+.cardContent::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 45%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 55%,
+    transparent 100%
+  );
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Step content area - natural height based on content */
+.stepContent {
+  position: relative;
+  z-index: 1;
+}
 
 /* Step header - centered title for each step */
 .stepHeader {
   text-align: center;       
-  margin-bottom: 1rem;     
+  margin-bottom: 0.75rem;
+  position: relative;
+  z-index: 1;
 }
 
-/* Step title - large, bold text for each step */
+/* Step title - large, bold text for each step - CONSISTENT WITH MAIN TITLE */
 .stepTitle {
-  font-size: 1.75rem;      
-  margin-bottom: 0.5rem;   
+  font-size: 1.5rem;      
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  position: relative;
+  z-index: 1;
+  color: var(--text);
 }
 
 /* BUDGET SECTION */
 
 /* Budget section container */
 .budgetSection {
-  margin-top: 0.5rem;       
+  margin-top: 0.25rem;       
 }
 
 /* Slider container - holds the range slider */
 .sliderContainer {
-  margin-top: 1rem;         
+  margin-top: 0.5rem;         
 }
 
 /* Range slider - custom styled for budget selection */
 .slider {
   width: 100%;              
-  height: 8px;              
-  border-radius: 4px;       
-  background: var(--bg-dark);     
+  height: 10px;              
+  border-radius: 5px;       
+  background: linear-gradient(
+    90deg,
+    rgba(92, 107, 204, 0.2) 0%,
+    rgba(92, 107, 204, 0.5) 50%,
+    rgba(92, 107, 204, 0.8) 100%
+  );
   outline: none;            
   -webkit-appearance: none; 
-  appearance: none;         
+  appearance: none;
+  box-shadow: 
+    inset 0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 /* Slider thumb for WebKit browsers (Chrome, Safari) */
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none; 
   appearance: none;         
-  width: 20px;             
-  height: 20px;            
+  width: 24px;             
+  height: 24px;            
   border-radius: 50%;      
-  background: var(--primary);     
-  cursor: pointer;         
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--info) 100%
+  );
+  cursor: pointer;
+  box-shadow: 
+    0 2px 8px rgba(92, 107, 204, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  border: 2px solid white;
+}
+
+/* Slider thumb hover state for WebKit */
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 4px 12px rgba(92, 107, 204, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 
 /* Slider thumb for Firefox */
 .slider::-moz-range-thumb {
-  width: 20px;             
-  height: 20px;            
+  width: 24px;             
+  height: 24px;            
   border-radius: 50%;      
-  background: var(--primary);     
-  cursor: pointer;         
-  border: none;            
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--info) 100%
+  );
+  cursor: pointer;
+  box-shadow: 
+    0 2px 8px rgba(92, 107, 204, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  border: 2px solid white;
+}
+
+/* Slider thumb hover state for Firefox */
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 4px 12px rgba(92, 107, 204, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 
 /* Slider labels - min, current, max values */
@@ -151,160 +332,197 @@ font-weight: 500;
 
 /* Personal info section container */
 .personalInfoSection {
-  margin-top: 0.5rem;       
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 /* Unit selection section */
 .unitSelection {
-  margin-bottom: 1.5rem;    
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 /* Unit selection label */
 .unitLabel {
-  font-size: 1rem;          
-  font-weight: 500;         
-  margin-bottom: 0.75rem;   
-  display: block;          
-  color: var(--text) !important; 
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: var(--text) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Unit options container */
 .unitOptions {
-  display: flex;            
-  gap: 1rem;              
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
 }
 
 /* Individual unit card */
 .unitCard {
-  cursor: pointer;          
-  transition: all 0.2s ease; 
-  border: 1px solid var(--border); 
-  flex: 1;                  
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(92, 107, 204, 0.25);
+  background: var(--bg-light);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* Hover state for unit cards */
 .unitCard:hover {
-  border-color: var(--primary);   
+  border-color: rgba(92, 107, 204, 0.5);
+  background: rgba(92, 107, 204, 0.03);
+  box-shadow: 0 3px 10px rgba(92, 107, 204, 0.15);
+  transform: translateY(-1px);
 }
 
 /* Selected state for unit cards */
 .unitCard.selected {
-  border-color: var(--primary);   
-  background: rgba(92, 107, 204, 0.05); 
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(92, 107, 204, 0.08), rgba(92, 107, 204, 0.12));
+  box-shadow: 0 3px 10px rgba(92, 107, 204, 0.2);
 }
 
 /* Content inside unit cards */
 .unitCardContent {
-  padding: 0.75rem;         
+  padding: 0.6rem;
 }
 
 /* Individual unit option layout */
 .unitOption {
-  display: flex;           
-  align-items: center;   
-  gap: 0.75rem;           
-  color: var(--text) !important; 
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text) !important;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 /* Unit option text */
 .unitOption span {
-  color: var(--text) !important; 
+  color: var(--text) !important;
 }
 
 /* Row of input fields (age, height, weight) */
 .inputRow {
-  display: grid;            
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 2.5rem;              
-  margin-bottom: 1.5rem;   
-  width: 100%;              
-  box-sizing: border-box;   
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 /* Individual input group */
 .inputGroup {
-  display: flex;           
-  flex-direction: column;  
-  width: 100%;             
-  box-sizing: border-box;  
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Number input fields */
 .numberInput {
-  width: 100%;             
-  padding: 0.75rem;        
-  border: 1px solid var(--border); 
-  border-radius: 8px;       
-  background: var(--bg-light);        
-  font-size: 1rem;          
-  margin-top: 0.5rem;       
-  color: var(--text);           
-  text-align: center;       
-  box-sizing: border-box;   
-  max-width: 100%;         
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid rgba(92, 107, 204, 0.25);
+  border-radius: 8px;
+  background: var(--bg-light);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  color: var(--text);
+  text-align: center;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* Focus state for number inputs */
 .numberInput:focus {
-  outline: 2px solid var(--primary); 
-  outline-offset: 2px;      
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(92, 107, 204, 0.03);
+  box-shadow: 0 3px 10px rgba(92, 107, 204, 0.15);
 }
 
 /* Activity level section */
 .activityLevelSection {
-  margin-top: 1rem;         
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 /* Activity level label */
 .activityLevelLabel {
-  font-size: 1rem;          
-  font-weight: 500;         
-  margin-bottom: 0.75rem;   
-  display: block;          
-  color: var(--text) !important; 
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: var(--text) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Activity level options container */
 .activityLevelOptions {
-  display: grid;            
-  grid-template-columns: repeat(2, 1fr); 
-  gap: 0.5rem;            
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
 }
 
 /* Individual activity level card */
 .activityLevelCard {
-  cursor: pointer;          
-  transition: all 0.2s ease; 
-  border: 1px solid var(--border); 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(92, 107, 204, 0.25);
+  background: var(--bg-light);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* Hover state for activity level cards */
 .activityLevelCard:hover {
-  border-color: var(--primary);   
+  border-color: rgba(92, 107, 204, 0.5);
+  background: rgba(92, 107, 204, 0.03);
+  box-shadow: 0 3px 10px rgba(92, 107, 204, 0.15);
+  transform: translateY(-1px);
 }
 
 /* Selected state for activity level cards */
 .activityLevelCard.selected {
-  border-color: var(--primary);   
-  background: rgba(92, 107, 204, 0.05); 
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(92, 107, 204, 0.08), rgba(92, 107, 204, 0.12));
+  box-shadow: 0 3px 10px rgba(92, 107, 204, 0.2);
 }
 
 /* Content inside activity level cards */
 .activityLevelCardContent {
-  padding: 0.75rem;         
+  padding: 0.6rem;
 }
 
 /* Individual activity level option layout */
 .activityLevelOption {
-  display: flex;           
-  align-items: center;   
-  gap: 0.75rem;           
-  color: var(--text) !important; 
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text) !important;
+  font-weight: 500;
+  font-size: 0.85rem;
 }
 
 /* Activity level option text */
 .activityLevelOption span {
-  color: var(--text) !important; 
+  color: var(--text) !important;
+  line-height: 1.3;
 }
 
 /* COOKING EXPERIENCE SECTION */
@@ -345,9 +563,9 @@ font-weight: 500;
 
 /* Meal prep label */
 .mealPrepLabel {
-  font-size: 1rem;          
+  font-size: 0.875rem;          
   font-weight: 500;         
-  margin-bottom: 0.75rem;   
+  margin-bottom: 0.5rem;   
   display: block;          
   color: var(--text) !important; 
 }
@@ -356,43 +574,52 @@ font-weight: 500;
 .mealPrepOptions {
   display: grid;            
   grid-template-columns: repeat(2, 1fr); 
-  gap: 0.5rem;            
+  gap: 0.4rem;            
 }
 
 /* Individual meal prep option card */
 .mealPrepCard {
   cursor: pointer;          
   transition: all 0.2s ease; 
-  border: 1px solid var(--border); 
+  border: 1px solid rgba(92, 107, 204, 0.25);
+  border-radius: 8px;
+  background: var(--bg-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* Hover state for meal prep cards */
 .mealPrepCard:hover {
-  border-color: var(--primary);   
+  border-color: rgba(92, 107, 204, 0.5);
+  background: rgba(92, 107, 204, 0.03);
+  box-shadow: 0 3px 10px rgba(92, 107, 204, 0.15);
+  transform: translateY(-1px);
 }
 
 /* Selected state for meal prep cards */
 .mealPrepCard.selected {
   border-color: var(--primary);   
-  background: rgba(92, 107, 204, 0.05); 
+  background: rgba(92, 107, 204, 0.05);
+  box-shadow: 0 3px 10px rgba(92, 107, 204, 0.2);
 }
 
 /* Content inside meal prep cards */
 .mealPrepCardContent {
-  padding: 0.75rem;         
+  padding: 0.5rem;         
 }
 
 /* Individual meal prep option layout */
 .mealPrepOption {
   display: flex;           
   align-items: center;   
-  gap: 0.75rem;           
+  gap: 0.5rem;           
   color: var(--text) !important; 
 }
 
 /* Meal prep option text */
 .mealPrepOption span {
-  color: var(--text) !important; 
+  color: var(--text) !important;
+  font-size: 0.85rem;
+  line-height: 1.3;
 }
 
 /* Custom radio button */
@@ -480,62 +707,109 @@ font-weight: 500;
 /* Navigation container - holds back/next buttons */
 .navigation {
   display: flex;            
-  justify-content: space-between; 
-  margin-top: 1rem;         
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
-/* Back button - secondary style */
+/* Back button - subtle gray glassy style */
 .backButton {
-  background: transparent !important;  
-  color: var(--text) !important;          
-  border: 1px solid var(--border) !important; 
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.15) 0%, rgba(100, 116, 139, 0.1) 100%) !important;
+  backdrop-filter: blur(10px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(100, 116, 139, 0.3) !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-size: 0.9375rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+  outline: none !important;
 }
 
 /* Back button hover state */
 .backButton:hover {
-  background: var(--bg) !important;     
-  border-color: var(--secondary) !important;   
-  color: var(--text) !important;         
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.2) 0%, rgba(100, 116, 139, 0.15) 100%) !important;
+  border-color: rgba(100, 116, 139, 0.4) !important;
+  color: var(--text) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
 }
 
-/* Next button - primary style */
+/* Back button focus state - remove outline */
+.backButton:focus {
+  outline: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Next button - solid primary color glassy style */
 .nextButton {
-  background: var(--primary) !important;    
-  color: var(--bg-light) !important;            
-  border: none !important;            
+  background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%) !important;
+  backdrop-filter: blur(10px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+  color: var(--bg-light) !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-size: 0.9375rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 8px rgba(92, 107, 204, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  outline: none !important;
 }
 
 /* Next button hover state */
 .nextButton:hover {
-  background: var(--info) !important;    
-  color: var(--bg-light) !important;            
+  background: linear-gradient(135deg, var(--info) 0%, var(--primary) 100%) !important;
+  color: var(--bg-light) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(92, 107, 204, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Next button focus state - remove outline */
+.nextButton:focus {
+  outline: none !important;
+  box-shadow: 0 2px 8px rgba(92, 107, 204, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Button disabled state */
+.backButton:disabled,
+.nextButton:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
 }
 
 /* MACROS SECTION */
 
 /* Macros section container */
 .macrosSection {
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 /* Grid layout for macro cards */
 .macrosGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 /* Individual macro card */
 .macroCard {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
+  border-radius: 10px;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
@@ -548,7 +822,7 @@ font-weight: 500;
 
 /* Macro label */
 .macroLabel {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text);
   margin: 0;
@@ -558,59 +832,95 @@ font-weight: 500;
 .macroInputGroup {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   width: 100%;
-  max-width: 200px;
 }
 
 /* Macro increment/decrement buttons */
 .macroButton {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-light);
+  border: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
   color: var(--text);
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 /* Macro button hover state */
 .macroButton:hover {
-  background: var(--primary);
+  background: linear-gradient(
+    135deg,
+    rgba(92, 107, 204, 0.8) 0%,
+    rgba(92, 107, 204, 0.9) 100%
+  );
   color: var(--bg-light);
-  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 16px rgba(92, 107, 204, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 /* Macro button active state */
 .macroButton:active {
-  transform: scale(0.95);
+  transform: translateY(0px) scale(0.96);
+  box-shadow: 
+    0 2px 8px rgba(92, 107, 204, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 /* Macro input field */
 .macroInput {
   flex: 1;
-  padding: 0.75rem;
-  border: 2px solid var(--border);
+  padding: 0.5rem;
+  border: none;
   border-radius: 8px;
-  background: var(--bg-light);
-  font-size: 1.25rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text);
   text-align: center;
   width: 100%;
   box-sizing: border-box;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Macro input focus state */
 .macroInput:focus {
   outline: none;
-  border-color: var(--primary);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  box-shadow: 
+    0 4px 16px rgba(92, 107, 204, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
 }
 
 /* Remove spinner arrows from number input */
@@ -627,7 +937,7 @@ font-weight: 500;
 
 /* Macro unit label */
 .macroUnit {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text);
   opacity: 0.7;
   font-weight: 500;
@@ -680,43 +990,70 @@ font-weight: 500;
 }
 
 .errorSection {
-  padding: 20px;
+  padding: 1.5rem;
   text-align: center;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 240, 240, 0.6) 0%,
+    rgba(255, 245, 245, 0.5) 100%
+  );
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  margin-top: 1rem;
 }
 
 .errorMessage {
   color: #dc2626;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
   font-weight: 500;
+  font-size: 0.9375rem;
 }
 
 .errorActions {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   justify-content: center;
+  margin-bottom: 0.75rem;
 }
 
 .retryButton,
 .manualButton {
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
   border: none;
+  transition: all 0.2s ease;
+  font-size: 0.9375rem;
 }
 
 .retryButton {
-  background-color: #2563eb;
+  background: var(--primary);
   color: white;
+  box-shadow: 0 2px 4px rgba(92, 107, 204, 0.2);
+}
+
+.retryButton:hover {
+  background: var(--info);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(92, 107, 204, 0.3);
 }
 
 .manualButton {
-  background-color: #6b7280;
-  color: white;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.manualButton:hover {
+  background: var(--bg);
+  border-color: var(--primary);
 }
 
 .errorHelp {
-  margin-top: 8px;
-  color: #6b7280;
-  font-size: 14px;
+  margin-top: 0.5rem;
+  color: var(--text);
+  opacity: 0.7;
+  font-size: 0.875rem;
 }

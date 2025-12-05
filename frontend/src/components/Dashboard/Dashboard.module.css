@@ -1,11 +1,13 @@
 /* General Layout and Reset */
 .Dashboard {
-  font-family: Arial, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
 /* Header Styling */
 .header {
   margin-bottom: 30px;
+  position: relative;
+  z-index: 1;
 }
 
 .block {
@@ -20,7 +22,7 @@
 }
 
 .greeting {
-  font-size: 2rem;
+  font-size: 2.5rem;
   padding: 10px;  /*better spacing*/
   font-weight: 700;
   color: var(--text);
@@ -38,24 +40,154 @@
   text-align: left;
 }
 
+/* Top Section Wrapper - includes header + summary cards with gradient background */
+.topSectionWrapper {
+  position: relative;
+  padding: 30px 30px 50px 30px;
+  border-radius: 0;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+/* Soft mesh gradient base - using purple-blue palette (260-272°) */
+.topSectionWrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(
+      circle at 0% 0%,
+      oklch(0.92 0.08 268) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 0%,
+      oklch(0.90 0.10 264) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      oklch(0.91 0.09 270) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      oklch(0.93 0.06 266) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      oklch(0.95 0.04 264),
+      oklch(0.94 0.05 268),
+      oklch(0.95 0.04 272)
+    );
+  filter: blur(80px);
+  z-index: 0;
+}
+
+/* Additional soft color layer for depth */
+.topSectionWrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(
+      ellipse 600px 600px at 30% 30%,
+      oklch(0.94 0.06 260) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 70% 60%,
+      oklch(0.92 0.08 268) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 500px 600px at 50% 80%,
+      oklch(0.93 0.07 272) 0%,
+      transparent 60%
+    );
+  filter: blur(100px);
+  z-index: 0;
+  opacity: 0.7;
+}
+
 /* Summary Grid */
 .summaryGrid {
   display: flex;
   gap: 20px;
   justify-content: flex-start;
+  position: relative;
+  z-index: 1;
 }
 
-/* Summary Card Styling */
+/* Summary Card Styling with liquid glass effect (visionOS-style) */
 .summaryCard {
   flex: 1;
   min-width: 280px;
-  background-color: var(--bg-light);
-  border-radius: 12px;
+  border-radius: 24px;
   padding: 20px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.55) 100%
+  );
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.14),
+    0 8px 24px rgba(0, 0, 0, 0.10),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.5);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Liquid glass shimmer effect */
+.summaryCard::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 45%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 55%,
+    transparent 100%
+  );
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.summaryCard:hover {
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 
+    0 20px 56px rgba(0, 0, 0, 0.16),
+    0 10px 28px rgba(0, 0, 0, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 1),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.6);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  border-bottom-color: rgba(255, 255, 255, 0.8);
 }
 
 .cardHeader {
@@ -63,6 +195,8 @@
   font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .cardBody {
@@ -70,38 +204,60 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .cardValue {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text);
+  position: relative;
+  z-index: 1;
+}
+
+/* Color the main values to match card themes - rich saturated purple-blue */
+.summaryCard:nth-child(1) .cardValue {
+  color: oklch(0.60 0.18 266);
+}
+
+.summaryCard:nth-child(2) .cardValue {
+  color: oklch(0.62 0.18 268);
+}
+
+.summaryCard:nth-child(3) .cardValue {
+  color: oklch(0.64 0.18 270);
 }
 
 .iconBackground {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 600;
 }
 
+.iconBackground svg {
+  display: block;
+  margin: auto;
+}
+
+/* Colored icon backgrounds with matching colors - rich saturated purple-blue */
 .summaryCard:nth-child(1) .iconBackground {
-  background-color: var(--bg-dark);
-  color: var(--text);
+  background: linear-gradient(135deg, oklch(0.92 0.04 264), oklch(0.90 0.05 260));
+  color: oklch(0.60 0.18 266);
 }
 
 .summaryCard:nth-child(2) .iconBackground {
-  background-color: var(--bg-dark);
-  color: var(--text);
+  background: linear-gradient(135deg, oklch(0.92 0.04 268), oklch(0.90 0.05 272));
+  color: oklch(0.62 0.18 268);
 }
 
 .summaryCard:nth-child(3) .iconBackground {
-  background-color: var(--bg-dark);
-  color: var(--text-muted);
+  background: linear-gradient(135deg, oklch(0.92 0.04 260), oklch(0.90 0.05 268));
+  color: oklch(0.64 0.18 270);
 }
 
 .cardSubtext {
@@ -109,75 +265,178 @@
   color: var(--text-muted);
 }
 
-/* Progress Bar Styling */
+/* Progress Bar Styling with colors matching card themes */
 .progressBarContainer {
   height: 8px;
-  background-color: var(--bg-dark);
   border-radius: 4px;
   overflow: hidden;
   margin-top: 15px;
 }
 
+/* Lighter background for each card's progress bar - all purple for cohesion */
+.summaryCard:nth-child(1) .progressBarContainer {
+  background: linear-gradient(90deg, oklch(0.90 0.03 264), oklch(0.88 0.04 260));
+}
+
+.summaryCard:nth-child(2) .progressBarContainer {
+  background: linear-gradient(90deg, oklch(0.90 0.03 268), oklch(0.88 0.04 272));
+}
+
+.summaryCard:nth-child(3) .progressBarContainer {
+  background: linear-gradient(90deg, oklch(0.90 0.03 260), oklch(0.88 0.04 268));
+}
+
 .progressBarFill {
   height: 100%;
   border-radius: 4px;
-  background-color: var(--primary);
   transition: width 0.3s ease-in-out;
+  
+  /* Progress bar growth animation - fills from left to right */
+  animation: progressGrow 1.2s ease-out forwards;
+  transform-origin: left;
+}
+
+/* Progress Bar Growth Animation - Left to Right Fill */
+@keyframes progressGrow {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/* Colored progress fills - all purple for cohesion */
+.summaryCard:nth-child(1) .progressBarFill {
+  background: linear-gradient(90deg, var(--primary), var(--info));
+}
+
+.summaryCard:nth-child(2) .progressBarFill {
+  background: linear-gradient(90deg, oklch(0.60 0.15 268), oklch(0.65 0.15 272));
+}
+
+.summaryCard:nth-child(3) .progressBarFill {
+  background: linear-gradient(90deg, var(--info), oklch(0.65 0.15 268));
 }
 
 /* --- Dashboard Content Switcher --- */
 .contentSwitcher {
-  margin-top: 2rem;
+  margin-top: 0;
 }
 
 .tabNav {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0px;
-  background-color: var(--bg-dark);
-  padding: 4px;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: none;
+  padding: 6px;
+  border-radius: 16px 16px 0 0;
+  margin-bottom: 0;
+  position: relative;
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Liquid glass morphing blob indicator */
+.tabNav::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc(25% - 8px);
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    oklch(0.62 0.16 268) 100%
+  );
+  backdrop-filter: blur(12px) saturate(200%);
+  -webkit-backdrop-filter: blur(12px) saturate(200%);
+  border-radius: 12px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 16px rgba(92, 107, 204, 0.3),
+    0 2px 8px rgba(92, 107, 204, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  z-index: 0;
+}
+
+/* Position blob for each active tab */
+.tabNav:has(.tabButton:nth-child(1).active)::before {
+  transform: translateX(0);
+}
+
+.tabNav:has(.tabButton:nth-child(2).active)::before {
+  transform: translateX(calc(100% + 4px));
+}
+
+.tabNav:has(.tabButton:nth-child(3).active)::before {
+  transform: translateX(calc(200% + 8px));
+}
+
+.tabNav:has(.tabButton:nth-child(4).active)::before {
+  transform: translateX(calc(300% + 12px));
 }
 
 .tabButton {
   padding: 12px 20px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 1.05rem;
   color: var(--text-muted);
   background: transparent;
   border: none;
-  outline: none;
+  outline: none !important;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: color 0.2s ease;
   text-align: center;
   margin: 0;
+  position: relative;
+  z-index: 1;
+  border-radius: 6px;
+  box-shadow: none !important;
 }
 
 .tabButton:hover {
   color: var(--text);
-  background-color: var(--bg);
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .tabButton.active {
-  background-color: var(--bg-light);
-  color: var(--text);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  color: white;
   font-weight: 600;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .tabButton:focus,
-.tabButton:focus-visible {
-  outline: none;
+.tabButton:focus-visible,
+.tabButton:focus-within,
+.tabButton:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .tabContent {
   background: var(--bg-light);
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.04);
   min-height: 400px;
+  transition: all 0.3s ease;
 }
 
 /* Added filter chips styling */
@@ -266,6 +525,19 @@
   z-index: 100;
   scrollbar-width: thin;
   scrollbar-color: var(--border-muted) var(--bg-dark);
+  animation: dropdownSlideIn 0.15s cubic-bezier(0.34, 1.2, 0.64, 1);
+  transform-origin: top right;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .filterDropdown::-webkit-scrollbar {
@@ -583,6 +855,7 @@
   border-radius: 12px;
   padding: 1.5rem;
   border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -839,6 +1112,16 @@
   color: var(--text-muted);
 }
 
+/* Simple nutrition progress bars */
+.nutritionItem .progressBarContainer {
+  background-color: #e5e7eb;
+  margin-top: 12px;
+}
+
+.nutritionItem .progressBarFill {
+  transition: width 0.3s ease-in-out;
+}
+
 /* Modal Styles */
 .modalOverlay {
   position: fixed;
@@ -846,7 +1129,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -855,13 +1140,55 @@
 }
 
 .modalContent {
-  background-color: var(--bg-light);
-  border-radius: 16px;
+  background: white;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top: 2px solid rgba(255, 255, 255, 1);
+  border-radius: 28px;
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 12px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.18),
+    0 12px 30px rgba(0, 0, 0, 0.12),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  animation: zoomIn 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);
+  position: relative;
+}
+
+/* Glass-like edge glow effect */
+.modalContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 26px;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.3)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .modalHeader {
@@ -872,7 +1199,7 @@
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background-color: var(--bg-light);
+  background: white;
   z-index: 10;
 }
 
@@ -913,6 +1240,8 @@
 
 .modalBody {
   padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .recipeSection {
@@ -991,11 +1320,100 @@
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 1px solid var(--border);
+  justify-content: center;
 }
 
-.modalActions .primaryButton,
-.modalActions .secondaryButton {
-  flex: 1;
+/* Loading Modal Styles */
+.loadingModal {
+  background: white;
+  border-radius: 12px;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Skeleton Loader Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #f8f8f8 50%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 8px;
+}
+
+.loadingMessage {
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.loadingSubtext {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .plannerHeader {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .dayNavigation {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .mealCards {
+    grid-template-columns: 1fr;
+  }
+
+  .plannerFooter {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .dailyTotals {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 768px) {

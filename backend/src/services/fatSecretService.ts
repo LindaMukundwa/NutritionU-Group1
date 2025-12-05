@@ -90,8 +90,8 @@ const FatSecretService = new class FatSecretService {
 
   constructor() {
     this.config = {
-      clientId: process.env.FATSECRET_CLIENT_ID || '',
-      clientSecret: process.env.FATSECRET_CLIENT_SECRET || '',
+      clientId: process.env.FATSECRET_CLIENT_ID || '4c1be385d956400192a18f193fdd6d02',
+      clientSecret: process.env.FATSECRET_CLIENT_SECRET || '21930cf5d296421db9761d92b7d2b494',
       authUrl: 'https://oauth.fatsecret.com/connect/token',
       apiUrl: 'https://platform.fatsecret.com/rest/server.api'
     };

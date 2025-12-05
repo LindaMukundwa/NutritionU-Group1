@@ -5,7 +5,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,13 +18,55 @@
 /* Modal Content */
 .modalContent {
   background: white;
-  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top: 2px solid rgba(255, 255, 255, 1);
+  border-radius: 28px;
   width: 100%;
   max-width: 900px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.18),
+    0 12px 30px rgba(0, 0, 0, 0.12),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  animation: zoomIn 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);
+  position: relative;
+}
+
+/* Glass-like edge glow effect */
+.modalContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 26px;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.3)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Modal Header */
@@ -32,6 +76,7 @@
   align-items: center;
   padding: 24px;
   border-bottom: 1px solid #e5e7eb;
+  background: white;
 }
 
 .modalTitle {
@@ -59,35 +104,92 @@
 
 /* Tab Navigation */
 .tabNav {
-  display: flex;
-  padding: 0 24px;
-  gap: 8px;
-  border-bottom: 1px solid #e5e7eb;
+  display: inline-flex;
+  gap: 4px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 4px;
+  margin: 0 24px 16px;
+  position: relative;
+}
+
+/* Sliding blob indicator - sized to fit content */
+.tabNav::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  height: auto;
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    oklch(0.62 0.16 268) 100%
+  );
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 2px 4px rgba(92, 107, 204, 0.2),
+    0 1px 2px rgba(92, 107, 204, 0.1);
+  z-index: 0;
+}
+
+/* Position blob for "Search Meals" tab (first child) */
+.tabNav:has(.tabButton:nth-child(1).active)::before {
+  left: 4px;
+  width: 155px;
+  transform: translateX(0);
+}
+
+/* Position blob for "Favorites" tab (second child) */
+.tabNav:has(.tabButton:nth-child(2).active)::before {
+  left: 4px;
+  width: 140px;
+  transform: translateX(165px);
 }
 
 .tabButton {
-  padding: 12px 20px;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: #6b7280;
-  font-size: 0.875rem;
+  padding: 8px 18px;
   font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  outline: none !important;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s ease;
+  text-align: center;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  border-radius: 8px;
+  box-shadow: none !important;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 .tabButton:hover {
-  color: #111827;
-  background-color: #f9fafb;
+  color: var(--text);
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .tabButton.active {
-  color: #5c6bcc;
-  border-bottom-color: #5c6bcc;
+  color: white;
+  font-weight: 600;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.tabButton:focus,
+.tabButton:focus-visible,
+.tabButton:focus-within,
+.tabButton:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 /* Search Container */
@@ -236,4 +338,215 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Recipe Modal Styles */
+.recipeModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+}
+
+.recipeModalContent {
+  background: white;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top: 2px solid rgba(255, 255, 255, 1);
+  border-radius: 28px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.18),
+    0 12px 30px rgba(0, 0, 0, 0.12),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  animation: zoomIn 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);
+  position: relative;
+}
+
+/* Glass-like edge glow effect */
+.recipeModalContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 26px;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.3)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.recipeModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem 2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-light);
+  z-index: 10;
+}
+
+.recipeModalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px 0;
+}
+
+.recipeModalMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.recipeModalCloseButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.recipeModalCloseButton:hover {
+  background-color: var(--bg-dark);
+  color: var(--text);
+}
+
+.recipeModalBody {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.recipeSection {
+  margin-bottom: 2rem;
+}
+
+.recipeSection:last-child {
+  margin-bottom: 0;
+}
+
+.recipeSectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 1rem 0;
+}
+
+.ingredientsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ingredientItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 0.9375rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.bullet {
+  color: var(--text-muted);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.instructionsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.instructionItem {
+  display: flex;
+  gap: 12px;
+  font-size: 0.9375rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.stepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.recipeModalActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  justify-content: center;
+}
+
+.primaryButton {
+  padding: 10px 20px;
+  background-color: var(--primary);
+  color: var(--bg-light);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.primaryButton:hover {
+  background-color: var(--info);
+  box-shadow: 0 4px 12px rgba(92, 107, 204, 0.3);
 }

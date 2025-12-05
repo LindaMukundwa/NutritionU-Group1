@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_OPTIONS='--experimental-specifier-resolution=node' node src/server.ts",
+    "start": "npx tsx src/server.ts",
     "dev": "nodemon server.js",
     "test": "jest",
+    "build": "npx prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
@@ -31,6 +32,7 @@
     "mongoose": "^8.18.3",
     "openai": "^6.5.0",
     "prisma": "^6.19.0",
+    "tsx": "^4.19.2",
     "winston": "^3.17.0"
   },
   "devDependencies": {

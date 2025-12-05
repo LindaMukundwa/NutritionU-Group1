@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Signup from './components/SignUp/SignUp';
 import Dashboard from './components/Dashboard/Dashboard';
 import Settings from './pages/Settings/Settings';
+import Profile from './pages/Profile/Profile';
 
 function PrivateRoute({ children }: { children: React.ReactElement }) {
   const auth = useAuth();
@@ -43,12 +44,16 @@ function App() {
           <Route path="/onboarding" element={<OnboardingPage />} />
           {/* Protected dashboard (after onboarding completes, may route here instead) */}
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          {/* Protected profile page */}
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           {/* Protected settings page */}
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           {/* TEMPORARY: Direct dashboard access for development */}
           <Route path="/dashboard-preview" element={<Dashboard />} />
           {/* TEMPORARY: Direct settings access for development */}
           <Route path="/settings-preview" element={<Settings />} />
+          {/* TEMPORARY: Direct settings access for development */}
+          <Route path="/profile-preview" element={<Profile />} />
           {/* Fallback: redirect unknown routes to auth */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

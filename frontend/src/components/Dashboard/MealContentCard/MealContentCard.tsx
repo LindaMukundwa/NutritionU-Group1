@@ -1,6 +1,7 @@
-import { type FC, useState } from "react"
+import { type FC, useState, useEffect, useRef } from "react"
 import styles from "./MealContentCard.module.css"
 import React from 'react'
+import { Icon } from '../../ui/Icon'
 
 interface MealContentCardProps {
   recipeId: string;
@@ -34,6 +35,37 @@ const MealContentCard: FC<MealContentCardProps> = ({
 }) => {
   // For demo purposes start cards as favorited so they can be filtered/shown as favorites
   const [isLiked, setIsLiked] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for scroll animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            // Once visible, stop observing
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of card is visible
+        rootMargin: '50px', // Start animation slightly before card enters viewport
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, []);
 
   const handleLikeToggle = () => {
     setIsLiked(!isLiked);
@@ -53,14 +85,17 @@ const MealContentCard: FC<MealContentCardProps> = ({
   };
 
   return (
-    <div className={styles.MealContentCard}>
+    <div 
+      ref={cardRef}
+      className={`${styles.MealContentCard} ${isVisible ? styles.visible : ''}`}
+    >
       {/* Image Section */}
       <div className={styles.imageContainer}>
         {imageUrl ? (
           <img src={imageUrl} alt={title} className={styles.mealImage} />
         ) : (
           <div className={styles.imagePlaceholder}>
-            {title.charAt(0).toUpperCase()}
+            <Icon name="utensils" size={48} />
           </div>
         )}
 
@@ -118,45 +153,20 @@ const MealContentCard: FC<MealContentCardProps> = ({
         <div className={styles.mealDetails}>
           {/* Time */}
           <div className={styles.detailItem}>
-            <svg
-              className={styles.detailIcon}
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M8 4V8L10.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+            <Icon name="clock" size={12} className={styles.detailIcon} />
             <span className={styles.detailText}>{totalTime} min</span>
           </div>
 
           {/* Price */}
           <div className={styles.detailItem}>
-            <svg
-              className={styles.detailIcon}
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8 1V15M10.5 3.5H6.75C6.15326 3.5 5.58097 3.73705 5.15901 4.15901C4.73705 4.58097 4.5 5.15326 4.5 5.75C4.5 6.34674 4.73705 6.91903 5.15901 7.34099C5.58097 7.76295 6.15326 8 6.75 8H9.25C9.84674 8 10.419 8.23705 10.841 8.65901C11.2629 9.08097 11.5 9.65326 11.5 10.25C11.5 10.8467 11.2629 11.419 10.841 11.841C10.419 12.2629 9.84674 12.5 9.25 12.5H4.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
             <span className={styles.detailText}>
-              ${estimatedCostPerServing.toFixed(2)}
+              $ {estimatedCostPerServing.toFixed(2)}
             </span>
           </div>
 
           {/* Calories */}
           <div className={styles.detailItem}>
+            <Icon name="zap" size={12} className={styles.detailIcon} />
             <span className={styles.detailText}>
               {Math.round(nutritionInfo.calories)} cal
             </span>

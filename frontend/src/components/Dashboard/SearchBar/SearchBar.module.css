@@ -29,6 +29,8 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 0.95rem;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
   color: var(--text);
   background: var(--bg-light);
   transition: all 0.2s ease;
