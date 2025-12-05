@@ -1,6 +1,22 @@
 import type { Request, Response } from 'express';
 import prisma from '../lib/prisma.ts';
 
+const operationLocks = new Map<string, number>();
+const OPERATION_DELAY_MS = 500; // 500ms delay between operations
+
+// Helper function to check and enforce delay
+const enforceOperationDelay = (itemId: string): boolean => {
+  const now = Date.now();
+  const lastOperation = operationLocks.get(itemId);
+  
+  if (lastOperation && (now - lastOperation) < OPERATION_DELAY_MS) {
+    return false; // Operation too soon
+  }
+  
+  operationLocks.set(itemId, now);
+  return true; // Operation allowed
+};
+
 // Create a new grocery list for a user
 export const createGroceryList = async (req: Request, res: Response) => {
   try {
@@ -278,11 +294,16 @@ export const updateGroceryItem = async (req: Request, res: Response) => {
 };
 
 // Delete a specific grocery item
+// Update deleteGroceryItem
 export const deleteGroceryItem = async (req: Request, res: Response) => {
   try {
     const { itemId } = req.params;
 
-    // Check if item exists
+    // Enforce delay
+    if (!enforceOperationDelay(itemId)) {
+      return res.status(429).json({ error: 'Please wait before performing another action on this item' });
+    }
+
     const existingItem = await prisma.groceryItem.findUnique({
       where: { id: itemId }
     });
@@ -294,7 +315,7 @@ export const deleteGroceryItem = async (req: Request, res: Response) => {
     await prisma.groceryItem.delete({
       where: { id: itemId }
     });
-
+    console.log(`Grocery item deleted: ${existingItem.name} (ID: ${itemId})`);
     res.status(200).json({ message: 'Grocery item deleted successfully' });
   } catch (error) {
     console.error('Error deleting grocery item:', error);
@@ -307,7 +328,11 @@ export const toggleGroceryItemChecked = async (req: Request, res: Response) => {
   try {
     const { itemId } = req.params;
 
-    // Check if item exists and get current status
+    // Enforce delay
+    if (!enforceOperationDelay(itemId)) {
+      return res.status(429).json({ error: 'Please wait before performing another action on this item' });
+    }
+
     const existingItem = await prisma.groceryItem.findUnique({
       where: { id: itemId }
     });
