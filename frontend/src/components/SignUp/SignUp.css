@@ -13,6 +13,7 @@
   padding: 20px;
   box-sizing: border-box;
   overflow-y: auto;
+  background-color: var(--bg);
 }
 
 /* Soft mesh gradient background - matching landing page */
@@ -54,6 +55,36 @@
   z-index: 0;
 }
 
+[data-theme="dark"] .nutritionU-signup-container::before {
+  background: 
+    radial-gradient(
+      circle at 0% 0%,
+      oklch(0.25 0.08 268) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 0%,
+      oklch(0.23 0.10 264) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      oklch(0.24 0.09 270) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      oklch(0.26 0.06 266) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      oklch(0.20 0.04 264),
+      oklch(0.22 0.05 268),
+      oklch(0.21 0.04 272)
+    );
+}
+
 /* Additional soft color layer for depth */
 .nutritionU-signup-container::after {
   content: '';
@@ -83,27 +114,50 @@
   opacity: 0.7;
 }
 
+[data-theme="dark"] .nutritionU-signup-container::after {
+  background: 
+    radial-gradient(
+      ellipse 600px 600px at 30% 30%,
+      oklch(0.24 0.06 260) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 70% 60%,
+      oklch(0.22 0.08 268) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 500px 600px at 50% 80%,
+      oklch(0.23 0.07 272) 0%,
+      transparent 60%
+    );
+  opacity: 0.5;
+}
+
 .nutritionU-signup-card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 255, 255, 0.75) 100%
-  );
+  background: var(--bg-light);
   backdrop-filter: blur(20px) saturate(120%);
   -webkit-backdrop-filter: blur(20px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border);
   border-radius: 24px;
   padding: 16px 32px 20px 32px;
   box-shadow: 
-    0 20px 60px rgba(92, 107, 204, 0.15),
+    0 20px 60px rgba(0, 0, 0, 0.15),
     0 8px 24px rgba(0, 0, 0, 0.1),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    inset 0 1px 2px var(--bg-light);
   width: 100%;
   max-width: 440px;
   box-sizing: border-box;
   margin: auto;
   position: relative;
   z-index: 1;
+}
+
+[data-theme="dark"] .nutritionU-signup-card {
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px var(--bg-light);
 }
 
 .nutritionU-logo {
@@ -146,14 +200,10 @@
 .nutritionU-form-input {
   width: 100%;
   padding: 10px 12px;
-  border: 2px solid rgba(92, 107, 204, 0.15);
+  border: 2px solid var(--border-muted);
   border-radius: 10px;
   font-size: 14px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.8) 100%
-  );
+  background: var(--bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: var(--text);
@@ -167,25 +217,17 @@
 }
 
 .nutritionU-form-input:hover {
-  border-color: rgba(92, 107, 204, 0.25);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.85) 100%
-  );
+  border-color: var(--border);
+  background: var(--bg-light);
 }
 
 .nutritionU-form-input:focus {
   outline: none;
   border-color: var(--primary);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
+  background: var(--bg-light);
   box-shadow: 
     0 0 0 4px rgba(92, 107, 204, 0.1),
-    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+    inset 0 1px 2px var(--bg-light);
 }
 
 .nutritionU-primary-button {
@@ -195,7 +237,7 @@
     var(--primary) 0%,
     oklch(0.62 0.16 268) 100%
   );
-  color: white;
+  color: var(--highlight);
   border: none;
   padding: 12px;
   border-radius: 10px;
@@ -255,15 +297,11 @@
 
 .nutritionU-secondary-button {
   width: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0.6) 100%
-  );
+  background: var(--bg);
   backdrop-filter: blur(20px) saturate(120%);
   -webkit-backdrop-filter: blur(20px) saturate(120%);
   color: var(--primary);
-  border: 2px solid rgba(92, 107, 204, 0.3);
+  border: 2px solid var(--border);
   padding: 14px;
   border-radius: 12px;
   font-size: 15px;
@@ -276,20 +314,16 @@
   gap: 8px;
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.08),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    inset 0 1px 2px var(--bg-light);
 }
 
 .nutritionU-secondary-button:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 255, 255, 0.75) 100%
-  );
-  border-color: rgba(92, 107, 204, 0.5);
+  background: var(--bg-light);
+  border-color: var(--primary);
   transform: translateY(-1px);
   box-shadow: 
     0 6px 16px rgba(0, 0, 0, 0.12),
-    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+    inset 0 1px 2px var(--bg-light);
 }
 
 .nutritionU-secondary-button:active,
@@ -298,7 +332,7 @@
   outline: none;
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.08),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    inset 0 1px 2px var(--bg-light);
 }
 
 .nutritionU-divider {
@@ -325,11 +359,7 @@
 }
 
 .nutritionU-divider span {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.8) 100%
-  );
+  background: var(--bg-light);
   padding: 0 20px;
   position: relative;
   z-index: 1;
@@ -344,13 +374,9 @@
 .nutritionU-social-button {
   flex: 1;
   padding: 10px;
-  border: 2px solid rgba(92, 107, 204, 0.2);
+  border: 2px solid var(--border-muted);
   border-radius: 12px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0.6) 100%
-  );
+  background: var(--bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   cursor: pointer;
@@ -360,20 +386,16 @@
   justify-content: center;
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.06),
-    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+    inset 0 1px 2px var(--bg-light);
 }
 
 .nutritionU-social-button:hover {
-  border-color: rgba(92, 107, 204, 0.35);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 255, 255, 0.75) 100%
-  );
+  border-color: var(--border);
+  background: var(--bg-light);
   transform: translateY(-2px);
   box-shadow: 
     0 6px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 2px rgba(255, 255, 255, 0.7);
+    inset 0 1px 2px var(--bg-light);
 }
 
 .nutritionU-social-button:active,
@@ -382,7 +404,7 @@
   outline: none;
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.06),
-    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+    inset 0 1px 2px var(--bg-light);
 }
 
 .nutritionU-social-icon {
@@ -429,11 +451,11 @@
 }
 
 .nutritionU-form-input:invalid {
-  border-color: rgba(92, 107, 204, 0.15);
+  border-color: var(--border-muted);
 }
 
 .nutritionU-form-input:valid {
-  border-color: rgba(92, 107, 204, 0.15);
+  border-color: var(--border-muted);
 }
 
 /* Responsive adjustments */
