@@ -432,7 +432,7 @@
 .numberInput {
   width: 100%;
   padding: 0.6rem;
-  border: 2px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 8px;
   background: var(--bg-light);
   font-size: 1rem;
@@ -442,13 +442,15 @@
   text-align: center;
   box-sizing: border-box;
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* Focus state for number inputs */
 .numberInput:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(92, 107, 204, 0.1);
+  background: rgba(92, 107, 204, 0.03);
+  box-shadow: 0 3px 10px rgba(92, 107, 204, 0.15);
 }
 
 /* Activity level section */

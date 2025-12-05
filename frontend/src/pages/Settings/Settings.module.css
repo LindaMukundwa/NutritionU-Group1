@@ -47,7 +47,7 @@
 
 .settingsSection {
   background: var(--bg-light);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 12px;
   padding: 1.5rem;
 }
@@ -151,7 +151,7 @@
 /* Select Dropdown */
 .select {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 8px;
   font-size: 0.875rem;
   color: var(--text);
@@ -195,7 +195,7 @@
   padding: 0.75rem 2rem;
   background: var(--bg-light);
   color: var(--text-muted);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
@@ -220,7 +220,7 @@
 }
 
 .profileSubsection {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 12px;
   padding: 1.25rem;
   background: var(--bg-light);
@@ -256,7 +256,7 @@
 }
 
 .chip {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   background: transparent;
   color: var(--text);
   padding: 0.4rem 0.9rem;
@@ -348,7 +348,7 @@
   padding: 0.7rem 1.5rem;
   background: transparent;
   color: var(--text-muted);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 500;
@@ -379,7 +379,7 @@
 }
 
 .summaryItem {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 10px;
   padding: 1rem;
   background: var(--bg-light);
@@ -406,7 +406,7 @@
 }
 
 .summaryGroup {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 10px;
   padding: 1rem;
   background: var(--bg-light);
@@ -425,7 +425,7 @@
   background: rgba(92, 107, 204, 0.12);
   color: var(--text);
   font-size: 0.8rem;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
 }
 
 .summaryChipPrimary {
@@ -477,7 +477,7 @@
   margin-top: 1.5rem;
   padding: 1.5rem;
   background: var(--bg-dark);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -498,7 +498,7 @@
 
 .formInput {
   padding: 0.75rem;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(92, 107, 204, 0.25);
   border-radius: 8px;
   font-size: 0.875rem;
   color: var(--text);
