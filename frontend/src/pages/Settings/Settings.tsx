@@ -510,6 +510,7 @@ export default function Settings() {
                       id="height"
                       type="number"
                       min="0"
+                      step="0.1"
                       value={profileForm.height}
                       onChange={(e) => handleProfileInputChange('height', e.target.value)}
                       className={styles.formInput}
@@ -521,6 +522,7 @@ export default function Settings() {
                       id="weight"
                       type="number"
                       min="0"
+                      step="0.1"
                       value={profileForm.weight}
                       onChange={(e) => handleProfileInputChange('weight', e.target.value)}
                       className={styles.formInput}
