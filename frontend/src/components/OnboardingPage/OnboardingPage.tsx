@@ -56,7 +56,10 @@ export default function OnboardingPage() {
   const goalOptions = ["Save Money", "Eat Healthier", "Save Time", "Learn to Cook", "Lose Weight", "Gain Muscle"];
 
   const nextStep = () => setStep(Math.min(step + 1, totalSteps));
-  const prevStep = () => setStep(Math.max(step - 1, 1));
+  const prevStep = () => {
+    setMacroError(false); // Reset error when going back
+    setStep(Math.max(step - 1, 1));
+  };
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
