@@ -10,11 +10,11 @@ const enforceOperationDelay = (itemId: string): boolean => {
   const lastOperation = operationLocks.get(itemId);
   
   if (lastOperation && (now - lastOperation) < OPERATION_DELAY_MS) {
-    return false; // Operation too soon
+    return false; 
   }
   
   operationLocks.set(itemId, now);
-  return true; // Operation allowed
+  return true; // Allow to continue
 };
 
 // Create a new grocery list for a user
@@ -261,7 +261,7 @@ export const updateGroceryItem = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Grocery item not found' });
     }
 
-    // Validate required fields if provided
+    // Check required fields if provided
     if (name !== undefined && (typeof name !== 'string' || name.trim().length === 0)) {
       return res.status(400).json({ error: 'Valid item name is required' });
     }
@@ -294,7 +294,6 @@ export const updateGroceryItem = async (req: Request, res: Response) => {
 };
 
 // Delete a specific grocery item
-// Update deleteGroceryItem
 export const deleteGroceryItem = async (req: Request, res: Response) => {
   try {
     const { itemId } = req.params;
@@ -447,8 +446,6 @@ export const generateGroceryListFromMealPlan = async (req: Request, res: Respons
             const key = ingredientName.toLowerCase().trim();
             
             if (ingredientMap.has(key)) {
-              // If ingredient already exists, we could merge quantities here
-              // For now, we'll just keep the first occurrence
             } else {
               ingredientMap.set(key, {
                 quantity: ingredientQuantity,
@@ -460,7 +457,6 @@ export const generateGroceryListFromMealPlan = async (req: Request, res: Respons
       }
     });
 
-    // Create grocery items from the ingredient map
     const groceryItemsData = Array.from(ingredientMap.entries()).map(([name, data]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
       quantity: data.quantity,
@@ -477,7 +473,6 @@ export const generateGroceryListFromMealPlan = async (req: Request, res: Respons
       data: groceryItemsData
     });
 
-    // Update the grocery list to link it to the meal plan
     await prisma.groceryList.update({
       where: { id: groceryListId },
       data: { mealPlanId: mealPlanIdInt }
@@ -499,7 +494,6 @@ export const duplicateGroceryList = async (req: Request, res: Response) => {
     const { groceryListId } = req.params;
     const { name } = req.body;
 
-    // Get the original grocery list with items
     const originalGroceryList = await prisma.groceryList.findUnique({
       where: { id: groceryListId },
       include: {
@@ -516,7 +510,7 @@ export const duplicateGroceryList = async (req: Request, res: Response) => {
       data: {
         name: name || `${originalGroceryList.name} (Copy)`,
         userId: originalGroceryList.userId,
-        mealPlanId: null // Don't link duplicated list to meal plan
+        mealPlanId: null 
       }
     });
 
@@ -526,7 +520,7 @@ export const duplicateGroceryList = async (req: Request, res: Response) => {
         name: item.name,
         quantity: item.quantity,
         source: item.source,
-        checked: false, // Reset checked status for new list
+        checked: false,
         groceryListId: duplicatedGroceryList.id
       }));
 
@@ -535,7 +529,6 @@ export const duplicateGroceryList = async (req: Request, res: Response) => {
       });
     }
 
-    // Fetch and return the complete duplicated grocery list
     const completeDuplicatedList = await prisma.groceryList.findUnique({
       where: { id: duplicatedGroceryList.id },
       include: {
