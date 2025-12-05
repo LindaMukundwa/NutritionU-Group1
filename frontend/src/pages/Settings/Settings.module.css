@@ -1,6 +1,6 @@
 .settingsPage {
   padding: 2rem;
-  max-width: 900px;
+  max-width: 1050px;
   margin: 0 auto;
   min-height: 100vh;
   background-color: var(--bg);
@@ -600,4 +600,3 @@
     width: 100%;
   }
 }
-
