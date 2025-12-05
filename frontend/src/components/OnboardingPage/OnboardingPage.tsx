@@ -723,7 +723,7 @@ export default function OnboardingPage() {
                     Retry
                   </button>
                 </div>
-                <p className={styles.errorHelp}>Or click Continue to enter macros manually</p>
+                <p className={styles.errorHelp}>Or click continue to enter macros manually</p>
               </div>
             )}
 
