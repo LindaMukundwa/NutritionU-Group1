@@ -171,7 +171,7 @@ function RecipeModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        {/* Keep the header as it was */}
+        {/* Modified header with Add to Grocery List button */}
         <div className={styles.modalHeader}>
           <div>
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
@@ -185,9 +185,37 @@ function RecipeModal({
               </span>
             </div>
           </div>
-          <button className={styles.modalCloseButton} onClick={onClose}>
-            <Icon name="close" size={20} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              className={styles.primaryButton}
+              disabled={isAddingToGrocery}
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (isAddingToGrocery) return;
+
+                setIsAddingToGrocery(true);
+                console.log('RecipeModal: Add to grocery list clicked', Date.now());
+
+                try {
+                  if (onAddToGroceryList) {
+                    await onAddToGroceryList(recipe);
+                  }
+                } finally {
+                  setIsAddingToGrocery(false);
+                }
+              }}
+            >
+              <Icon name="shopping-cart" size={18} />
+              <span style={{ marginLeft: '6px' }}>
+                {isAddingToGrocery ? 'Adding...' : 'Add to Grocery List'}
+              </span>
+            </button>
+            <button className={styles.modalCloseButton} onClick={onClose}>
+              <Icon name="close" size={20} />
+            </button>
+          </div>
         </div>
 
         <div className={styles.modalBody}>
@@ -260,39 +288,6 @@ function RecipeModal({
                 </li>
               ))}
             </ol>
-          </div>
-
-          <div className={styles.modalActions}>
-            <button
-              className={styles.primaryButton}
-              disabled={isAddingToGrocery}
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                if (isAddingToGrocery) return;
-
-                setIsAddingToGrocery(true);
-                console.log('RecipeModal: Add to grocery list clicked', Date.now());
-
-                try {
-                  if (onAddToGroceryList) {
-                    await onAddToGroceryList(recipe);
-                  }
-                } finally {
-                  setIsAddingToGrocery(false);
-                }
-              }}
-            >
-              <Icon name="shopping-cart" size={18} />
-              <span style={{ marginLeft: '6px' }}>
-                {isAddingToGrocery ? 'Adding...' : 'Add to Grocery List'}
-              </span>
-            </button>
-            <button className={styles.secondaryButton}>
-              <Icon name="edit" size={18} />
-              <span style={{ marginLeft: '6px' }}>Edit Recipe</span>
-            </button>
           </div>
         </div>
       </div>

@@ -40,6 +40,7 @@ export default function PlannerMealCard({
   onDeleteMeal,
   onAddMeal,
 }: PlannerMealCardProps) {
+  console.log(`[PlannerMealCard] ${mealType} meals for ${selectedDay}:`, meals);
   return (
     <div 
       className={styles.mealSection}
