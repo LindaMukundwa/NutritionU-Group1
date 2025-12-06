@@ -6,6 +6,14 @@
 
 NutritionU is a full-stack web application that combines meal planning, recipe discovery, and personalized nutrition tracking. Built with modern web technologies and deployed on cloud infrastructure for reliable, scalable performance.
 
+### The Team 🎯
+
+- Hannah Muermann
+- Jayden Melendez
+- Joseph-Bryan Asafo-Boakye
+- Linda Mukundwa
+- Sylvie Edelstein
+
 ---
 
 ## 📋 Table of Contents
