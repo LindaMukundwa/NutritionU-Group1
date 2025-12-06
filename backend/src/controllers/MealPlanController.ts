@@ -289,6 +289,8 @@ export const getMealPlansByDateRange = async (req: Request, res: Response) => {
         const { userId } = req.params;
         const { startDate, endDate } = req.query;
 
+        console.log('[getMealPlansByDateRange] Request received:', { userId, startDate, endDate });
+
         const user = await prisma.user.findFirst({
             where: {
                 OR: [
@@ -299,8 +301,11 @@ export const getMealPlansByDateRange = async (req: Request, res: Response) => {
         });
 
         if (!user) {
+            console.log('[getMealPlansByDateRange] User not found:', userId);
             return res.status(404).json({ error: 'User not found' });
         }
+
+        console.log('[getMealPlansByDateRange] User found:', { id: user.id, firebaseUid: user.firebaseUid });
 
         const mealPlans = await prisma.mealPlan.findMany({
             where: {
@@ -325,9 +330,19 @@ export const getMealPlansByDateRange = async (req: Request, res: Response) => {
             orderBy: { startDate: 'asc' }
         });
 
+        console.log('[getMealPlansByDateRange] Found meal plans:', mealPlans.length);
+        console.log('[getMealPlansByDateRange] Meal plans summary:', mealPlans.map(mp => ({
+            id: mp.id,
+            startDate: mp.startDate,
+            endDate: mp.endDate,
+            itemCount: mp.items.length
+        })));
+
         res.status(200).json(mealPlans);
     } catch (error) {
-        console.error('Error fetching meal plans by date range:', error);
+        console.error('[getMealPlansByDateRange] Error fetching meal plans by date range:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('[getMealPlansByDateRange] Error details:', errorMessage);
         res.status(500).json({ error: 'Failed to fetch meal plans' });
     }
 };

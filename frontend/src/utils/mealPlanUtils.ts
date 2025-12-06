@@ -119,13 +119,22 @@ export function convertFrontendToBackendItems(plan: WeeklyMealPlan): Omit<MealPl
  * Convert backend MealPlan array to frontend WeeklyMealPlan format
  */
 export function convertBackendPlansToFrontend(plans: any[]): WeeklyMealPlan {
+  console.log('[convertBackendPlansToFrontend] Input plans:', plans);
+  console.log('[convertBackendPlansToFrontend] Plans count:', plans?.length);
+  
   const result: WeeklyMealPlan = {};
 
-  plans.forEach((plan) => {
-    plan.items.forEach((item: any) => {
+  plans.forEach((plan, planIndex) => {
+    console.log(`[convertBackendPlansToFrontend] Processing plan ${planIndex}:`, plan);
+
+    plan.items.forEach((item: any, itemIndex: number) => {
+      console.log(`[convertBackendPlansToFrontend] Processing item ${itemIndex}:`, item);
+
       const dateStr = item.date.split('T')[0]; // Ensure YYYY-MM-DD format
-      
+      console.log(`[convertBackendPlansToFrontend] Extracted date: ${dateStr}`);
+
       if (!result[dateStr]) {
+        console.log(`[convertBackendPlansToFrontend] Initializing day plan for date: ${dateStr}`);
         result[dateStr] = {
           breakfast: [],
           lunch: [],
@@ -135,6 +144,8 @@ export function convertBackendPlansToFrontend(plans: any[]): WeeklyMealPlan {
       }
 
       if (item.recipe) {
+        console.log(`[convertBackendPlansToFrontend] Found recipe for item ${itemIndex}:`, item.recipe);
+
         const meal: Meal = {
           id: item.id,
           recipeId: item.recipeId,
@@ -162,11 +173,15 @@ export function convertBackendPlansToFrontend(plans: any[]): WeeklyMealPlan {
           },
         };
 
+        console.log(`[convertBackendPlansToFrontend] Adding meal to ${item.mealType} for date ${dateStr}:`, meal);
         result[dateStr][item.mealType as keyof DayMealPlan].push(meal);
+      } else {
+        console.warn(`[convertBackendPlansToFrontend] No recipe found for item ${itemIndex}, skipping.`);
       }
     });
   });
 
+  console.log('[convertBackendPlansToFrontend] Final result:', result);
   return result;
 }
 

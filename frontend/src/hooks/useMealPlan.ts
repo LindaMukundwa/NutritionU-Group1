@@ -48,6 +48,8 @@ export function useMealPlan(userId: string | undefined) {
 
         const converted = convertBackendPlansToFrontend(plans);
         console.log('[useMealPlan] Converted to frontend format:', converted);
+        console.log('[useMealPlan] Total days with meals:', Object.keys(converted).length);
+
 
         setWeeklyMealPlan(converted);
       } catch (err) {
