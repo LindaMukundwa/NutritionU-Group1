@@ -748,6 +748,8 @@ export const generateMealPlan = async (req: Request, res: Response) => {
 
         console.log('[generateMealPlan] Building meal plan items...');
 
+        const addedMeals = new Set<string>();
+
         for (const dateString of dates) {
             console.log(`[generateMealPlan] Processing date: ${dateString}`);
 
@@ -762,8 +764,14 @@ export const generateMealPlan = async (req: Request, res: Response) => {
             }
 
             for (const mealType of mealTypes) {
+                const mealKey = `${dateString}-${mealType}`;
                 const availableRecipes = recipesByMealType[mealType];
                 console.log(`[generateMealPlan] Processing ${mealType} - ${availableRecipes.length} recipes available`);
+
+                if (addedMeals.has(mealKey)) {
+                    console.log(`[generateMealPlan] ⚠️ Skipping duplicate for ${mealType} on ${dateString}`);
+                    continue;
+                }
 
                 if (availableRecipes.length > 0) {
                     const topRecipes = availableRecipes.slice(0, Math.min(3, availableRecipes.length));
@@ -815,6 +823,9 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                             date: new Date(dateString),
                             mealType: mealType
                         });
+
+                        addedMeals.add(mealKey);
+
                         console.log(`[generateMealPlan] ✅ Added meal plan item: ${mealType} on ${dateString}`);
 
                     } catch (saveError) {

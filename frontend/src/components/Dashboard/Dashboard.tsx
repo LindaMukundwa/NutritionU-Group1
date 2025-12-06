@@ -995,6 +995,8 @@ function PlannerContent({
   const [addMealType, setAddMealType] = useState<string>('')
   const [showGenerateMealPlanModal, setShowGenerateMealPlanModal] = useState(false)
   const [isAddingMeal, setIsAddingMeal] = useState(false);
+  const [deletionError, setDeletionError] = useState<string | null>(null);
+
 
   const handleMealClick = (meal: any) => {
     if (meal && meal.recipe) {
@@ -1014,7 +1016,7 @@ function PlannerContent({
         await mealPlanService.removeMealPlanItem(mealToDelete.recipeId);
       } catch (error) {
         console.error('Failed to delete meal from backend:', error);
-        // Optionally show error to user
+        setDeletionError(null);
         return;
       }
     }
@@ -1486,6 +1488,24 @@ function PlannerContent({
           onGenerate={handleGenerateMealPlan}
         />
       )}
+
+      {deletionError && (
+        <div className={styles.errorPopup}>
+          <div className={styles.errorContent}>
+            <div className={styles.errorHeader}>
+              <Icon name="alert" size={20} />
+              <span>Deletion Failed</span>
+            </div>
+            <p>{deletionError}</p>
+            <button
+              className={styles.errorCloseButton}
+              onClick={() => setDeletionError(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1954,6 +1974,7 @@ function DashboardContentSwitcher({
         pendingRecipe={pendingRecipeForGrocery}
         setPendingRecipeForGrocery={setPendingRecipeForGrocery}
       />
+
     </div>
   );
 }
