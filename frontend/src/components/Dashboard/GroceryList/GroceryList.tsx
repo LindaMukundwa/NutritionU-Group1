@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import styles from './GroceryList.module.css';
 
@@ -29,6 +29,7 @@ interface GroceryListProps {
   onClose: () => void;
   weeklyMealPlan: any;
   pendingRecipe?: any;
+  setPendingRecipeForGrocery: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
@@ -37,7 +38,8 @@ const GroceryList: React.FC<GroceryListProps> = ({
   isOpen,
   onClose,
   weeklyMealPlan,
-  pendingRecipe
+  pendingRecipe,
+  setPendingRecipeForGrocery
 }) => {
   const { user } = useAuth();
   const [groceryList, setGroceryList] = useState<GroceryListData | null>(null);
@@ -47,6 +49,9 @@ const GroceryList: React.FC<GroceryListProps> = ({
   const [newItemQuantity, setNewItemQuantity] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
+  const isProcessingRecipe = useRef(false);
+  const lastProcessedRecipeId = useRef<string | null>(null);
 
   // Categories for organizing items
   const categories = ['All', 'Produce', 'Meat', 'Dairy', 'Pantry', 'Other'];
@@ -235,6 +240,7 @@ const GroceryList: React.FC<GroceryListProps> = ({
   // Toggle item checked status
   const toggleItemChecked = async (itemId: string) => {
     try {
+      setUpdatingItemId(itemId);
       const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${itemId}/toggle`, {
         method: 'PATCH',
       });
@@ -252,26 +258,47 @@ const GroceryList: React.FC<GroceryListProps> = ({
       } : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to toggle item');
+    } finally {
+      setUpdatingItemId(null);
     }
   };
 
   // Delete grocery item
   const deleteGroceryItem = async (itemId: string) => {
+    // Prevent deletion if already updating this item
+    if (updatingItemId === itemId) {
+      return;
+    }
+
     try {
+      setUpdatingItemId(itemId);
+
       const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${itemId}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete grocery item');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete grocery item');
       }
 
+      // Only update state AFTER successful deletion
       setGroceryList(prev => prev ? {
         ...prev,
         items: prev.items.filter(item => item.id !== itemId)
       } : null);
+
+      setError(null);
     } catch (err) {
+      console.error('Delete error:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete item');
+
+      // Optionally refetch to ensure UI is in sync
+      if (groceryList?.id) {
+        await fetchGroceryListById(groceryList.id);
+      }
+    } finally {
+      setUpdatingItemId(null);
     }
   };
 
@@ -446,26 +473,74 @@ const GroceryList: React.FC<GroceryListProps> = ({
   };
 
   // Add ingredients from pending recipe
-  const addRecipeIngredients = async () => {
-    if (!pendingRecipe?.recipe?.ingredients || !groceryList) return;
+  // In GroceryList.tsx, replace the addRecipeIngredients function:
 
-    const ingredients: string[] = pendingRecipe.recipe.ingredients;
+// In GroceryList.tsx, replace the addRecipeIngredients function:
 
-    try {
-      // Get current grocery list to check for existing items
-      const existingItemNames = groceryList.items.map(item =>
-        item.name.toLowerCase().trim()
-      );
+// In GroceryList.tsx, replace the addRecipeIngredients function:
 
-      // Filter out ingredients that already exist
-      const newIngredients = ingredients.filter(ingredient =>
-        !existingItemNames.includes(ingredient.toLowerCase().trim())
-      );
+const addRecipeIngredients = async () => {
+  if (!pendingRecipe?.recipe?.ingredients || !groceryList) return;
 
-      // Add only new ingredients as separate items
-      let addedCount = 0;
-      for (const ingredient of newIngredients) {
-        try {
+  const ingredients: string[] = pendingRecipe.recipe.ingredients;
+
+  try {
+    // Get existing items map for comparison
+    const existingItemsMap = new Map(
+      groceryList.items.map(item => [item.name.toLowerCase().trim(), item])
+    );
+
+    // Track what we're adding/updating
+    const newItemsToAdd: GroceryItem[] = [];
+    let addedCount = 0;
+    let updatedCount = 0;
+
+    // Process each ingredient
+    for (const ingredient of ingredients) {
+      try {
+        const ingredientKey = ingredient.toLowerCase().trim();
+        const existingItem = existingItemsMap.get(ingredientKey);
+
+        if (existingItem) {
+          // UPDATE existing item - increment quantity
+          const currentQuantity = parseInt(existingItem.quantity) || 1;
+          const newQuantity = currentQuantity + 1;
+
+          // Build source string - avoid duplicates
+          const existingSources = existingItem.source ? existingItem.source.split(', ') : [];
+          const newSource = existingSources.includes(pendingRecipe.name)
+            ? existingItem.source
+            : existingSources.concat(pendingRecipe.name).join(', ');
+
+          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${existingItem.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: existingItem.name,
+              quantity: `${newQuantity} serving${newQuantity > 1 ? 's' : ''}`,
+              source: newSource,
+            }),
+          });
+
+          if (response.ok) {
+            const updatedItem = await response.json();
+            // Update in local state immediately
+            setGroceryList(prev => prev ? {
+              ...prev,
+              items: prev.items.map(item =>
+                item.id === existingItem.id ? updatedItem : item
+              )
+            } : null);
+            updatedCount++;
+            // Update the map so subsequent ingredients don't re-update
+            existingItemsMap.set(ingredientKey, updatedItem);
+          } else {
+            console.error(`Failed to update item: ${ingredient}`, await response.text());
+          }
+        } else {
+          // ADD new item
           const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
             method: 'POST',
             headers: {
@@ -479,22 +554,36 @@ const GroceryList: React.FC<GroceryListProps> = ({
           });
 
           if (response.ok) {
+            const newItem = await response.json();
+            newItemsToAdd.push(newItem);
             addedCount++;
+            // Add to map so subsequent duplicates in same recipe don't re-add
+            existingItemsMap.set(ingredientKey, newItem);
+          } else {
+            console.error(`Failed to add item: ${ingredient}`, await response.text());
           }
-        } catch (itemError) {
-          console.error(`Failed to add ingredient: ${ingredient}`, itemError);
         }
+      } catch (itemError) {
+        console.error(`Error processing ingredient: ${ingredient}`, itemError);
+        // Continue with other ingredients
       }
-
-      // Refresh the grocery list to show new items
-      if (addedCount > 0) {
-        await fetchCurrentWeekGroceryList();
-      }
-
-    } catch (err) {
-      setError('Failed to add recipe ingredients');
     }
-  };
+
+    // Add all new items to state at once
+    if (addedCount > 0) {
+      setGroceryList(prev => prev ? {
+        ...prev,
+        items: [...prev.items, ...newItemsToAdd]
+      } : null);
+    }
+
+    console.log(`Recipe ingredients processed: ${addedCount} added, ${updatedCount} updated`);
+
+  } catch (err) {
+    console.error('Error adding recipe ingredients:', err);
+    setError('Failed to add recipe ingredients');
+  }
+};
 
   // Categorize items based on common patterns
   const categorizeItem = (itemName: string): string => {
@@ -549,8 +638,36 @@ const GroceryList: React.FC<GroceryListProps> = ({
 
   // Auto-add pending recipe ingredients when modal opens with a recipe
   useEffect(() => {
-    if (isOpen && pendingRecipe && groceryList) {
-      addRecipeIngredients();
+    // Only process if we have a new recipe that hasn't been processed yet
+    const recipeId = pendingRecipe?.id || pendingRecipe?.name;
+    
+    if (isOpen && 
+        pendingRecipe && 
+        groceryList && 
+        !isProcessingRecipe.current &&
+        recipeId !== lastProcessedRecipeId.current) {
+      
+      isProcessingRecipe.current = true;
+      lastProcessedRecipeId.current = recipeId;
+      
+      const processRecipe = async () => {
+        try {
+          await addRecipeIngredients();
+        } catch (err) {
+          console.error('Failed to process recipe:', err);
+        } finally {
+          setPendingRecipeForGrocery(null);
+          isProcessingRecipe.current = false;
+        }
+      };
+      
+      processRecipe();
+    }
+    
+    // Reset tracking when modal closes
+    if (!isOpen) {
+      isProcessingRecipe.current = false;
+      lastProcessedRecipeId.current = null;
     }
   }, [isOpen, pendingRecipe, groceryList]);
 
@@ -700,6 +817,7 @@ const GroceryList: React.FC<GroceryListProps> = ({
                               item={item}
                               onToggleChecked={toggleItemChecked}
                               onDelete={deleteGroceryItem}
+                              isUpdating={updatingItemId === item.id}
                             />
                           ))}
                         </div>
@@ -750,20 +868,23 @@ interface GroceryItemRowProps {
   item: GroceryItem;
   onToggleChecked: (itemId: string) => void;
   onDelete: (itemId: string) => void;
+  isUpdating?: boolean;
 }
 
 const GroceryItemRow: React.FC<GroceryItemRowProps> = ({
   item,
   onToggleChecked,
-  onDelete
+  onDelete,
+  isUpdating
 }) => {
   return (
-    <div className={`${styles.groceryItem} ${item.checked ? styles.checkedItem : ''}`}>
+    <div className={`${styles.groceryItem} ${item.checked ? styles.checkedItem : ''} ${isUpdating ? styles.updating : ''}`}>
       <label className={styles.itemCheckbox}>
         <input
           type="checkbox"
           checked={item.checked}
           onChange={() => onToggleChecked(item.id)}
+          disabled={isUpdating}
         />
         <span className={styles.checkboxCustom}></span>
       </label>
@@ -779,6 +900,7 @@ const GroceryItemRow: React.FC<GroceryItemRowProps> = ({
       <button
         onClick={() => onDelete(item.id)}
         className={styles.deleteButton}
+        disabled={isUpdating}
         title="Delete item"
       >
         ×
