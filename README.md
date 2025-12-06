@@ -2,7 +2,7 @@
 
 **A smart meal planning platform that helps you organize your nutrition, discover recipes, and maintain healthy eating habits.**
 
-<img width="150" height="150" align="center" alt="Untitled design (1)" src="https://github.com/user-attachments/assets/b134afbf-bd35-4378-bbf4-505075d1954e" />
+<img width="200" height="200" align-items="center" alt="Untitled design (1)" src="https://github.com/user-attachments/assets/b134afbf-bd35-4378-bbf4-505075d1954e" />
 
 NutritionU is a full-stack web application that combines meal planning, recipe discovery, and personalized nutrition tracking. Built with modern web technologies and deployed on cloud infrastructure for reliable, scalable performance.
 
