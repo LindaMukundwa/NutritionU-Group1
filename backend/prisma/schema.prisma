@@ -16,6 +16,7 @@ model User {
 
   // Onboarding data
   age                 Int?
+  gender              String? // "male", "female", "nonbinary", "prefer_not"
   height              Float?
   weight              Float?
   units               String  @default("metric")
