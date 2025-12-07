@@ -15,6 +15,8 @@ import { Icon } from '../ui/Icon';
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    displayName: '',
+    gender: '',
     age: undefined as number | undefined,
     height: undefined as number | undefined,
     weight: undefined as number | undefined,
@@ -184,6 +186,7 @@ export default function OnboardingPage() {
 
       const payload = {
         age: formData.age,
+        gender: formData.gender,
         height: formData.height,
         weight: formData.weight,
         units: formData.units,
@@ -299,6 +302,44 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className={styles.personalInfoSection}>
+                  <div className={styles.personalInfoWrapper}>
+                    <Label className={styles.sectionLabel}>Personal Information</Label>
+
+                    <div className={styles.inputRow}>
+                      {/* Display Name */}
+                      <div className={styles.inputGroup}>
+                        <Label>Display Name</Label>
+                        <input
+                          type="text"
+                          placeholder="Enter your display name"
+                          value={formData.displayName}
+                          onChange={(e) =>
+                            setFormData({ ...formData, displayName: e.target.value })
+                          }
+                          className={styles.textInput}
+                        />
+                      </div>
+
+                      {/* Gender */}
+                      <div className={styles.inputGroup}>
+                        <Label>Gender</Label>
+                        <select
+                          value={formData.gender}
+                          onChange={(e) =>
+                            setFormData({ ...formData, gender: e.target.value })
+                          }
+                          className={styles.selectInput}
+                        >
+                          <option value="">Select gender</option>
+                          <option value="female">Female</option>
+                          <option value="male">Male</option>
+                          <option value="nonbinary">Non-binary</option>
+                          <option value="prefer_not">Prefer not to say</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Unit Selection */}
                   <div className={styles.unitSelection}>
                     <Label className={styles.unitLabel}>Units</Label>

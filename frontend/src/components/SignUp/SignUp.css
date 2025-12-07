@@ -450,3 +450,39 @@
     width: 150px;
   }
 }
+
+/* Privacy Policy Checkbox */
+.nutritionU-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.nutritionU-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.nutritionU-checkbox label {
+  cursor: pointer;
+  display: block;
+}
+
+.privacy-link {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.privacy-link:hover {
+  color: oklch(0.60 0.17 264);
+  text-decoration: underline;
+}
