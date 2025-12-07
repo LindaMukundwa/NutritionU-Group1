@@ -171,7 +171,6 @@ function RecipeModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        {/* Modified header with Add to Grocery List button */}
         <div className={styles.modalHeader}>
           <div>
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
@@ -860,23 +859,29 @@ function MealContent({
               let enhancedIngredients = mealToAdd.recipe.ingredients;
               let enhancedInstructions = mealToAdd.recipe.instructions;
 
-              try {
-                const chatbotResponse = await fetch(`${API_BASE}/api/chatbot/instructions-ingredients`, {
+              console.log(`INSTRUCTION: ${enhancedInstructions} ${enhancedIngredients}`);
+                // Only enhance if ingredients or instructions are missing/empty
+                const needsEnhancement = !enhancedIngredients || enhancedIngredients.length === 0 || 
+                            !enhancedInstructions || enhancedInstructions.length === 0;
+
+                if (needsEnhancement) {
+                try {
+                  const chatbotResponse = await fetch(`${API_BASE}/api/chatbot/instructions-ingredients`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     query: `${mealToAdd.name || mealToAdd.title} with approximately ${mealToAdd.calories} calories, ${mealToAdd.recipe.nutrition.protein}g protein, ${mealToAdd.recipe.nutrition.carbs}g carbs, and ${mealToAdd.recipe.nutrition.fat}g fat.`
                   }),
-                });
+                  });
 
-                if (chatbotResponse.ok) {
+                  if (chatbotResponse.ok) {
                   const data = await chatbotResponse.json() as { ingredients?: string[]; instructions?: string[] };
                   console.log('[Dashboard] ✅ Chatbot generated content:', data);
 
-                  if (data.ingredients && data.ingredients.length > 0) {
+                  if (data.ingredients && data.ingredients.length > 0 && (!enhancedIngredients || enhancedIngredients.length === 0)) {
                     enhancedIngredients = data.ingredients;
                   }
-                  if (data.instructions && data.instructions.length > 0) {
+                  if (data.instructions && data.instructions.length > 0 && (!enhancedInstructions || enhancedInstructions.length === 0)) {
                     enhancedInstructions = data.instructions;
                   }
 
@@ -885,29 +890,32 @@ function MealContent({
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                      ingredients: enhancedIngredients.map((ing: string) => ({
-                        name: ing,
-                        amount: 1,
-                        unit: { type: 'metric', value: 'serving' },
-                      })),
-                      instructions: enhancedInstructions.map((inst: string, idx: number) => ({
-                        stepNumber: idx + 1,
-                        instruction: inst,
-                        equipment: [],
-                      })),
+                    ingredients: enhancedIngredients.map((ing: string) => ({
+                      name: ing,
+                      amount: 1,
+                      unit: { type: 'metric', value: 'serving' },
+                    })),
+                    instructions: enhancedInstructions.map((inst: string, idx: number) => ({
+                      stepNumber: idx + 1,
+                      instruction: inst,
+                      equipment: [],
+                    })),
                     }),
                   });
 
                   if (updateResponse.ok) {
                     console.log('[Dashboard] ✅ Recipe updated with chatbot content');
                   }
-                } else {
+                  } else {
                   console.log('[Dashboard] ⚠️ Chatbot API failed, using original content');
+                  }
+                } catch (chatbotError) {
+                  console.error('[Dashboard] Chatbot error:', chatbotError);
+                  console.log('[Dashboard] Using original recipe content');
                 }
-              } catch (chatbotError) {
-                console.error('[Dashboard] Chatbot error:', chatbotError);
-                console.log('[Dashboard] Using original recipe content');
-              }
+                } else {
+                console.log('[Dashboard] Recipe already has ingredients and instructions, skipping enhancement');
+                }
 
               // Step 4: Create meal with recipeId and enhanced content
               const plannerMeal: Meal = {

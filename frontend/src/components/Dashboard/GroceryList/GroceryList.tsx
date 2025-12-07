@@ -325,159 +325,189 @@ const GroceryList: React.FC<GroceryListProps> = ({
   };
 
   // Generate grocery list from meal plan
-  const generateFromMealPlan = async () => {
-    if (!groceryList || !weeklyMealPlan) return;
+const generateFromMealPlan = async () => {
+  if (!groceryList || !weeklyMealPlan) return;
 
-    try {
-      // Extract ingredients with their source recipes and count occurrences
-      const ingredientMap = new Map<string, { count: number; sources: string[]; recipeIds: Set<number> }>();
+  try {
+    // Get all of the ingredients
+    const ingredientMap = new Map<string, { 
+      originalIngredient: string;
+      count: number; 
+      sources: string[]; 
+      recipeIds: Set<number> 
+    }>();
 
-      Object.values(weeklyMealPlan).forEach((dayPlan: any) => {
-        ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
-          dayPlan[mealType]?.forEach((meal: any) => {
-            if (meal.recipe?.ingredients && meal.name && meal.recipeId) {
-              meal.recipe.ingredients.forEach((ingredient: string) => {
-                const ingredientKey = ingredient.toLowerCase().trim();
+    Object.values(weeklyMealPlan).forEach((dayPlan: any) => {
+      ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
+        dayPlan[mealType]?.forEach((meal: any) => {
+          if (meal.recipe?.ingredients && meal.name && meal.recipeId) {
+            meal.recipe.ingredients.forEach((ingredient: string) => {
+              const ingredientKey = ingredient.toLowerCase().trim();
 
-                if (ingredientMap.has(ingredientKey)) {
-                  const existing = ingredientMap.get(ingredientKey)!;
+              if (ingredientMap.has(ingredientKey)) {
+                const existing = ingredientMap.get(ingredientKey)!;
 
-                  // Only increment count if this is a different recipe ID
-                  if (!existing.recipeIds.has(meal.recipeId)) {
-                    existing.count += 1;
-                    existing.recipeIds.add(meal.recipeId);
+                // Only increment count if this is a different recipe ID
+                if (!existing.recipeIds.has(meal.recipeId)) {
+                  existing.count += 1;
+                  existing.recipeIds.add(meal.recipeId);
 
-                    // Add source if it's not already included
-                    if (!existing.sources.includes(meal.name)) {
-                      existing.sources.push(meal.name);
-                    }
-                  } else {
-                    // If same recipe ID, don't increment but still track the recipe name if different
-                    if (!existing.sources.includes(meal.name)) {
-                      existing.sources.push(meal.name);
-                    }
+                  // Add source if it's not already included
+                  if (!existing.sources.includes(meal.name)) {
+                    existing.sources.push(meal.name);
                   }
-                } else {
-                  ingredientMap.set(ingredientKey, {
-                    count: 1,
-                    sources: [meal.name],
-                    recipeIds: new Set([meal.recipeId])
-                  });
                 }
-              });
-            }
-          });
+              } else {
+                ingredientMap.set(ingredientKey, {
+                  originalIngredient: ingredient,
+                  count: 1,
+                  sources: [meal.name],
+                  recipeIds: new Set([meal.recipeId])
+                });
+              }
+            });
+          }
         });
       });
+    });
 
-      // Get current grocery list to check for existing items
-      const existingItemsMap = new Map(
-        groceryList.items.map(item => [item.name.toLowerCase().trim(), item])
-      );
+    // Simplify all ingredients via open AI API
+    const allIngredients = Array.from(ingredientMap.values()).map(data => data.originalIngredient);
+    
+    console.log('Simplifying meal plan ingredients...', allIngredients);
+    const simplifyResponse = await fetch(`${API_BASE_URL}/grocery/grocery-lists/simplify-ingredients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ingredients: allIngredients }),
+    });
 
-      // Process all ingredients - update existing or add new
-      const newItemsToAdd: GroceryItem[] = [];
-      let addedCount = 0;
-      let updatedCount = 0;
-
-      for (const [ingredientKey, data] of ingredientMap.entries()) {
-        try {
-          // Find the original ingredient name (with proper capitalization)
-          const originalIngredient = Object.values(weeklyMealPlan)
-            .flatMap((dayPlan: any) =>
-              ['breakfast', 'lunch', 'dinner', 'snacks'].flatMap(mealType =>
-                dayPlan[mealType]?.flatMap((meal: any) =>
-                  meal.recipe?.ingredients || []
-                ) || []
-              )
-            )
-            .find((ing: string) => ing.toLowerCase().trim() === ingredientKey);
-
-          const quantity = data.count === 1 ? '1 serving' : `${data.count} servings`;
-
-          // Use the first recipe as primary source, but could show multiple sources
-          const primarySource = data.sources[0];
-          const sourceText = data.sources.length > 1
-            ? `${primarySource} (+${data.sources.length - 1} more)`
-            : primarySource;
-
-          const existingItem = existingItemsMap.get(ingredientKey);
-
-          if (existingItem) {
-            // Update existing item quantity and source
-            const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${existingItem.id}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                name: originalIngredient || existingItem.name,
-                quantity: quantity,
-                source: sourceText,
-              }),
-            });
-
-            if (response.ok) {
-              const updatedItem = await response.json();
-
-              // Update frontend state for this item
-              setGroceryList(prev => prev ? {
-                ...prev,
-                items: prev.items.map(item =>
-                  item.id === existingItem.id ? updatedItem : item
-                )
-              } : null);
-              updatedCount++;
-            }
-          } else {
-            // Add new item
-            const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                name: originalIngredient || ingredientKey,
-                quantity: quantity,
-                source: sourceText,
-              }),
-            });
-
-            if (response.ok) {
-              const newItem = await response.json();
-              newItemsToAdd.push(newItem);
-              addedCount++;
-            }
-          }
-        } catch (itemError) {
-          console.error(`Failed to process ingredient: ${ingredientKey}`, itemError);
-        }
-      }
-
-      // Add new items to frontend state
-      if (addedCount > 0) {
-        setGroceryList(prev => prev ? {
-          ...prev,
-          items: [...prev.items, ...newItemsToAdd]
-        } : null);
-      }
-
-      if (addedCount > 0 || updatedCount > 0) {
-        setError(null);
-      }
-
-    } catch (err) {
-      console.error('Error in generateFromMealPlan:', err);
-      setError('Failed to generate grocery list from meal plan');
+    if (!simplifyResponse.ok) {
+      throw new Error('Failed to simplify ingredients');
     }
-  };
 
-  // Add ingredients from pending recipe
-  // In GroceryList.tsx, replace the addRecipeIngredients function:
+    const { simplifiedIngredients } = await simplifyResponse.json();
+    console.log('Simplified meal plan ingredients:', simplifiedIngredients);
 
-// In GroceryList.tsx, replace the addRecipeIngredients function:
+    // Create a map of simplified names to their metadata
+    const simplifiedMap = new Map<string, {
+      simplifiedName: string;
+      count: number;
+      sources: string[];
+    }>();
 
-// In GroceryList.tsx, replace the addRecipeIngredients function:
+    let index = 0;
+    for (const [originalKey, data] of ingredientMap.entries()) {
+      const simplifiedName = simplifiedIngredients[index];
+      const simplifiedKey = simplifiedName.toLowerCase().trim();
+
+      if (simplifiedMap.has(simplifiedKey)) {
+        // Merge if simplified name already exists
+        const existing = simplifiedMap.get(simplifiedKey)!;
+        existing.count += data.count;
+        existing.sources = [...new Set([...existing.sources, ...data.sources])];
+      } else {
+        simplifiedMap.set(simplifiedKey, {
+          simplifiedName,
+          count: data.count,
+          sources: data.sources
+        });
+      }
+      index++;
+    }
+
+    // Get existing items for comparison
+    const existingItemsMap = new Map(
+      groceryList.items.map(item => [item.name.toLowerCase().trim(), item])
+    );
+
+    // Process all ingredients - update existing or add new
+    const newItemsToAdd: GroceryItem[] = [];
+    let addedCount = 0;
+    let updatedCount = 0;
+
+    for (const [simplifiedKey, data] of simplifiedMap.entries()) {
+      try {
+        const quantity = data.count === 1 ? '1 serving' : `${data.count} servings`;
+
+        // Use the first recipe as primary source
+        const primarySource = data.sources[0];
+        const sourceText = data.sources.length > 1
+          ? `${primarySource} (+${data.sources.length - 1} more)`
+          : primarySource;
+
+        const existingItem = existingItemsMap.get(simplifiedKey);
+
+        if (existingItem) {
+          // Update existing item quantity and source
+          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${existingItem.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: data.simplifiedName,
+              quantity: quantity,
+              source: sourceText,
+            }),
+          });
+
+          if (response.ok) {
+            const updatedItem = await response.json();
+
+            // Update frontend state for this item
+            setGroceryList(prev => prev ? {
+              ...prev,
+              items: prev.items.map(item =>
+                item.id === existingItem.id ? updatedItem : item
+              )
+            } : null);
+            updatedCount++;
+          }
+        } else {
+          // Add new item
+          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: data.simplifiedName,
+              quantity: quantity,
+              source: sourceText,
+            }),
+          });
+
+          if (response.ok) {
+            const newItem = await response.json();
+            newItemsToAdd.push(newItem);
+            addedCount++;
+          }
+        }
+      } catch (itemError) {
+        console.error(`Failed to process ingredient: ${simplifiedKey}`, itemError);
+      }
+    }
+
+    // Add new items to frontend state
+    if (addedCount > 0) {
+      setGroceryList(prev => prev ? {
+        ...prev,
+        items: [...prev.items, ...newItemsToAdd]
+      } : null);
+    }
+
+    if (addedCount > 0 || updatedCount > 0) {
+      setError(null);
+      console.log(`Meal plan processed: ${addedCount} added, ${updatedCount} updated`);
+    }
+
+  } catch (err) {
+    console.error('Error in generateFromMealPlan:', err);
+    setError('Failed to generate grocery list from meal plan');
+  }
+};
 
 const addRecipeIngredients = async () => {
   if (!pendingRecipe?.recipe?.ingredients || !groceryList) return;
@@ -485,7 +515,24 @@ const addRecipeIngredients = async () => {
   const ingredients: string[] = pendingRecipe.recipe.ingredients;
 
   try {
-    // Get existing items map for comparison
+    // Step 1: Simplify ingredients via API
+    console.log('Simplifying ingredients...', ingredients);
+    const simplifyResponse = await fetch(`${API_BASE_URL}/grocery/grocery-lists/simplify-ingredients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ingredients }),
+    });
+
+    if (!simplifyResponse.ok) {
+      throw new Error('Failed to simplify ingredients');
+    }
+
+    const { simplifiedIngredients } = await simplifyResponse.json();
+    console.log('Simplified ingredients:', simplifiedIngredients);
+
+    // Step 2: Get existing items map for comparison (using simplified names)
     const existingItemsMap = new Map(
       groceryList.items.map(item => [item.name.toLowerCase().trim(), item])
     );
@@ -495,10 +542,13 @@ const addRecipeIngredients = async () => {
     let addedCount = 0;
     let updatedCount = 0;
 
-    // Process each ingredient
-    for (const ingredient of ingredients) {
+    // Step 3: Process each simplified ingredient
+    for (let i = 0; i < simplifiedIngredients.length; i++) {
+      const simplifiedName = simplifiedIngredients[i];
+      const originalIngredient = ingredients[i];
+      
       try {
-        const ingredientKey = ingredient.toLowerCase().trim();
+        const ingredientKey = simplifiedName.toLowerCase().trim();
         const existingItem = existingItemsMap.get(ingredientKey);
 
         if (existingItem) {
@@ -518,70 +568,78 @@ const addRecipeIngredients = async () => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              name: existingItem.name,
-              quantity: `${newQuantity} serving${newQuantity > 1 ? 's' : ''}`,
+              name: simplifiedName, // Use simplified name
+              quantity: newQuantity.toString(),
               source: newSource,
+              checked: existingItem.checked,
             }),
           });
 
-          if (response.ok) {
-            const updatedItem = await response.json();
-            // Update in local state immediately
-            setGroceryList(prev => prev ? {
-              ...prev,
-              items: prev.items.map(item =>
-                item.id === existingItem.id ? updatedItem : item
-              )
-            } : null);
-            updatedCount++;
-            // Update the map so subsequent ingredients don't re-update
-            existingItemsMap.set(ingredientKey, updatedItem);
-          } else {
-            console.error(`Failed to update item: ${ingredient}`, await response.text());
+          if (!response.ok) {
+            console.error(`Failed to update item: ${simplifiedName}`);
+            continue;
           }
+
+          const updatedItem = await response.json();
+          updatedCount++;
+          console.log(`Updated: ${simplifiedName} (quantity: ${newQuantity})`);
+
         } else {
-          // ADD new item
+          // CREATE new item with simplified name
+          const newItem: GroceryItem = {
+            id: `temp-${Date.now()}-${i}`,
+            name: simplifiedName, // Use simplified name
+            quantity: '1',
+            source: pendingRecipe.name,
+            checked: false,
+            groceryListId: groceryList.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          newItemsToAdd.push(newItem);
+          console.log(`Prepared to add: ${simplifiedName}`);
+        }
+      } catch (itemError) {
+        console.error(`Error processing ingredient ${simplifiedName}:`, itemError);
+      }
+    }
+
+    // Step 4: Batch create new items
+    if (newItemsToAdd.length > 0) {
+      for (const newItem of newItemsToAdd) {
+        try {
           const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              name: ingredient.trim(),
-              quantity: '1 serving',
-              source: pendingRecipe.name,
+              name: newItem.name,
+              quantity: newItem.quantity,
+              source: newItem.source,
             }),
           });
 
           if (response.ok) {
-            const newItem = await response.json();
-            newItemsToAdd.push(newItem);
             addedCount++;
-            // Add to map so subsequent duplicates in same recipe don't re-add
-            existingItemsMap.set(ingredientKey, newItem);
+            console.log(`Added: ${newItem.name}`);
           } else {
-            console.error(`Failed to add item: ${ingredient}`, await response.text());
+            console.error(`Failed to add item: ${newItem.name}`);
           }
+        } catch (error) {
+          console.error(`Error adding item ${newItem.name}:`, error);
         }
-      } catch (itemError) {
-        console.error(`Error processing ingredient: ${ingredient}`, itemError);
-        // Continue with other ingredients
       }
     }
 
-    // Add all new items to state at once
-    if (addedCount > 0) {
-      setGroceryList(prev => prev ? {
-        ...prev,
-        items: [...prev.items, ...newItemsToAdd]
-      } : null);
-    }
-
+    // Step 5: Refresh the grocery list
+    await fetchGroceryListById(groceryList.id);
     console.log(`Recipe ingredients processed: ${addedCount} added, ${updatedCount} updated`);
 
-  } catch (err) {
-    console.error('Error adding recipe ingredients:', err);
-    setError('Failed to add recipe ingredients');
+  } catch (error) {
+    console.error('Error adding recipe ingredients:', error);
+    // Optionally show error toast to user
   }
 };
 
@@ -891,9 +949,9 @@ const GroceryItemRow: React.FC<GroceryItemRowProps> = ({
 
       <div className={styles.itemContent}>
         <div className={styles.itemName}>{item.name}</div>
-        <div className={styles.itemQuantity}>{item.quantity}</div>
+        <div className={styles.itemQuantity}>Quantity: {item.quantity}</div>
         {item.source && (
-          <div className={styles.itemMeals}>from {item.source}</div>
+          <div className={styles.itemMeals}>For: {item.source}</div>
         )}
       </div>
 
