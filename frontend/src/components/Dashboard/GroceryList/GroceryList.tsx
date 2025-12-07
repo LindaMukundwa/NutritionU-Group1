@@ -485,7 +485,24 @@ const addRecipeIngredients = async () => {
   const ingredients: string[] = pendingRecipe.recipe.ingredients;
 
   try {
-    // Get existing items map for comparison
+    // Step 1: Simplify ingredients via API
+    console.log('Simplifying ingredients...', ingredients);
+    const simplifyResponse = await fetch(`${API_BASE_URL}/grocery/grocery-lists/simplify-ingredients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ingredients }),
+    });
+
+    if (!simplifyResponse.ok) {
+      throw new Error('Failed to simplify ingredients');
+    }
+
+    const { simplifiedIngredients } = await simplifyResponse.json();
+    console.log('Simplified ingredients:', simplifiedIngredients);
+
+    // Step 2: Get existing items map for comparison (using simplified names)
     const existingItemsMap = new Map(
       groceryList.items.map(item => [item.name.toLowerCase().trim(), item])
     );
@@ -495,10 +512,13 @@ const addRecipeIngredients = async () => {
     let addedCount = 0;
     let updatedCount = 0;
 
-    // Process each ingredient
-    for (const ingredient of ingredients) {
+    // Step 3: Process each simplified ingredient
+    for (let i = 0; i < simplifiedIngredients.length; i++) {
+      const simplifiedName = simplifiedIngredients[i];
+      const originalIngredient = ingredients[i];
+      
       try {
-        const ingredientKey = ingredient.toLowerCase().trim();
+        const ingredientKey = simplifiedName.toLowerCase().trim();
         const existingItem = existingItemsMap.get(ingredientKey);
 
         if (existingItem) {
@@ -518,70 +538,78 @@ const addRecipeIngredients = async () => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              name: existingItem.name,
-              quantity: `${newQuantity} serving${newQuantity > 1 ? 's' : ''}`,
+              name: simplifiedName, // Use simplified name
+              quantity: newQuantity.toString(),
               source: newSource,
+              checked: existingItem.checked,
             }),
           });
 
-          if (response.ok) {
-            const updatedItem = await response.json();
-            // Update in local state immediately
-            setGroceryList(prev => prev ? {
-              ...prev,
-              items: prev.items.map(item =>
-                item.id === existingItem.id ? updatedItem : item
-              )
-            } : null);
-            updatedCount++;
-            // Update the map so subsequent ingredients don't re-update
-            existingItemsMap.set(ingredientKey, updatedItem);
-          } else {
-            console.error(`Failed to update item: ${ingredient}`, await response.text());
+          if (!response.ok) {
+            console.error(`Failed to update item: ${simplifiedName}`);
+            continue;
           }
+
+          const updatedItem = await response.json();
+          updatedCount++;
+          console.log(`Updated: ${simplifiedName} (quantity: ${newQuantity})`);
+
         } else {
-          // ADD new item
+          // CREATE new item with simplified name
+          const newItem: GroceryItem = {
+            id: `temp-${Date.now()}-${i}`,
+            name: simplifiedName, // Use simplified name
+            quantity: '1',
+            source: pendingRecipe.name,
+            checked: false,
+            groceryListId: groceryList.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          newItemsToAdd.push(newItem);
+          console.log(`Prepared to add: ${simplifiedName}`);
+        }
+      } catch (itemError) {
+        console.error(`Error processing ingredient ${simplifiedName}:`, itemError);
+      }
+    }
+
+    // Step 4: Batch create new items
+    if (newItemsToAdd.length > 0) {
+      for (const newItem of newItemsToAdd) {
+        try {
           const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              name: ingredient.trim(),
-              quantity: '1 serving',
-              source: pendingRecipe.name,
+              name: newItem.name,
+              quantity: newItem.quantity,
+              source: newItem.source,
             }),
           });
 
           if (response.ok) {
-            const newItem = await response.json();
-            newItemsToAdd.push(newItem);
             addedCount++;
-            // Add to map so subsequent duplicates in same recipe don't re-add
-            existingItemsMap.set(ingredientKey, newItem);
+            console.log(`Added: ${newItem.name}`);
           } else {
-            console.error(`Failed to add item: ${ingredient}`, await response.text());
+            console.error(`Failed to add item: ${newItem.name}`);
           }
+        } catch (error) {
+          console.error(`Error adding item ${newItem.name}:`, error);
         }
-      } catch (itemError) {
-        console.error(`Error processing ingredient: ${ingredient}`, itemError);
-        // Continue with other ingredients
       }
     }
 
-    // Add all new items to state at once
-    if (addedCount > 0) {
-      setGroceryList(prev => prev ? {
-        ...prev,
-        items: [...prev.items, ...newItemsToAdd]
-      } : null);
-    }
-
+    // Step 5: Refresh the grocery list
+    await fetchGroceryListById(groceryList.id);
     console.log(`Recipe ingredients processed: ${addedCount} added, ${updatedCount} updated`);
 
-  } catch (err) {
-    console.error('Error adding recipe ingredients:', err);
-    setError('Failed to add recipe ingredients');
+  } catch (error) {
+    console.error('Error adding recipe ingredients:', error);
+    // Optionally show error toast to user
   }
 };
 
@@ -891,9 +919,9 @@ const GroceryItemRow: React.FC<GroceryItemRowProps> = ({
 
       <div className={styles.itemContent}>
         <div className={styles.itemName}>{item.name}</div>
-        <div className={styles.itemQuantity}>{item.quantity}</div>
+        <div className={styles.itemQuantity}>Quantity: {item.quantity}</div>
         {item.source && (
-          <div className={styles.itemMeals}>from {item.source}</div>
+          <div className={styles.itemMeals}>For: {item.source}</div>
         )}
       </div>
 

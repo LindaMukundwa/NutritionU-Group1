@@ -100,8 +100,6 @@ model MealPlanItem {
   date       DateTime // Specific date for this meal (YYYY-MM-DD)
   mealType   String // "breakfast", "lunch", "dinner", "snacks"
   createdAt  DateTime @default(now())
-
-  @@unique([mealPlanId, date, mealType]) // Prevent duplicates
 }
 
 model GroceryList {

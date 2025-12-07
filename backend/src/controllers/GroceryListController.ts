@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express';
 import prisma from '../lib/prisma.ts';
+import openai from '../openai.ts'
+
 
 const operationLocks = new Map<string, number>();
 const OPERATION_DELAY_MS = 500; // 500ms delay between operations
@@ -540,5 +542,82 @@ export const duplicateGroceryList = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error duplicating grocery list:', error);
     res.status(500).json({ error: 'Failed to duplicate grocery list' });
+  }
+};
+
+export const simplifyIngredients = async (req: Request, res: Response) => {
+  try {
+    const { ingredients } = req.body;
+
+    console.log('Received ingredients:', ingredients);
+
+    if (!Array.isArray(ingredients) || ingredients.length === 0) {
+      return res.status(400).json({ error: 'Invalid ingredients array' });
+    }
+
+    const prompt = `Simplify the following grocery ingredients to basic item names. Remove quantities, measurements, and preparation details. Return only the core ingredient name in its singular or standard grocery store form.
+
+    Examples:
+    - "1/2 cup diced red onion" → "Red Onion"
+    - "3 large eggs" → "Eggs"
+    - "2 tablespoons olive oil" → "Olive Oil"
+    - "half an apple, chopped" → "Apple"
+
+    Ingredients to simplify:
+    ${ingredients.map((ing, i) => `${i + 1}. ${ing}`).join('\n')}
+
+    IMPORTANT: You must return exactly ${ingredients.length} simplified ingredients, one per line, in the exact same order. Do not skip any ingredients.`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful assistant that simplifies grocery ingredient lists. Always return the exact same number of items as provided in the input.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 1000,
+    });
+
+    const simplifiedText = completion.choices[0]?.message?.content?.trim();
+    
+    if (!simplifiedText) {
+      throw new Error('No response from OpenAI');
+    }
+
+    const simplifiedIngredients = simplifiedText
+      .split('\n')
+      .map(line => line.replace(/^\d+\.\s*/, '').trim())
+      .filter(line => line.length > 0);
+
+    console.log(`Input count: ${ingredients.length}, Output count: ${simplifiedIngredients.length}`);
+
+    // If count mismatch, try to fix or return originals
+    if (simplifiedIngredients.length !== ingredients.length) {
+      console.warn('Simplified ingredients count mismatch');
+      
+      // Pad with originals if needed
+      while (simplifiedIngredients.length < ingredients.length) {
+        const missingIndex = simplifiedIngredients.length;
+        simplifiedIngredients.push(ingredients[missingIndex]);
+      }
+      
+      // Trim if too many
+      if (simplifiedIngredients.length > ingredients.length) {
+        simplifiedIngredients.length = ingredients.length;
+      }
+    }
+
+    console.log('Final simplified ingredients:', simplifiedIngredients);
+    res.json({ simplifiedIngredients });
+    
+  } catch (error) {
+    console.error('Error simplifying ingredients:', error);
+    res.status(500).json({ error: 'Failed to simplify ingredients' });
   }
 };

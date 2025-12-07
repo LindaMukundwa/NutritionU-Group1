@@ -171,7 +171,6 @@ function RecipeModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        {/* Modified header with Add to Grocery List button */}
         <div className={styles.modalHeader}>
           <div>
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
@@ -860,12 +859,14 @@ function MealContent({
               let enhancedIngredients = mealToAdd.recipe.ingredients;
               let enhancedInstructions = mealToAdd.recipe.instructions;
 
+              console.log(`INSTRUCTION: ${enhancedInstructions} ${enhancedIngredients}`);
               try {
                 const chatbotResponse = await fetch(`${API_BASE}/api/chatbot/instructions-ingredients`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
-                    query: `${mealToAdd.name || mealToAdd.title} with approximately ${mealToAdd.calories} calories, ${mealToAdd.recipe.nutrition.protein}g protein, ${mealToAdd.recipe.nutrition.carbs}g carbs, and ${mealToAdd.recipe.nutrition.fat}g fat.`
+                    query: `${mealToAdd.name || mealToAdd.title} with approximately ${mealToAdd.calories} calories, ${mealToAdd.recipe.nutrition.protein}g protein, ${mealToAdd.recipe.nutrition.carbs}g carbs, and ${mealToAdd.recipe.nutrition.fat}g fat. 
+                    If applicable the ingredients are ${enhancedIngredients.join(" ")} and instructions are ${enhancedInstructions}}`
                   }),
                 });
 

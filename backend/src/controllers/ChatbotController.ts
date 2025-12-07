@@ -251,10 +251,13 @@ export const generateMacros = async (req: Request, res: Response) => {
 
 // Generate instructions based on a recipe from fat secret
 export const generateInstructionsAndIngredients = async (req: Request, res: Response) => {
+  console.log("[CHATBOT]: Generating instructions and ingredients");
   try {
     const { query } = req.body;
+    console.log("[CHATBOT] generateInstructionsAndIngredients(): Request body query:", query);
 
     if (!query || typeof query !== 'string') {
+      console.error("[CHATBOT] generateInstructionsAndIngredients(): Invalid query parameter");
       return res.status(400).json({ error: 'Invalid or missing query parameter' });
     }
 
@@ -313,6 +316,7 @@ export const generateInstructionsAndIngredients = async (req: Request, res: Resp
         - Respond only with the specified JSON format.
       `;
 
+    console.log("[CHATBOT] generateInstructionsAndIngredients(): Sending request to OpenAI API");
     // Query OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -329,11 +333,13 @@ export const generateInstructionsAndIngredients = async (req: Request, res: Resp
     });
 
     const responseMessage = completion.choices[0].message?.content;
+    console.log("[CHATBOT] generateInstructionsAndIngredients(): Received response from OpenAI");
     const recipe = JSON.parse(responseMessage || '{}');
+    console.log("[CHATBOT] generateInstructionsAndIngredients(): Recipe generation successful");
 
     res.status(200).json(recipe);
   } catch (error) {
-    console.error('OpenAI API error:', error);
+    console.error('[CHATBOT] generateInstructionsAndIngredients(): OpenAI API error:', error);
     res.status(500).json({ error: 'Failed to generate recipe' });
   }
 };
@@ -646,3 +652,5 @@ Format your response with clear headings and bullet points.`;
     res.status(500).json({ error: 'Failed to generate meal suggestions' });
   }
 };
+
+
