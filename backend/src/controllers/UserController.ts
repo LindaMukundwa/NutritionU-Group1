@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import User from '../models/UserModel.ts';
 import prisma from '../lib/prisma.ts';
 import Recipe from '../models/RecipeModel.ts';
+import { sendWelcomeEmail } from '../services/emailService.ts';
 
 // Create a new user - updated to work with new schema (no Profile model)
 export const createUser = async (req: Request, res: Response) => {
@@ -470,6 +471,9 @@ export const patchUserProfile = async (req: Request, res: Response) => {
         });
 
         if (user) {
+            // Check if this is the first time completing onboarding
+            const isFirstTimeOnboarding = !user.onboardingCompleted && profile.onboardingCompleted !== false;
+            
             // Update existing user directly (no profile table)
             const updatedUser = await prisma.user.update({
                 where: { id: user.id },
@@ -499,6 +503,17 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                         : profile.budget || { value: 100, default: 100, description: 'Weekly food budget in dollars' }
                 }
             });
+
+            // Send welcome email if this is first time completing onboarding
+            if (isFirstTimeOnboarding && updatedUser.email) {
+                try {
+                    await sendWelcomeEmail(updatedUser.email, updatedUser.displayName || undefined);
+                    console.log('[patchUserProfile] 📧 Welcome email sent to:', updatedUser.email);
+                } catch (emailError) {
+                    console.error('[patchUserProfile] ⚠️ Failed to send welcome email:', emailError);
+                    // Don't fail the request if email fails
+                }
+            }
 
             console.log('[patchUserProfile] ✅ User profile updated:', updatedUser);
 
@@ -534,6 +549,17 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                     : profile.budget || { value: 100, default: 100, description: 'Weekly food budget in dollars' }
             }
         });
+
+        // Send welcome email for new user
+        if (newUser.email) {
+            try {
+                await sendWelcomeEmail(newUser.email, newUser.displayName || undefined);
+                console.log('[patchUserProfile] 📧 Welcome email sent to:', newUser.email);
+            } catch (emailError) {
+                console.error('[patchUserProfile] ⚠️ Failed to send welcome email:', emailError);
+                // Don't fail the request if email fails
+            }
+        }
 
         return res.status(200).json(newUser);
     } catch (err) {
