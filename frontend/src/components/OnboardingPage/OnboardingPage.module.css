@@ -1099,3 +1099,155 @@
   opacity: 0.7;
   font-size: 0.875rem;
 }
+
+/* AI THOUGHT PROCESS DROPDOWN */
+
+/* Container for the thought process section */
+.thoughtProcessContainer {
+  margin-top: 1rem;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.05) 0%,
+    rgba(59, 130, 246, 0.02) 100%
+  );
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover state for container */
+.thoughtProcessContainer:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Header button for toggling */
+.thoughtProcessHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(59, 130, 246, 0.05) 100%
+  );
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover state for header */
+.thoughtProcessHeader:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12) 0%,
+    rgba(59, 130, 246, 0.08) 100%
+  );
+}
+
+/* Header title */
+.thoughtProcessTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgb(37, 99, 235);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Arrow icon container */
+.thoughtProcessArrow {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: rgb(37, 99, 235);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+/* Rotated state for arrow */
+.thoughtProcessArrow.expanded {
+  transform: rotate(180deg);
+}
+
+/* Content area */
+.thoughtProcessContent {
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide down animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Text content */
+.thoughtProcessText {
+  font-size: 0.875rem;
+  color: var(--text);
+  line-height: 1.6;
+  white-space: pre-line;
+  margin: 0;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .thoughtProcessContainer {
+    border-color: rgba(96, 165, 250, 0.3);
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.08) 0%,
+      rgba(59, 130, 246, 0.04) 100%
+    );
+  }
+
+  .thoughtProcessHeader {
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.12) 0%,
+      rgba(59, 130, 246, 0.08) 100%
+    );
+  }
+
+  .thoughtProcessHeader:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.16) 0%,
+      rgba(59, 130, 246, 0.12) 100%
+    );
+  }
+
+  .thoughtProcessTitle,
+  .thoughtProcessArrow {
+    color: rgb(96, 165, 250);
+  }
+
+  .thoughtProcessContent {
+    background: linear-gradient(
+      135deg,
+      rgba(30, 41, 59, 0.6) 0%,
+      rgba(30, 41, 59, 0.4) 100%
+    );
+    border-top-color: rgba(96, 165, 250, 0.2);
+  }
+}
