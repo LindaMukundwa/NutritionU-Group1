@@ -1,3 +1,13 @@
+/*
+  Warnings:
+
+  - A unique constraint covering the columns `[mealPlanId,date,mealType]` on the table `MealPlanItem` will be added. If there are existing duplicate values, this will fail.
+
+*/
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "cookingLevel" TEXT,
+ADD COLUMN     "goals" JSONB;
+
 -- CreateTable
 CREATE TABLE "GroceryList" (
     "id" TEXT NOT NULL,
@@ -21,6 +31,9 @@ CREATE TABLE "GroceryItem" (
 
     CONSTRAINT "GroceryItem_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "MealPlanItem_mealPlanId_date_mealType_key" ON "MealPlanItem"("mealPlanId", "date", "mealType");
 
 -- AddForeignKey
 ALTER TABLE "GroceryList" ADD CONSTRAINT "GroceryList_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

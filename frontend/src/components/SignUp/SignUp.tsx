@@ -8,14 +8,22 @@ import { useNavigate } from 'react-router-dom';
 const Signup = () => {
   const [email, SetEmail] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
+  const [agreedToPolicy, setAgreedToPolicy] = useState(false);
   const navigate = useNavigate();
 
   const SignupWithEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!email || !password) {
       console.error("Provide Email and Password");
       return;
     }
+
+    if (!agreedToPolicy) {
+      console.error("You must agree to the Privacy Policy.");
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -26,7 +34,9 @@ const Signup = () => {
       const user = userCredential.user;
       console.log(user);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // After signup, go to onboarding
+      navigate('/onboarding');
+
     } catch (error: any) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -39,10 +49,8 @@ const Signup = () => {
     try {
       const resp = await AuthService.signInWithGoogle();
       if (resp.success && resp.user) {
-        // navigate to onboarding (new users should complete onboarding first)
         navigate('/onboarding');
       } else if (!resp.success && !resp.error) {
-        // redirect flow started (signInWithRedirect) — nothing more to do here
         console.log('Redirecting to Google sign-in...');
       } else {
         console.error('Google sign-up error', resp.error);
@@ -55,15 +63,13 @@ const Signup = () => {
   return (
     <div className="nutritionU-signup-container">
       <div className="nutritionU-signup-card">
-        {/* Logo - Replace with your actual NutritionU logo */}
-        <img
-          className="nutritionU-logo"
-          src="/2.png"
-          alt="NutritionU"
-        />
-        
+
+        <img className="nutritionU-logo" src="/2.png" alt="NutritionU" />
+
         <h2 className="nutritionU-signup-title">Create an Account</h2>
-        <p className="nutritionU-signup-subtitle">Join NutritionU and start your meal planning journey</p>
+        <p className="nutritionU-signup-subtitle">
+          Join NutritionU and start your meal planning journey
+        </p>
 
         <form onSubmit={SignupWithEmail}>
           <div className="nutritionU-form-group">
@@ -91,6 +97,7 @@ const Signup = () => {
                 Forgot password?
               </a>
             </div>
+
             <input
               id="password"
               name="password"
@@ -101,6 +108,26 @@ const Signup = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
             />
+          </div>
+
+          {/* Privacy Policy Checkbox */}
+          <div className="nutritionU-checkbox">
+            <input
+              type="checkbox"
+              id="privacyCheck"
+              checked={agreedToPolicy}
+              onChange={() => setAgreedToPolicy(!agreedToPolicy)}
+            />
+            <label htmlFor="privacyCheck">
+              Checking this box means you agree to our{" "}
+              <span
+                className="privacy-link"
+                onClick={() => window.open("/privacy-policy", "_blank")}
+                style={{ color: "#4a90e2", cursor: "pointer" }}
+              >
+                Privacy Policy
+              </span>
+            </label>
           </div>
 
           <button type="submit" className="nutritionU-primary-button">
@@ -120,7 +147,7 @@ const Signup = () => {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-          </button>  
+          </button>
         </div>
 
         <p className="nutritionU-login-link">

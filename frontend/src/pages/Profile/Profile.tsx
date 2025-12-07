@@ -11,6 +11,7 @@ type PreferenceField = 'lifestyleDiets' | 'medicalRestrictions' | 'culturalDiets
 
 interface ProfileFormState {
   displayName: string;
+  gender: string;
   units: Units;
   age: string;
   height: string;
@@ -60,6 +61,7 @@ export default function Profile() {
   
   const [profileForm, setProfileForm] = useState<ProfileFormState>({
     displayName: '',
+    gender: '',
     units: 'imperial',
     age: '',
     height: '',
@@ -94,6 +96,7 @@ export default function Profile() {
 
     setProfileForm({
       displayName: user.displayName || profileData.displayName || '',
+      gender: user.gender || profileData.gender || '',
       units: (profileData.units || user.units || 'imperial') as Units,
       age: profileData.age != null ? String(profileData.age) : (user.age != null ? String(user.age) : ''),
       height: profileData.height != null ? String(profileData.height) : (user.height != null ? String(user.height) : ''),
@@ -160,6 +163,7 @@ export default function Profile() {
 
     const payload: Record<string, unknown> = {
       displayName: trimmedName,
+      gender: profileForm.gender,
       activityLevel: profileForm.activityLevel,
       units: profileForm.units,
       budget: profileForm.budget,
@@ -290,6 +294,15 @@ export default function Profile() {
                     <p className={styles.summaryValue}>{profileForm.displayName || '—'}</p>
                   </div>
                   <div className={styles.summaryItem}>
+                    <p className={styles.summaryLabel}>Gender</p>
+                    <p className={styles.summaryValue}>
+                      {profileForm.gender === 'male' ? 'Male' : 
+                       profileForm.gender === 'female' ? 'Female' : 
+                       profileForm.gender === 'nonbinary' ? 'Non-binary' : 
+                       profileForm.gender === 'prefer_not' ? 'Prefer not to say' : '—'}
+                    </p>
+                  </div>
+                  <div className={styles.summaryItem}>
                     <p className={styles.summaryLabel}>Activity Level</p>
                     <p className={styles.summaryValue}>{ACTIVITY_OPTIONS.find(opt => opt.value === profileForm.activityLevel)?.label || '—'}</p>
                   </div>
@@ -406,6 +419,24 @@ export default function Profile() {
 
                   <div className={styles.inlineInputs}>
                     <div className={styles.formGroup}>
+                      <label htmlFor="gender" className={styles.formLabel}>
+                        Gender
+                      </label>
+                      <select
+                        id="gender"
+                        value={profileForm.gender}
+                        onChange={(e) => handleProfileInputChange('gender', e.target.value)}
+                        className={styles.select}
+                      >
+                        <option value="">Select gender</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                        <option value="nonbinary">Non-binary</option>
+                        <option value="prefer_not">Prefer not to say</option>
+                      </select>
+                    </div>
+
+                    <div className={styles.formGroup}>
                       <label htmlFor="activityLevel" className={styles.formLabel}>
                         Activity Level
                       </label>
@@ -420,21 +451,21 @@ export default function Profile() {
                         ))}
                       </select>
                     </div>
+                  </div>
 
-                    <div className={styles.formGroup}>
-                      <label htmlFor="units" className={styles.formLabel}>
-                        Preferred Units
-                      </label>
-                      <select
-                        id="units"
-                        value={profileForm.units}
-                        onChange={(e) => handleProfileInputChange('units', e.target.value as Units)}
-                        className={styles.select}
-                      >
-                        <option value="imperial">Imperial (lbs, in)</option>
-                        <option value="metric">Metric (kg, cm)</option>
-                      </select>
-                    </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="units" className={styles.formLabel}>
+                      Preferred Units
+                    </label>
+                    <select
+                      id="units"
+                      value={profileForm.units}
+                      onChange={(e) => handleProfileInputChange('units', e.target.value as Units)}
+                      className={styles.select}
+                    >
+                      <option value="imperial">Imperial (lbs, in)</option>
+                      <option value="metric">Metric (kg, cm)</option>
+                    </select>
                   </div>
 
                   <div className={styles.inlineInputs}>

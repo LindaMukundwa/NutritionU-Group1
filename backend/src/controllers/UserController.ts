@@ -477,23 +477,26 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                     displayName: profile.displayName,
                     photoURL: profile.photoURL,
                     age: profile.age,
+                    gender: profile.gender,
                     height: profile.height,
                     weight: profile.weight,
                     bmi: profile.bmi,
                     units: profile.units || user.units,
-                    goals: profile.goals,
+                    goals: profile.goals || [],
                     cookingLevel: profile.cookingLevel,
-                    activityLevel: profile.activityLevel,
+                    activityLevel: profile.activityLevel || user.activityLevel,
                     onboardingCompleted: true,
-                    medicalRestrictions: profile.medicalRestrictions,
-                    nutritionGoals: profile.macros,
-                    lifestyleDiets: profile.lifestyleDiets,
-                    culturalDiets: profile.culturalDiets,
-                    budget: {
-                        value: profile.budget,
-                        default: profile.budget?.default || 100,
-                        description: profile.budget?.description || 'Weekly food budget in dollars'
-                    }
+                    medicalRestrictions: profile.medicalRestrictions || [],
+                    nutritionGoals: profile.macros || profile.nutritionGoals || {},
+                    lifestyleDiets: profile.lifestyleDiets || [],
+                    culturalDiets: profile.culturalDiets || [],
+                    budget: typeof profile.budget === 'number' 
+                        ? {
+                            value: profile.budget,
+                            default: 100,
+                            description: 'Weekly food budget in dollars'
+                          }
+                        : profile.budget || { value: 100, default: 100, description: 'Weekly food budget in dollars' }
                 }
             });
 
@@ -509,17 +512,26 @@ export const patchUserProfile = async (req: Request, res: Response) => {
                 displayName: profile.displayName,
                 photoURL: profile.photoURL,
                 age: profile.age,
+                gender: profile.gender,
                 height: profile.height,
                 weight: profile.weight,
                 bmi: profile.bmi,
                 units: profile.units || 'metric',
                 activityLevel: profile.activityLevel || 'moderately_active',
                 onboardingCompleted: true,
-                medicalRestrictions: profile.medicalRestrictions,
-                nutritionGoals: profile.nutritionGoals,
-                lifestyleDiets: profile.lifestyleDiets,
-                culturalDiets: profile.culturalDiets,
-                budget: profile.budget
+                medicalRestrictions: profile.medicalRestrictions || [],
+                nutritionGoals: profile.macros || profile.nutritionGoals || {},
+                lifestyleDiets: profile.lifestyleDiets || [],
+                culturalDiets: profile.culturalDiets || [],
+                goals: profile.goals || [],
+                cookingLevel: profile.cookingLevel,
+                budget: typeof profile.budget === 'number'
+                    ? {
+                        value: profile.budget,
+                        default: 100,
+                        description: 'Weekly food budget in dollars'
+                      }
+                    : profile.budget || { value: 100, default: 100, description: 'Weekly food budget in dollars' }
             }
         });
 

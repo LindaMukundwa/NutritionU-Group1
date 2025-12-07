@@ -4,6 +4,7 @@ import type { Recipe } from "./recipe";
  * Definining shared user types and interfaces to be used thhroughut application
  */
 export interface User {
+  gender: any;
   // Generally static
   _id: string;
   firebaseUid: string;

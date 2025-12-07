@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LandingPage from './components/LandingPage/LandingPage'
 //import AuthPage from './components/AuthPage/AuthPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import PrivacyPolicy from './components/PrivacyPolicy/PrivacyPolicy';
 import Signup from './components/SignUp/SignUp';
 import Dashboard from './components/Dashboard/Dashboard';
 import Settings from './pages/Settings/Settings';
@@ -40,6 +41,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           {/* Public onboarding route used immediately after signup/sign-in */}
           <Route path="/onboarding" element={<OnboardingPage />} />
           {/* Protected dashboard (after onboarding completes, may route here instead) */}

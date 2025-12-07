@@ -155,6 +155,7 @@ export const generateMacros = async (req: Request, res: Response) => {
 
       Consider the following required user inputs:
       - age
+      - gender (e.g. "male", "female", "nonbinary", "prefer_not")
       - height
       - weight
       - units (e.g. "imperial" or "metric")
@@ -168,8 +169,8 @@ export const generateMacros = async (req: Request, res: Response) => {
       - mealPrep (frequency, e.g. "daily", "weekly")
 
       Reason step by step through the following before producing your answer:
-      1. Interpret all user attributes, goals, and restrictions, combining insights from activity level, age, and goals. Adjust for lifestyle or cultural diet flags, medical restrictions, and budgetary/cooking constraints only if relevant.
-      2. Determine an appropriate total daily calorie target.
+      1. Interpret all user attributes, goals, and restrictions, combining insights from activity level, age, gender, and goals. Adjust for lifestyle or cultural diet flags, medical restrictions, and budgetary/cooking constraints only if relevant.
+      2. Determine an appropriate total daily calorie target using gender-specific calculations (e.g., Mifflin-St Jeor equation).
       3. Calculate evidence-based recommendations for daily macronutrient targets (grams and/or % of calories) for protein, fats, and carbohydrates, based on user profile and goals.
       4. Ensure macronutrient ratios make sense for all stated goals, prioritizing muscle gain, athletic performance, and high protein per the example.
       5. Only after finalizing your calculations, present the conclusion in a well-structured JSON object.
@@ -517,7 +518,8 @@ ${recipesText}`;
             "Be specific about why one recipe might be better than others. " +
             "Consider macronutrient balance, micronutrient content, and overall dietary quality. " +
             "Keep your analysis comprehensive but concise. " +
-            "Use bold formatting for headers and structure your response clearly."
+            "Use bold formatting for headers and structure your response clearly." +
+            "Do not respond if not about recipes and nutrition. Instead, state that you can only respond to recipe and nutrition related inquiries."
         },
         {
           role: "user", 

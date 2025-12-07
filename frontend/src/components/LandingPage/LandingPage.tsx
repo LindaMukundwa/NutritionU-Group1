@@ -8,16 +8,15 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = () => {
   // Event handlers with the TypeScript types
-  const handleGetStarted = (): void => {
-    console.log('Get Started clicked');
-    // signup page or open a modal
-  };
-
 
   const navigate = useNavigate();
 
   const handleSignIn = (): void => {
     navigate('/signup');
+  };
+
+  const handlePrivacyPolicy = (): void => {
+    navigate('/privacy-policy');
   };
 
   const handleNavAuthClick = (action: string): void => {
@@ -66,10 +65,10 @@ const LandingPage: React.FC<LandingPageProps> = () => {
         <div className="cta-buttons">
           <button 
             className="primary-btn" 
-            onClick={handleGetStarted}
-            aria-label="Start planning meals now"
+            onClick={handlePrivacyPolicy}
+            aria-label="Ready Our Privacy Policy"
           >
-            Start Planning Meals
+            Read Our Privacy Policy
           </button>
         </div>
       </section>

@@ -27,14 +27,34 @@ ALTER TABLE "MealPlanItem" DROP CONSTRAINT "MealPlanItem_recipeId_fkey";
 -- DropForeignKey
 ALTER TABLE "Profile" DROP CONSTRAINT "Profile_userId_fkey";
 
--- AlterTable
-ALTER TABLE "MealPlan" ADD COLUMN     "endDate" TIMESTAMP(3) NOT NULL,
-ADD COLUMN     "startDate" TIMESTAMP(3) NOT NULL;
+-- AlterTable: Handle existing data for MealPlan
+-- Step 1: Add columns as nullable first
+ALTER TABLE "MealPlan" ADD COLUMN "startDate" TIMESTAMP(3);
+ALTER TABLE "MealPlan" ADD COLUMN "endDate" TIMESTAMP(3);
 
--- AlterTable
-ALTER TABLE "MealPlanItem" DROP COLUMN "dayOfWeek",
-ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "date" TIMESTAMP(3) NOT NULL;
+-- Step 2: Set default values for existing rows (this week's Monday to Sunday)
+UPDATE "MealPlan" 
+SET "startDate" = date_trunc('week', CURRENT_DATE) + INTERVAL '1 day',
+    "endDate" = date_trunc('week', CURRENT_DATE) + INTERVAL '7 days'
+WHERE "startDate" IS NULL;
+
+-- Step 3: Make columns required
+ALTER TABLE "MealPlan" ALTER COLUMN "startDate" SET NOT NULL;
+ALTER TABLE "MealPlan" ALTER COLUMN "endDate" SET NOT NULL;
+
+-- AlterTable: Handle existing data for MealPlanItem
+-- Step 1: Add date column as nullable first
+ALTER TABLE "MealPlanItem" ADD COLUMN "date" TIMESTAMP(3);
+ALTER TABLE "MealPlanItem" ADD COLUMN "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- Step 2: Calculate date from dayOfWeek for existing rows
+UPDATE "MealPlanItem" 
+SET "date" = date_trunc('week', CURRENT_DATE) + INTERVAL '1 day' + (COALESCE("dayOfWeek", 0) * INTERVAL '1 day')
+WHERE "date" IS NULL;
+
+-- Step 3: Make date column required and drop dayOfWeek
+ALTER TABLE "MealPlanItem" ALTER COLUMN "date" SET NOT NULL;
+ALTER TABLE "MealPlanItem" DROP COLUMN "dayOfWeek";
 
 -- AlterTable
 ALTER TABLE "User" ADD COLUMN     "activityLevel" TEXT NOT NULL DEFAULT 'moderately_active',
