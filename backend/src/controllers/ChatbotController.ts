@@ -655,4 +655,105 @@ Format your response with clear headings and bullet points.`;
   }
 };
 
+/**
+ * Estimate the cost per serving for a recipe using OpenAI
+ * POST /api/chatbot/estimate-recipe-cost
+ * Body: { ingredients: Array<{name: string, amount: number, unit: string}>, servings: number, location?: string }
+ */
+export const estimateRecipeCost = async (req: Request, res: Response) => {
+  console.log("[CHATBOT]: Estimating recipe cost with OpenAI");
+  
+  try {
+    const { ingredients, servings, location } = req.body;
+
+    if (!ingredients || ingredients.length === 0) {
+      return res.status(400).json({ error: 'No ingredients provided for cost estimation' });
+    }
+
+    if (!servings || servings < 1) {
+      return res.status(400).json({ error: 'Valid servings count required' });
+    }
+
+    // Format ingredients for prompt
+    const ingredientsText = ingredients.map((ing: any) => 
+      `- ${ing.amount} ${ing.unit} ${ing.name}`
+    ).join('\n');
+
+    // Build cost estimation prompt
+    const prompt = `Estimate the total cost in USD for these recipe ingredients (${servings} servings):
+
+${ingredientsText}
+
+${location ? `Location: ${location}` : 'Use average US grocery prices'}
+
+Consider:
+- Current average grocery prices
+- Common package sizes
+- Seasonal availability
+- Store brand vs name brand averages
+
+Provide a JSON response with:
+{
+  "totalCost": [total cost for all ingredients, float],
+  "costPerServing": [cost divided by servings, float],
+  "breakdown": [
+    {
+      "ingredient": "[ingredient name]",
+      "estimatedCost": [cost for this ingredient, float],
+      "notes": "[any relevant pricing notes]"
+    }
+  ],
+  "reasoning": "[brief explanation of cost factors]"
+}
+
+Be realistic and conservative in your estimates. Output ONLY valid JSON, no markdown formatting.`;
+
+    console.log("[CHATBOT] estimateRecipeCost(): Sending request to OpenAI API");
+    
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are a grocery pricing expert with knowledge of current food costs. " +
+            "Provide accurate, realistic cost estimates based on average US grocery prices. " +
+            "Consider package sizes and typical quantities. " +
+            "Always respond with valid JSON only."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 800
+    });
+
+    const responseMessage = completion.choices[0].message?.content;
+    
+    if (!responseMessage) {
+      throw new Error('Empty response from OpenAI');
+    }
+
+    console.log("[CHATBOT] estimateRecipeCost(): Received response from OpenAI");
+    
+    // Parse JSON response
+    const costEstimate = JSON.parse(responseMessage);
+    
+    console.log("[CHATBOT] estimateRecipeCost(): Cost estimation successful");
+    console.log(`[CHATBOT] Estimated cost per serving: $${costEstimate.costPerServing}`);
+
+    res.status(200).json({
+      ...costEstimate,
+      servings,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('[CHATBOT] estimateRecipeCost(): OpenAI API error:', error);
+    res.status(500).json({ error: 'Failed to estimate recipe cost' });
+  }
+};
+
 

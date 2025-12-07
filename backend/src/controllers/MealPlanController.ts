@@ -474,7 +474,7 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                 title: template.title,
                 description: `Nutritionally balanced ${mealType} following optimal macro ratios`,
                 totalTime: 25,
-                estimatedCostPerServing: 7.0,
+                estimatedCostPerServing: 0,
                 adjustedNutrition: {
                     calories: Math.round(targetCalories),
                     protein: Math.round(proteinGrams),
@@ -796,7 +796,7 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                                 : selectedRecipe.title,
                             description: selectedRecipe.description || `Nutritious ${selectedRecipe.title.toLowerCase()}`,
                             totalTime: selectedRecipe.totalTime || 30,
-                            estimatedCostPerServing: (selectedRecipe.estimatedCostPerServing || 5.0) * (selectedRecipe.servingMultiplier || 1),
+                            estimatedCostPerServing: (selectedRecipe.estimatedCostPerServing || 0) * (selectedRecipe.servingMultiplier || 1),
                             nutritionInfo: selectedRecipe.adjustedNutrition || selectedRecipe.nutritionInfo,
                             ingredients: selectedRecipe.ingredients.map((ing: any) => ({
                                 name: ing.name,

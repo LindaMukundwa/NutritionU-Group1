@@ -275,6 +275,8 @@ export const searchRecipes = async (req: Request, res: Response) => {
       }
     }
 
+    console.log("COVERTED", convertedRecipes);
+
     res.json({
       success: true,
       count: convertedRecipes.length,

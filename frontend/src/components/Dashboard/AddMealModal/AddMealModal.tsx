@@ -56,6 +56,9 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
 
     try {
       const results = await recipeService.searchRecipes(query);
+
+      console.log("RESULTS", results);
+
       const mappedResults = results.map((r: any) => ({
         id: r._id,
         imageUrl: r.imageUrl,
@@ -64,8 +67,9 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
         description: r.description,
         time: String(r.totalTime || r.cookTime || 30),
         cookTime: String(r.cookTime || r.totalTime || 30),
-        price: `$${(r.estimatedCostPerServing || 5).toFixed(2)}`,
-        cost: `$${(r.estimatedCostPerServing || 5).toFixed(2)}`,
+        estimatedCostPerServing: r.estimatedCostPerServing || 5,
+        price: `$${(r.estimatedCostPerServing || 0).toFixed(2)}`,
+        cost: `$${(r.estimatedCostPerServing || 0).toFixed(2)}`,
         calories: r.nutritionInfo?.calories || 0,
         rating: 4.5,
         tags: r.dietaryTags || [],
@@ -194,9 +198,9 @@ const AddMealModal: React.FC<AddMealModalProps> = ({
                     description={meal.description}
                     totalTime={typeof meal.time === 'string' ? parseInt(meal.time) : meal.time}
                     estimatedCostPerServing={
-                      typeof meal.price === 'string'
-                        ? parseFloat(meal.price.replace('$', ''))
-                        : meal.estimatedCostPerServing || 5
+                      typeof meal.estimatedCostPerServing === 'string'
+                        ? parseFloat(meal.estimatedCostPerServing.replace('$', ''))
+                        : meal.estimatedCostPerServing || 0
                     }
                     nutritionInfo={{
                       calories: meal.calories,
