@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
+import { Sparkles } from 'lucide-react';
 import styles from './GroceryList.module.css';
 
 // Types based on Prisma schema
@@ -790,7 +791,7 @@ const addRecipeIngredients = async () => {
                     onClick={generateFromMealPlan}
                     className={styles.generateButton}
                   >
-                    📅 From Meal Plan
+                    <Sparkles size={16} /> From Meal Plan
                   </button>
 
                   <button

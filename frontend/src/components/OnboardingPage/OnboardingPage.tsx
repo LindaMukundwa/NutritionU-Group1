@@ -14,6 +14,7 @@ import { Icon } from '../ui/Icon';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
+  const [isGenderDropdownOpen, setIsGenderDropdownOpen] = useState(false);
   const [formData, setFormData] = useState({
     displayName: '',
     gender: '',
@@ -303,45 +304,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className={styles.personalInfoSection}>
-                  <div className={styles.personalInfoWrapper}>
-                    <Label className={styles.sectionLabel}>Personal Information</Label>
-
-                    <div className={styles.inputRow}>
-                      {/* Display Name */}
-                      <div className={styles.inputGroup}>
-                        <Label>Display Name</Label>
-                        <input
-                          type="text"
-                          placeholder="Enter your display name"
-                          value={formData.displayName}
-                          onChange={(e) =>
-                            setFormData({ ...formData, displayName: e.target.value })
-                          }
-                          className={styles.textInput}
-                        />
-                      </div>
-
-                      {/* Gender */}
-                      <div className={styles.inputGroup}>
-                        <Label>Gender</Label>
-                        <select
-                          value={formData.gender}
-                          onChange={(e) =>
-                            setFormData({ ...formData, gender: e.target.value })
-                          }
-                          className={styles.selectInput}
-                        >
-                          <option value="">Select gender</option>
-                          <option value="female">Female</option>
-                          <option value="male">Male</option>
-                          <option value="nonbinary">Non-binary</option>
-                          <option value="prefer_not">Prefer not to say</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Unit Selection */}
+                  {/* Unit Selection - First */}
                   <div className={styles.unitSelection}>
                     <Label className={styles.unitLabel}>Units</Label>
                     <div className={styles.unitOptions}>
@@ -370,40 +333,136 @@ export default function OnboardingPage() {
                     </div>
                   </div>
 
-                  <div className={styles.inputRow}>
-                    <div className={styles.inputGroup}>
-                      <Label>Age (years)</Label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="120"
-                        value={formData.age || ''}
-                        onChange={(e) => setFormData({ ...formData, age: e.target.value ? parseInt(e.target.value) : undefined })}
-                        className={styles.numberInput}
-                      />
+                  {/* Personal Information - grouped in blue box */}
+                  <div className={styles.nameGenderSection}>
+                    <Label className={styles.sectionLabel}>Personal Information</Label>
+                    
+                    {/* Display Name and Gender Row */}
+                    <div className={styles.nameGenderRow}>
+                      <div className={styles.inputGroup}>
+                        <Label>Display Name</Label>
+                        <input
+                          type="text"
+                          placeholder="Enter your display name"
+                          value={formData.displayName}
+                          onChange={(e) =>
+                            setFormData({ ...formData, displayName: e.target.value })
+                          }
+                          className={styles.textInput}
+                        />
+                      </div>
+
+                      <div className={styles.inputGroup}>
+                        <Label>Gender</Label>
+                        <div className={styles.customDropdown}>
+                          <div
+                            className={styles.dropdownTrigger}
+                            onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
+                          >
+                            <span className={styles.dropdownValue}>
+                              {formData.gender === 'female' ? 'Female' :
+                               formData.gender === 'male' ? 'Male' :
+                               formData.gender === 'nonbinary' ? 'Non-binary' :
+                               formData.gender === 'prefer_not' ? 'Prefer not to say' :
+                               'Select gender'}
+                            </span>
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              style={{ 
+                                transition: 'transform 0.2s ease',
+                                transform: isGenderDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                              }}
+                            >
+                              <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                          </div>
+                          {isGenderDropdownOpen && (
+                            <div className={styles.dropdownMenu}>
+                              <div
+                                className={`${styles.dropdownItem} ${formData.gender === 'female' ? styles.selected : ''}`}
+                                onClick={() => {
+                                  setFormData({ ...formData, gender: 'female' });
+                                  setIsGenderDropdownOpen(false);
+                                }}
+                              >
+                                Female
+                              </div>
+                              <div
+                                className={`${styles.dropdownItem} ${formData.gender === 'male' ? styles.selected : ''}`}
+                                onClick={() => {
+                                  setFormData({ ...formData, gender: 'male' });
+                                  setIsGenderDropdownOpen(false);
+                                }}
+                              >
+                                Male
+                              </div>
+                              <div
+                                className={`${styles.dropdownItem} ${formData.gender === 'nonbinary' ? styles.selected : ''}`}
+                                onClick={() => {
+                                  setFormData({ ...formData, gender: 'nonbinary' });
+                                  setIsGenderDropdownOpen(false);
+                                }}
+                              >
+                                Non-binary
+                              </div>
+                              <div
+                                className={`${styles.dropdownItem} ${formData.gender === 'prefer_not' ? styles.selected : ''}`}
+                                onClick={() => {
+                                  setFormData({ ...formData, gender: 'prefer_not' });
+                                  setIsGenderDropdownOpen(false);
+                                }}
+                              >
+                                Prefer not to say
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className={styles.inputGroup}>
-                      <Label>Height ({formData.units === 'imperial' ? 'ft' : 'cm'})</Label>
-                      <input
-                        type="number"
-                        min={formData.units === 'imperial' ? '3' : '50'}
-                        max={formData.units === 'imperial' ? '8' : '300'}
-                        step={formData.units === 'imperial' ? '0.1' : '1'}
-                        value={formData.height || ''}
-                        onChange={(e) => setFormData({ ...formData, height: e.target.value ? parseFloat(e.target.value) : undefined })}
-                        className={styles.numberInput}
-                      />
-                    </div>
-                    <div className={styles.inputGroup}>
-                      <Label>Weight ({formData.units === 'imperial' ? 'lbs' : 'kg'})</Label>
-                      <input
-                        type="number"
-                        min={formData.units === 'imperial' ? '50' : '20'}
-                        max={formData.units === 'imperial' ? '1000' : '500'}
-                        value={formData.weight || ''}
-                        onChange={(e) => setFormData({ ...formData, weight: e.target.value ? parseInt(e.target.value) : undefined })}
-                        className={styles.numberInput}
-                      />
+                    
+                    {/* Age, Height, Weight Row - ungrouped but still in Personal Info */}
+                    <div className={styles.ageHeightWeightRow}>
+                      <div className={styles.inputGroup}>
+                        <Label>Age (years)</Label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="120"
+                          value={formData.age || ''}
+                          onChange={(e) => setFormData({ ...formData, age: e.target.value ? parseInt(e.target.value) : undefined })}
+                          className={styles.numberInput}
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <Label>Height ({formData.units === 'imperial' ? 'ft' : 'cm'})</Label>
+                        <input
+                          type="number"
+                          min={formData.units === 'imperial' ? '3' : '50'}
+                          max={formData.units === 'imperial' ? '8' : '300'}
+                          step={formData.units === 'imperial' ? '0.1' : '1'}
+                          value={formData.height || ''}
+                          onChange={(e) => setFormData({ ...formData, height: e.target.value ? parseFloat(e.target.value) : undefined })}
+                          className={styles.numberInput}
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <Label>Weight ({formData.units === 'imperial' ? 'lbs' : 'kg'})</Label>
+                        <input
+                          type="number"
+                          min={formData.units === 'imperial' ? '50' : '20'}
+                          max={formData.units === 'imperial' ? '1000' : '500'}
+                          value={formData.weight || ''}
+                          onChange={(e) => setFormData({ ...formData, weight: e.target.value ? parseInt(e.target.value) : undefined })}
+                          className={styles.numberInput}
+                        />
+                      </div>
                     </div>
                   </div>
 
