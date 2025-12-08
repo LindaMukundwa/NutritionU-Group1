@@ -53,6 +53,9 @@ const GroceryList: React.FC<GroceryListProps> = ({
   const isProcessingRecipe = useRef(false);
   const lastProcessedRecipeId = useRef<string | null>(null);
 
+  // Helper to build API URLs consistently
+  const getApiUrl = (path: string) => `${API_BASE_URL}/api${path}`;
+
   // Categories for organizing items
   const categories = ['All', 'Produce', 'Meat', 'Dairy', 'Pantry', 'Other'];
 
@@ -92,7 +95,7 @@ const GroceryList: React.FC<GroceryListProps> = ({
       console.log('Looking for list with name:', weekName);
 
       // Get all user's grocery lists
-      const response = await fetch(`${API_BASE_URL}/grocery/users/${user.firebaseUid}/grocery-lists`);
+      const response = await fetch(`${API_BASE_URL}/api/grocery/users/${user.firebaseUid}/grocery-lists`);
 
       if (response.ok) {
         const allLists = await response.json();
@@ -130,7 +133,7 @@ const GroceryList: React.FC<GroceryListProps> = ({
   // Fetch complete grocery list by ID (including items)
   const fetchGroceryListById = async (listId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${listId}`);
+      const response = await fetch(`${API_BASE_URL}/api/grocery/grocery-lists/${listId}`);
 
       if (response.ok) {
         const listData = await response.json();
@@ -155,7 +158,7 @@ const GroceryList: React.FC<GroceryListProps> = ({
 
       console.log('Creating weekly grocery list with name:', listName);
 
-      const response = await fetch(`${API_BASE_URL}/grocery/users/${user.firebaseUid}/grocery-lists`, {
+      const response = await fetch(`${API_BASE_URL}/api/grocery/users/${user.firebaseUid}/grocery-lists`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,7 +244,7 @@ const GroceryList: React.FC<GroceryListProps> = ({
   const toggleItemChecked = async (itemId: string) => {
     try {
       setUpdatingItemId(itemId);
-      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${itemId}/toggle`, {
+      const response = await fetch(`${API_BASE_URL}/api/grocery/grocery-lists/items/${itemId}/toggle`, {
         method: 'PATCH',
       });
 
@@ -273,7 +276,7 @@ const GroceryList: React.FC<GroceryListProps> = ({
     try {
       setUpdatingItemId(itemId);
 
-      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${itemId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/grocery/grocery-lists/items/${itemId}`, {
         method: 'DELETE',
       });
 
@@ -307,7 +310,7 @@ const GroceryList: React.FC<GroceryListProps> = ({
     if (!groceryList) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/checked-items`, {
+      const response = await fetch(`${API_BASE_URL}/api/grocery/grocery-lists/${groceryList.id}/checked-items`, {
         method: 'DELETE',
       });
 
@@ -375,7 +378,7 @@ const generateFromMealPlan = async () => {
     const allIngredients = Array.from(ingredientMap.values()).map(data => data.originalIngredient);
     
     console.log('Simplifying meal plan ingredients...', allIngredients);
-    const simplifyResponse = await fetch(`${API_BASE_URL}/grocery/grocery-lists/simplify-ingredients`, {
+    const simplifyResponse = await fetch(`${API_BASE_URL}/api/grocery/grocery-lists/simplify-ingredients`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -441,7 +444,7 @@ const generateFromMealPlan = async () => {
 
         if (existingItem) {
           // Update existing item quantity and source
-          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/items/${existingItem.id}`, {
+          const response = await fetch(`${API_BASE_URL}/api/grocery/grocery-lists/items/${existingItem.id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -467,7 +470,7 @@ const generateFromMealPlan = async () => {
           }
         } else {
           // Add new item
-          const response = await fetch(`${API_BASE_URL}/grocery/grocery-lists/${groceryList.id}/items`, {
+          const response = await fetch(`${API_BASE_URL}/api/grocery/grocery-lists/${groceryList.id}/items`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -517,7 +520,7 @@ const addRecipeIngredients = async () => {
   try {
     // Step 1: Simplify ingredients via API
     console.log('Simplifying ingredients...', ingredients);
-    const simplifyResponse = await fetch(`${API_BASE_URL}/grocery/grocery-lists/simplify-ingredients`, {
+    const simplifyResponse = await fetch(`${API_BASE_URL}/api/grocery/grocery-lists/simplify-ingredients`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
