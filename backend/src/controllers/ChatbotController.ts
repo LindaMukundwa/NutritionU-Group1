@@ -22,6 +22,69 @@ const tools = [{
   }
 }];
 
+// Add this helper function to ChatbotController.ts
+export const estimateRecipeCostInternal = async (
+  ingredients: Array<{name: string, amount: number, unit: string}>, 
+  servings: number, 
+  location?: string
+): Promise<number> => {
+  try {
+    const ingredientsText = ingredients.map((ing: any) => 
+      `- ${ing.amount} ${ing.unit} ${ing.name}`
+    ).join('\n');
+
+    const prompt = `Estimate the total cost in USD for these recipe ingredients (${servings} servings):
+
+${ingredientsText}
+
+${location ? `Location: ${location}` : 'Use average US grocery prices'}
+
+Consider:
+- Current average grocery prices
+- Common package sizes
+- Seasonal availability
+- Store brand vs name brand averages
+
+Provide a JSON response with:
+{
+  "totalCost": [total cost for all ingredients, float],
+  "costPerServing": [cost divided by servings, float]
+}
+
+Be realistic and conservative in your estimates. Output ONLY valid JSON, no markdown formatting.`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are a grocery pricing expert with knowledge of current food costs. " +
+            "Provide accurate, realistic cost estimates based on average US grocery prices. " +
+            "Always respond with valid JSON only."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 400
+    });
+
+    const responseMessage = completion.choices[0].message?.content;
+    if (!responseMessage) {
+      return 5; // Default fallback
+    }
+
+    const costEstimate = JSON.parse(responseMessage);
+    return costEstimate.costPerServing || 5;
+  } catch (error) {
+    console.error('[CHATBOT] Cost estimation failed:', error);
+    return 5; // Default fallback
+  }
+};
+
 // Generate a response for chatbot
 export const generateChatbotResponse = async (req: Request, res: Response) => {
   console.log("[CHATBOT]: Generating chatbot response")
@@ -380,7 +443,7 @@ export const generateIngredientPrices = async (req: Request, res: Response) => {
         ### Example Input
         {
           "ingredients": ["milk", "eggs", "cheddar cheese"],
-          "location": "Toronto, Canada"
+          "location": "Poughkeepsie, NY, United States"
         }
 
         ### Example Output
@@ -418,6 +481,7 @@ export const generateIngredientPrices = async (req: Request, res: Response) => {
         ---
 
         **Important:**  
+        - 
         - Output must be a single JSON object (see above structure), with clear reasoning included as a field.  
         - Always report accurate source URLs.  
         - Mark not-found ingredients with null prices and explain in "notes".

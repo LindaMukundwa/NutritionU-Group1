@@ -796,7 +796,7 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                                 : selectedRecipe.title,
                             description: selectedRecipe.description || `Nutritious ${selectedRecipe.title.toLowerCase()}`,
                             totalTime: selectedRecipe.totalTime || 30,
-                            estimatedCostPerServing: (selectedRecipe.estimatedCostPerServing || 0) * (selectedRecipe.servingMultiplier || 1),
+                            estimatedCostPerServing: selectedRecipe.estimatedCostPerServing || 5, // Will be updated below
                             nutritionInfo: selectedRecipe.adjustedNutrition || selectedRecipe.nutritionInfo,
                             ingredients: selectedRecipe.ingredients.map((ing: any) => ({
                                 name: ing.name,
@@ -811,6 +811,13 @@ export const generateMealPlan = async (req: Request, res: Response) => {
                                 equipment: inst.equipment || []
                             }))
                         };
+
+                        // Estimate cost if not already set
+                        if (!selectedRecipe.estimatedCostPerServing || selectedRecipe.estimatedCostPerServing === 5) {
+                            const costPerServing = 5; // Default cost per serving, replace with actual logic if needed
+                            recipeData.estimatedCostPerServing = costPerServing * (selectedRecipe.servingMultiplier || 1);
+                            console.log(`[MEAL_PLAN] Estimated cost for ${recipeData.title}: $${recipeData.estimatedCostPerServing}`);
+                        }
 
                         console.log(`[generateMealPlan] Saving scaled recipe: "${recipeData.title}" with ${selectedRecipe.adjustedNutrition?.calories || selectedRecipe.nutritionInfo.calories} calories`);
                         const savedRecipe = await prisma.recipe.create({
@@ -926,13 +933,20 @@ export const generateMealPlan = async (req: Request, res: Response) => {
             .filter(item => item.date.toISOString().split('T')[0] === dates[0])
             .reduce((sum, item) => sum + ((item.recipe.nutritionInfo as any)?.calories || 0), 0);
 
+        const totalEstimatedCost = mealPlan.items.reduce((sum, item) => {
+            return sum + (item.recipe?.estimatedCostPerServing || 5);
+        }, 0);
+
         const response = {
             mealPlan,
             summary: {
                 totalMealsGenerated,
                 daysPlanned: dates.length,
                 averageDailyCalories: dailyCaloriesGenerated,
-                mealsPerDay: mealTypes.length
+                mealsPerDay: mealTypes.length,
+                totalEstimatedCost: parseFloat(totalEstimatedCost.toFixed(2)),
+                averageCostPerMeal: parseFloat((totalEstimatedCost / totalMealsGenerated).toFixed(2)),
+                averageCostPerDay: parseFloat((totalEstimatedCost / dates.length).toFixed(2))
             }
         };
 
