@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateChatbotResponse, generateChatbotPrompts, generateMacros, generateInstructionsAndIngredients, generateIngredientPrices, analyzeRecipes, getMealSuggestions } from '../controllers/ChatbotController.ts';
+import { generateChatbotResponse, generateChatbotPrompts, generateMacros, generateInstructionsAndIngredients, generateIngredientPrices, analyzeRecipes, getMealSuggestions, estimateRecipeCost } from '../controllers/ChatbotController.ts';
 
 
 const router = express.Router();
@@ -22,6 +22,8 @@ router.post('/ingredients-prices', generateIngredientPrices);
 router.post('/analyze-recipes', analyzeRecipes);
 
 router.post('/meal-suggestions', getMealSuggestions);
+
+router.post('/estimate-recipe-cost', estimateRecipeCost);
 
 
 export default router;

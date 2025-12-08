@@ -19,11 +19,13 @@ import { mealPlanService } from "../../../services/mealPlanService"
 import { Icon } from '../ui/Icon';
 import { DatePicker } from '../ui/DatePicker';
 
+import type { IconName } from '../ui/Icon';
+
 interface SummaryCardData {
   title: string;
   value: string | number;
   subtext: string;
-  icon: string;
+  icon: IconName;
   progressBar?: {
     current: number;
     total: number;
@@ -88,22 +90,49 @@ function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-// Helper function to format date for display
-function formatDisplayDate(dateString: string): string {
-  const date = new Date(dateString + 'T00:00:00');
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  };
-  return date.toLocaleDateString('en-US', options);
+// Add this helper function near the top of the file with other utility functions
+function calculateWeeklyCost(
+  weeklyMealPlan: WeeklyMealPlan,
+  startDate?: string,
+  endDate?: string
+): number {
+  let totalCost = 0;
+  
+  Object.keys(weeklyMealPlan).forEach(dateString => {
+    // Skip dates outside the specified range
+    if (startDate && dateString < startDate) return;
+    if (endDate && dateString > endDate) return;
+    
+    const dayPlan = weeklyMealPlan[dateString];
+    const mealTypes: (keyof DayMealPlan)[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
+    
+    mealTypes.forEach(mealType => {
+      dayPlan[mealType].forEach(meal => {
+        totalCost += parseFloat(meal.cost.replace('$', ''));
+      });
+    });
+  });
+  
+  return totalCost;
 }
 
-// Helper function to get day name
-function getDayName(dateString: string): string {
-  const date = new Date(dateString + 'T00:00:00');
-  return date.toLocaleDateString('en-US', { weekday: 'long' });
+// Helper function to get start and end of current week
+function getCurrentWeekRange(): { start: string; end: string } {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+  
+  // Calculate start of week (Sunday)
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - dayOfWeek);
+  
+  // Calculate end of week (Saturday)
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  
+  return {
+    start: getDateString(startOfWeek),
+    end: getDateString(endOfWeek)
+  };
 }
 
 // Helper to get or create empty day plan
@@ -171,7 +200,6 @@ function RecipeModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        {/* Modified header with Add to Grocery List button */}
         <div className={styles.modalHeader}>
           <div>
             <h2 className={styles.modalTitle}>{recipe.name}</h2>
@@ -600,8 +628,8 @@ function MealContent({
         description: r.description,
         time: String(r.totalTime || r.cookTime || 30),
         cookTime: String(r.cookTime || r.totalTime || 30),
-        price: `$${(r.estimatedCostPerServing || 5).toFixed(2)}`,
-        cost: `$${(r.estimatedCostPerServing || 5).toFixed(2)}`,
+        price: `$${(r.estimatedCostPerServing || 0).toFixed(2)}`,
+        cost: `$${(r.estimatedCostPerServing || 0).toFixed(2)}`,
         calories: r.nutritionInfo?.calories || 0,
         rating: 4.5,
         tags: r.dietaryTags || [],
@@ -860,23 +888,29 @@ function MealContent({
               let enhancedIngredients = mealToAdd.recipe.ingredients;
               let enhancedInstructions = mealToAdd.recipe.instructions;
 
-              try {
-                const chatbotResponse = await fetch(`${API_BASE}/api/chatbot/instructions-ingredients`, {
+              console.log(`INSTRUCTION: ${enhancedInstructions} ${enhancedIngredients}`);
+                // Only enhance if ingredients or instructions are missing/empty
+                const needsEnhancement = !enhancedIngredients || enhancedIngredients.length === 0 || 
+                            !enhancedInstructions || enhancedInstructions.length === 0;
+
+                if (needsEnhancement) {
+                try {
+                  const chatbotResponse = await fetch(`${API_BASE}/api/chatbot/instructions-ingredients`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     query: `${mealToAdd.name || mealToAdd.title} with approximately ${mealToAdd.calories} calories, ${mealToAdd.recipe.nutrition.protein}g protein, ${mealToAdd.recipe.nutrition.carbs}g carbs, and ${mealToAdd.recipe.nutrition.fat}g fat.`
                   }),
-                });
+                  });
 
-                if (chatbotResponse.ok) {
+                  if (chatbotResponse.ok) {
                   const data = await chatbotResponse.json() as { ingredients?: string[]; instructions?: string[] };
                   console.log('[Dashboard] ✅ Chatbot generated content:', data);
 
-                  if (data.ingredients && data.ingredients.length > 0) {
+                  if (data.ingredients && data.ingredients.length > 0 && (!enhancedIngredients || enhancedIngredients.length === 0)) {
                     enhancedIngredients = data.ingredients;
                   }
-                  if (data.instructions && data.instructions.length > 0) {
+                  if (data.instructions && data.instructions.length > 0 && (!enhancedInstructions || enhancedInstructions.length === 0)) {
                     enhancedInstructions = data.instructions;
                   }
 
@@ -885,29 +919,32 @@ function MealContent({
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                      ingredients: enhancedIngredients.map((ing: string) => ({
-                        name: ing,
-                        amount: 1,
-                        unit: { type: 'metric', value: 'serving' },
-                      })),
-                      instructions: enhancedInstructions.map((inst: string, idx: number) => ({
-                        stepNumber: idx + 1,
-                        instruction: inst,
-                        equipment: [],
-                      })),
+                    ingredients: enhancedIngredients.map((ing: string) => ({
+                      name: ing,
+                      amount: 1,
+                      unit: { type: 'metric', value: 'serving' },
+                    })),
+                    instructions: enhancedInstructions.map((inst: string, idx: number) => ({
+                      stepNumber: idx + 1,
+                      instruction: inst,
+                      equipment: [],
+                    })),
                     }),
                   });
 
                   if (updateResponse.ok) {
                     console.log('[Dashboard] ✅ Recipe updated with chatbot content');
                   }
-                } else {
+                  } else {
                   console.log('[Dashboard] ⚠️ Chatbot API failed, using original content');
+                  }
+                } catch (chatbotError) {
+                  console.error('[Dashboard] Chatbot error:', chatbotError);
+                  console.log('[Dashboard] Using original recipe content');
                 }
-              } catch (chatbotError) {
-                console.error('[Dashboard] Chatbot error:', chatbotError);
-                console.log('[Dashboard] Using original recipe content');
-              }
+                } else {
+                console.log('[Dashboard] Recipe already has ingredients and instructions, skipping enhancement');
+                }
 
               // Step 4: Create meal with recipeId and enhanced content
               const plannerMeal: Meal = {
@@ -1632,11 +1669,13 @@ function AIAssistantContent() {
 
 function DashboardContentSwitcher({
   showGroceryList,
-  setShowGroceryList
+  setShowGroceryList,
+  onWeeklyCostChange,
 }: {
   showGroceryList: boolean;
   setShowGroceryList: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+  onWeeklyCostChange?: (cost: number) => void;
+})  {
   const { user } = useAuth(); // trying to implement user persistence
   const [activeTab, setActiveTab] = useState("meals");
   // Initialize to today's date
@@ -1851,6 +1890,14 @@ function DashboardContentSwitcher({
     saveMealPlan
   } = useMealPlan(user?.firebaseUid);
 
+  React.useEffect(() => {
+    if (onWeeklyCostChange && !loading) {
+      const { start, end } = getCurrentWeekRange();
+      const weeklyCost = calculateWeeklyCost(weeklyMealPlan, start, end);
+      onWeeklyCostChange(weeklyCost);
+    }
+  }, [weeklyMealPlan, loading, onWeeklyCostChange]);
+
   // Show loading state while fetching data
   if (loading) {
     return (
@@ -1956,24 +2003,24 @@ function DashboardContentSwitcher({
 const Dashboard: FC<DashboardProps> = () => {
   const { user } = useAuth();
   const [showGroceryList, setShowGroceryList] = useState(false);
-  // Get meal plan data and the count method
+  const [weeklyCost, setWeeklyCost] = useState(0);
+  
   const { getTotalMealsCount } = useMealPlan(user?.firebaseUid);
-
-  // Call the method to get total meals
   const totalMeals = getTotalMealsCount();
-
-  // Get display name from user or use default
   const displayName = user?.displayName || 'there';
+
+  const weeklyBudget = user?.budget?.value ?? 100;
+  const remainingBudget = weeklyBudget - weeklyCost;
 
   const dashboardSummary: SummaryCardData[] = [
     {
       title: "Weekly Budget",
-      value: user?.budget?.value ?? 100,
-      subtext: "",
+      value: `$${remainingBudget.toFixed(2)}`,
+      subtext: `$${weeklyCost.toFixed(2)} spent`,
       icon: "circle-dollar",
       progressBar: {
-        current: 75, // TODO: Make dynamic
-        total: user?.budget?.value ?? 100,
+        current: weeklyCost,
+        total: weeklyBudget,
       },
     },
     {
@@ -1992,7 +2039,7 @@ const Dashboard: FC<DashboardProps> = () => {
         total: 100,
       },
     },
-  ]
+  ];
 
   const renderProgressBar = (current: number, total: number) => {
     const percentage = (current / total) * 100
@@ -2004,18 +2051,22 @@ const Dashboard: FC<DashboardProps> = () => {
   }
 
   const renderSummaryCard = (card: SummaryCardData, index: number) => {
-    // Determine if icon is a lucide icon name or a simple string (like "$")
-    const isLucideIcon = card.icon !== "$";
-
-    // Use counter animation for numeric values with slight delay per card
+    const lucideIcons: IconName[] = ["circle-dollar", "soup", "zap"]; // Add all valid IconName values here
+    const isLucideIcon = lucideIcons.includes(card.icon as IconName);
+  
+    // Check if the value is a number (not a string)
+    const isNumeric = typeof card.value === 'number';
+    
+    // Only use animation for numeric values
     const animatedValue = useCountUp(
-      typeof card.value === 'number' ? card.value : 0,
+      isNumeric ? Number(card.value) : 0,
       1200,
       0
     );
-
-    const displayValue = typeof card.value === 'number' ? animatedValue : card.value;
-
+  
+    // Use animated value for numbers, original value for strings
+    const displayValue = isNumeric ? animatedValue : card.value;
+  
     return (
       <div key={card.title} className={styles.summaryCard}>
         <div className={styles.cardHeader}>
@@ -2024,52 +2075,49 @@ const Dashboard: FC<DashboardProps> = () => {
         <div className={styles.cardBody}>
           <div className={styles.cardValue}>{displayValue}</div>
           <div className={styles.iconBackground}>
-            {isLucideIcon ? (
-              <Icon name={card.icon as any} size={20} />
-            ) : (
-              card.icon
-            )}
+            {isLucideIcon && <Icon name={card.icon} size={24} />}
           </div>
         </div>
-
+  
         {card.progressBar ? (
-          renderProgressBar(card.progressBar.current, card.progressBar.total)
+          <>
+            {renderProgressBar(card.progressBar.current, card.progressBar.total)}
+            {card.subtext && <div className={styles.cardSubtext}>{card.subtext}</div>}
+          </>
         ) : (
           <div className={styles.cardSubtext}>{card.subtext}</div>
         )}
       </div>
     );
-  }
+  };
 
   return (
     <div className={styles.Dashboard}>
-      {/* Top Navigation Bar */}
       <TopNavBar
         userEmail={user?.email || ""}
         onOpenGroceryList={() => setShowGroceryList(true)}
       />
 
-      {/* Top Section with Gradient Background - includes Header + Summary Cards */}
       <div className={styles.topSectionWrapper}>
-        {/* Header/Greeting Section */}
         <div className={styles.header}>
           <h1 className={styles.greeting}>
-            Good morning, {displayName}
+            Good morning, {displayName}!
           </h1>
           <p className={styles.prompt}>Ready to plan some delicious meals for this week?</p>
         </div>
 
-        {/* Summary Cards Section */}
-        <div className={styles.summaryGrid}>{dashboardSummary.map((card, index) => renderSummaryCard(card, index))}</div>
+        <div className={styles.summaryGrid}>
+          {dashboardSummary.map((card, index) => renderSummaryCard(card, index))}
+        </div>
       </div>
 
-      {/* Dashboard Content Switcher Section */}
       <DashboardContentSwitcher
         showGroceryList={showGroceryList}
         setShowGroceryList={setShowGroceryList}
+        onWeeklyCostChange={setWeeklyCost}
       />
     </div>
-  )
-}
+  );
+};
 
 export default Dashboard

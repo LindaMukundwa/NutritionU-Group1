@@ -45,7 +45,7 @@ interface FatSecretRecipe {
   recipe_image?: string;
   cooking_time_min?: string;
   number_of_servings: string;
-  ingredients: {
+  recipe_ingredients: {
     ingredient: Array<{
       food_id: string;
       food_name: string;
@@ -87,6 +87,7 @@ const FatSecretService = new class FatSecretService {
   private config: FatSecretConfig;
   private accessToken: string | null = null;
   private tokenExpiry: number | null = null;
+  private costCache: Map<string, number> = new Map();
 
   constructor() {
     this.config = {
@@ -274,15 +275,79 @@ const FatSecretService = new class FatSecretService {
     }
   }
 
-  /**
-   * Convert FatSecret recipe to our Recipe model format
-   */
+
+  private estimateCostAsync(recipe: any, ingredients: any[], servings: number): Promise<void> {
+    // Use the correct port - 3001 based on your earlier logs
+    const apiUrl = `${process.env.API_BASE_URL || 'http://localhost:3001'}/api/chatbot/estimate-recipe-cost`;
+
+    console.log(`[FATSECRET] Attempting cost estimation for ${recipe.title}`);
+    console.log(`[FATSECRET] API URL: ${apiUrl}`);
+    console.log(`[FATSECRET] Ingredients count: ${ingredients.length}`);
+
+    // Validate ingredients before sending
+    if (!ingredients || ingredients.length === 0) {
+      console.warn(`[FATSECRET] ⚠ No ingredients to estimate for ${recipe.title}`);
+      return Promise.resolve();
+    }
+
+    const ingredientsPayload = ingredients.map(ing => ({
+      name: ing.name || 'Unknown',
+      amount: ing.amount || 1,
+      unit: ing.unit?.value || ing.unit || 'unit'
+    }));
+
+    return axios.post(
+      apiUrl,
+      {
+        ingredients: ingredientsPayload,
+        servings
+      },
+      {
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    ).then(response => {
+        if (response.data && response.data.costPerServing) {
+          recipe.estimatedCostPerServing = response.data.costPerServing;
+          console.log(`[FATSECRET] ✓ Cost estimation updated: $${recipe.estimatedCostPerServing} per serving for ${recipe.title}`);
+        } else {
+          console.warn(`[FATSECRET] ⚠ Unexpected response format for ${recipe.title}:`, response.data);
+        }
+      })
+      .catch(error => {
+        if (error.response) {
+          console.error(`[FATSECRET] ✗ Cost estimation API error for ${recipe.title}:`, {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            data: error.response.data,
+            url: apiUrl
+          });
+        } else if (error.request) {
+          console.error(`[FATSECRET] ✗ No response from cost estimation API for ${recipe.title}:`, {
+            url: apiUrl,
+            message: error.message,
+            code: error.code
+          });
+        } else {
+          console.error(`[FATSECRET] ✗ Cost estimation request setup failed for ${recipe.title}:`, {
+            message: error.message,
+            stack: error.stack
+          });
+        }
+      });
+  }
+
   convertToRecipeModel(fatSecretRecipe: FatSecretRecipe): any {
+
+    console.log("Recipe", fatSecretRecipe);
+
     // Defensive parsing: guard against missing nested fields and unexpected shapes
-    const ingredientsArray = fatSecretRecipe.ingredients && fatSecretRecipe.ingredients.ingredient
-      ? (Array.isArray(fatSecretRecipe.ingredients.ingredient)
-        ? fatSecretRecipe.ingredients.ingredient
-        : [fatSecretRecipe.ingredients.ingredient])
+    const ingredientsArray = fatSecretRecipe.recipe_ingredients && fatSecretRecipe.recipe_ingredients.ingredient
+      ? (Array.isArray(fatSecretRecipe.recipe_ingredients.ingredient)
+        ? fatSecretRecipe.recipe_ingredients.ingredient
+        : [fatSecretRecipe.recipe_ingredients.ingredient])
       : [];
 
     const directionsArray = fatSecretRecipe.directions && fatSecretRecipe.directions.direction
@@ -304,37 +369,42 @@ const FatSecretService = new class FatSecretService {
     const servings = safeParseInt(fatSecretRecipe.number_of_servings, 1);
     const cookingTime = safeParseInt(fatSecretRecipe.cooking_time_min, 30);
 
-    return {
+    // Map ingredients for the recipe model
+    const ingredients = ingredientsArray.map((ing: any) => ({
+      openFoodFactsId: ing.food_id || undefined,
+      name: ing.food_name || 'Ingredient',
+      amount: safeParseFloat(ing.number_of_units, 1),
+      unit: {
+        type: 'imperial',
+        value: this.normalizeUnit(ing.measurement_description || '')
+      },
+      category: 'other',
+      nutritionInfo: {
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        fiber: 0,
+        sugar: 0,
+        sodium: 0
+      }
+    }));
+
+
+    // Fire-and-forget cost estimation (non-blocking)
+    const recipe = {
       _id: `fatsecret_${fatSecretRecipe.recipe_id}`,
       title: fatSecretRecipe.recipe_name || 'Untitled Recipe',
       description: fatSecretRecipe.recipe_description || undefined,
       imageUrl: fatSecretRecipe.recipe_image || undefined,
-      cuisine: 'various', // FatSecret doesn't provide cuisine type
-      mealType: 'dinner', // Default can be inferred or set by user
-      difficulty: 'beginner', // Default
-      prepTime: 0, // FatSecret doesn't provide prep time separately
+      cuisine: 'various',
+      mealType: 'dinner',
+      difficulty: 'beginner',
+      prepTime: 0,
       cookTime: cookingTime,
       totalTime: cookingTime,
       servings,
-      ingredients: ingredientsArray.map((ing: any) => ({
-        openFoodFactsId: ing.food_id || undefined,
-        name: ing.food_name || 'Ingredient',
-        amount: safeParseFloat(ing.number_of_units, 1),
-        unit: {
-          type: 'imperial',
-          value: this.normalizeUnit(ing.measurement_description || '')
-        },
-        category: 'other', // Would need to categorize
-        nutritionInfo: {
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          fiber: 0,
-          sugar: 0,
-          sodium: 0
-        }
-      })),
+      ingredients,
       instructions: directionsArray.map((dir: any) => ({
         stepNumber: safeParseInt(dir.direction_number, 0),
         instruction: dir.direction_description || '',
@@ -357,12 +427,26 @@ const FatSecretService = new class FatSecretService {
         sugar: 0,
         sodium: 0
       },
-      estimatedCostPerServing: 5, // Default estimate
+      estimatedCostPerServing: 5, // Default, will be updated if API succeeds
       dietaryTags: [],
       source: 'fatsecret' as any,
       createdAt: new Date(),
       updatedAt: new Date()
     };
+
+    // Attempt cost estimation asynchronously without blocking
+    const cacheKey = `${fatSecretRecipe.recipe_id}`;
+
+    // Check cache first
+    recipe.estimatedCostPerServing = this.costCache.get(cacheKey) || 5;
+
+    // Update in background and cache result
+    this.estimateCostAsync(recipe, ingredients, servings)
+      .then(() => {
+        this.costCache.set(cacheKey, recipe.estimatedCostPerServing);
+      });
+    
+    return recipe;
   }
 
   /**

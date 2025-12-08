@@ -15,7 +15,14 @@ app.use(helmet({
   crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
   // Cross-Origin-Embedder-Policy can also cause issues for some popup flows —
   // disable it here to avoid COEP/COOP interactions while developing.
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  // Configure Content Security Policy to allow localhost connections for development
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", 'http://localhost:*', 'https://*'],
+    },
+  } : false, // Disable CSP in development to allow Chrome DevTools
 }));
 
 // CORS configuration: allow dev frontend origin and Authorization header for preflight

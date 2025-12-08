@@ -20,8 +20,7 @@ const LandingPage: React.FC<LandingPageProps> = () => {
   };
 
   const handleNavAuthClick = (action: string): void => {
-    // Handle navigation auth button click
-    console.log(`${action} clicked`);
+    navigate('/signup');
   };
 
   return (

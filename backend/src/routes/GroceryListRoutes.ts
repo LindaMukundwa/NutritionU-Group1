@@ -11,7 +11,8 @@ import {
     toggleGroceryItemChecked,
     clearCheckedItems,
     generateGroceryListFromMealPlan,
-    duplicateGroceryList
+    duplicateGroceryList,
+    simplifyIngredients
 } from '../controllers/GroceryListController.ts';
 
 const router = Router();
@@ -19,6 +20,8 @@ const router = Router();
 // User-specific grocery list routes
 router.post('/users/:firebaseUid/grocery-lists', createGroceryList);
 router.get('/users/:firebaseUid/grocery-lists', getUserGroceryLists);
+
+router.post('/grocery-lists/simplify-ingredients', simplifyIngredients);
 
 // General grocery list routes
 router.get('/grocery-lists/:groceryListId', getGroceryList);

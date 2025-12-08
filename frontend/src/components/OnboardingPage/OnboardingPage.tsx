@@ -36,6 +36,7 @@ export default function OnboardingPage() {
       protein: 150
     }
   });
+  const [showRationale, setShowRationale] = useState(false);
 
 
   const totalSteps = 6;
@@ -735,12 +736,30 @@ export default function OnboardingPage() {
                     </div>
                     {/* Add the rationale display here */}
                     {macroSuggestions?.rationale && (
-                      <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <h4 className="font-semibold text-blue-900 mb-2">AI Thought Process:</h4>
-                        <p className="text-sm text-blue-800 whitespace-pre-line">{macroSuggestions.rationale}</p>
+                      <div className={styles.thoughtProcessContainer}>
+                        <button
+                          onClick={() => setShowRationale(!showRationale)}
+                          className={styles.thoughtProcessHeader}
+                        >
+                          <h4 className={styles.thoughtProcessTitle}>
+                            💭 AI Thought Process
+                          </h4>
+                          <svg
+                            className={`${styles.thoughtProcessArrow} ${showRationale ? styles.expanded : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        {showRationale && (
+                          <div className={styles.thoughtProcessContent}>
+                            <p className={styles.thoughtProcessText}>{macroSuggestions.rationale}</p>
+                          </div>
+                        )}
                       </div>
                     )}
-
                     <Card className={styles.completionCard}>
                       <CardContent className={styles.completionContent}>
                         <h3 className={styles.completionTitle}>

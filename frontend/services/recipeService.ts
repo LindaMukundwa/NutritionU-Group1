@@ -33,6 +33,9 @@ class RecipeService {
       const response = await axios.get(`${API_BASE_URL}/api/recipes/search`, {
         params: { query, maxResults }
       });
+
+      console.log("RESPONSE", response);
+      
       return response.data.recipes;
     } catch (error) {
       console.error('Recipe search error:', error);
