@@ -54,7 +54,7 @@ Provide a JSON response with:
 Be realistic and conservative in your estimates. Output ONLY valid JSON, no markdown formatting.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4.1",
       messages: [
         {
           role: "system",
@@ -263,18 +263,18 @@ export const generateMacros = async (req: Request, res: Response) => {
 
       Corresponding output:
       {
-        "calories": 3200,
+        "calories":,
         "protein": {
-          "grams": 228,
-          "percent": 28.5
+          "grams": ,
+          "percent":
         },
         "carbs": {
-          "grams": 380,
-          "percent": 47.5
+          "grams":,
+          "percent":
         },
         "fats": {
-          "grams": 95,
-          "percent": 24
+          "grams":,
+          "percent": 
         },
         "rationale": "The user profile targets muscle gain and athletic performance with high activity and a high protein focus. Estimated TDEE is increased for 'very_active' status (+10% for muscle gain). Protein set at 1.2g/lb due to high-protein and muscle goals; fats kept moderate; carbs fill remainder to support performance and recovery."
       }
@@ -821,5 +821,4 @@ Be realistic and conservative in your estimates. Output ONLY valid JSON, no mark
     res.status(500).json({ error: 'Failed to estimate recipe cost' });
   }
 };
-
 
