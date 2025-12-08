@@ -278,7 +278,8 @@ const FatSecretService = new class FatSecretService {
 
   private estimateCostAsync(recipe: any, ingredients: any[], servings: number): Promise<void> {
     // Use the correct port - 3001 based on your earlier logs
-    const apiUrl = `${process.env.API_BASE_URL || 'http://localhost:3001'}/api/chatbot/estimate-recipe-cost`;
+
+    const apiUrl = `${process.env.VITE_API_BASE || 'http://localhost:3001'}/api/chatbot/estimate-recipe-cost`;
 
     console.log(`[FATSECRET] Attempting cost estimation for ${recipe.title}`);
     console.log(`[FATSECRET] API URL: ${apiUrl}`);
