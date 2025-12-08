@@ -11,11 +11,26 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-// Enable CORS so the frontend (vite dev server) can call the API.
-// Allow Authorization header and common methods. Use VITE/CORS env var if present.
-const FRONTEND_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
+// Enable CORS for multiple origins (development + production)
+const allowedOrigins = [
+  'http://localhost:5173',  // Local development
+  'http://localhost:3000',  // Alternative local port
+  'https://nutritionu.vercel.app',  // Production frontend
+  process.env.CORS_ORIGIN,  // Custom origin from env
+].filter(Boolean);  // Remove undefined values
+
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️ CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
