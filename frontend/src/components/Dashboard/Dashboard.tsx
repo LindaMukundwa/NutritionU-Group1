@@ -1536,7 +1536,7 @@ function NutritionContent({
       </div>
 
       <div className={styles.nutritionTracker}>
-        <div className={styles.nutritionItem}>
+        <div className={`${styles.nutritionItem} ${styles.nutritionItemCalories}`}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
               <span className={styles.nutritionIcon}>

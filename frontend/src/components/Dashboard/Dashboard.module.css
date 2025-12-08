@@ -1189,6 +1189,15 @@
   transition: width 0.3s ease-in-out;
 }
 
+/* Calories progress bar - darker in light mode for visibility */
+.nutritionItemCalories .progressBarFill {
+  background-color: oklch(0.55 0.12 264) !important;
+}
+
+[data-theme="dark"] .nutritionItemCalories .progressBarFill {
+  background-color: oklch(0.7 0.05 264) !important;
+}
+
 /* Modal Styles */
 .modalOverlay {
   position: fixed;
