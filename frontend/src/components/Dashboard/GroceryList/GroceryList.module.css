@@ -385,11 +385,27 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(92, 107, 204, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .generateButton:hover {
   background-color: var(--info);
-  box-shadow: 0 4px 12px rgba(92, 107, 204, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    0 8px 16px rgba(92, 107, 204, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.generateButton:active {
+  transform: translateY(0px);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(92, 107, 204, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .addButton {
@@ -406,12 +422,28 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .addButton:hover {
   background-color: var(--bg);
   border-color: var(--info);
   color: var(--info);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.addButton:active {
+  transform: translateY(0px);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Add Form */
@@ -775,5 +807,3 @@
     white-space: nowrap;
   }
 }
-
-
