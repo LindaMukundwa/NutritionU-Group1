@@ -322,16 +322,15 @@
 
 .mealTypeButtonActive {
   font-weight: 700;
-  color: var(--text);
   background: var(--primary);
   border-color: var(--primary);
-  color: var(--bg-light);
+  color: var(--text);
 }
 
 [data-theme="dark"] .mealTypeButtonActive {
   background: var(--primary);
   border-color: var(--primary);
-  color: var(--bg-light);
+  color: var(--text);
 }
 
 .mealTypeDot {

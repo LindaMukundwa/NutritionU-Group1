@@ -373,11 +373,11 @@
 
 .generateButton {
   padding: 10px 20px;
-  background-color: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
   color: var(--bg-light);
   border: none;
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.9375rem;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -385,11 +385,30 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  box-shadow: 
+    0 4px 12px rgba(92, 107, 204, 0.3),
+    0 2px 6px rgba(92, 107, 204, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .generateButton:hover {
-  background-color: var(--info);
-  box-shadow: 0 4px 12px rgba(92, 107, 204, 0.3);
+  background: linear-gradient(135deg, var(--info) 0%, var(--primary) 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 18px rgba(92, 107, 204, 0.35),
+    0 4px 10px rgba(92, 107, 204, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.generateButton:active {
+  transform: translateY(0px);
+  box-shadow: 
+    0 2px 6px rgba(92, 107, 204, 0.25),
+    0 1px 3px rgba(92, 107, 204, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .addButton {
@@ -398,7 +417,7 @@
   color: var(--primary);
   border: 1px solid var(--primary);
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.9375rem;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -406,12 +425,32 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  box-shadow: 
+    0 3px 10px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .addButton:hover {
   background-color: var(--bg);
   border-color: var(--info);
   color: var(--info);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 5px 14px rgba(0, 0, 0, 0.12),
+    0 3px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.addButton:active {
+  transform: translateY(0px);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* Add Form */
@@ -775,5 +814,3 @@
     white-space: nowrap;
   }
 }
-
-
