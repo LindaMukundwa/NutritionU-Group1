@@ -1067,65 +1067,99 @@
   z-index: 1;
 }
 
-/* Back button - subtle gray glassy style */
+/* Back button - subtle gray style with gentle 3D depth */
 .backButton {
-  background: var(--bg) !important;
+  background: var(--bg-light) !important;
   backdrop-filter: blur(10px) saturate(120%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
   color: var(--text) !important;
   border: 1px solid var(--border) !important;
-  padding: 10px 20px !important;
+  padding: 10px 24px !important;
   border-radius: 8px !important;
   font-weight: 500 !important;
   font-size: 0.9375rem !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 1px var(--bg-light) !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
   outline: none !important;
 }
 
-/* Back button hover state */
+/* Back button hover state - subtle lift effect */
 .backButton:hover {
-  background: var(--bg-light) !important;
-  border-color: var(--border) !important;
+  background: var(--bg) !important;
+  border-color: var(--primary) !important;
   color: var(--text) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 1px var(--bg-light) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 
+    0 3px 10px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
 }
 
-/* Back button focus state - remove outline */
+/* Back button active state - gentle press effect */
+.backButton:active {
+  transform: translateY(0px) !important;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    inset 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Back button focus state */
 .backButton:focus {
   outline: none !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 1px var(--bg-light) !important;
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    0 0 0 3px rgba(92, 107, 204, 0.15) !important;
 }
 
-/* Next button - solid primary color glassy style */
+/* Next button - solid primary color with moderate 3D effect */
 .nextButton {
   background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%) !important;
   backdrop-filter: blur(10px) saturate(120%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
-  color: var(--highlight) !important;
+  color: white !important;
   border: none !important;
-  padding: 10px 20px !important;
+  padding: 10px 24px !important;
   border-radius: 8px !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   font-size: 0.9375rem !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 0 2px 8px rgba(92, 107, 204, 0.3), inset 0 1px 1px var(--bg-light) !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  box-shadow: 
+    0 3px 10px rgba(92, 107, 204, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
   outline: none !important;
 }
 
-/* Next button hover state */
+/* Next button hover state - moderate lift */
 .nextButton:hover {
   background: linear-gradient(135deg, var(--info) 0%, var(--primary) 100%) !important;
-  color: var(--highlight) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 16px rgba(92, 107, 204, 0.4), inset 0 1px 1px var(--bg-light) !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 
+    0 4px 14px rgba(92, 107, 204, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
 }
 
-/* Next button focus state - remove outline */
+/* Next button active state - subtle press effect */
+.nextButton:active {
+  transform: translateY(0px) !important;
+  box-shadow: 
+    0 2px 6px rgba(92, 107, 204, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Next button focus state */
 .nextButton:focus {
   outline: none !important;
-  box-shadow: 0 2px 8px rgba(92, 107, 204, 0.3), inset 0 1px 1px var(--bg-light) !important;
+  box-shadow: 
+    0 3px 10px rgba(92, 107, 204, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    0 0 0 3px rgba(92, 107, 204, 0.2) !important;
 }
 
 /* Button disabled state */
@@ -1133,6 +1167,18 @@
 .nextButton:disabled {
   opacity: 0.5 !important;
   cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.backButton:disabled:hover,
+.nextButton:disabled:hover {
+  transform: none !important;
+}
+
+.backButton:disabled:active,
+.nextButton:disabled:active {
   transform: none !important;
 }
 
