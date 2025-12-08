@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './AssistantContent.module.css';
 
+const API_BASE = (import.meta.env.VITE_API_BASE as string) || 'http://localhost:3001';
 interface Message {
     id: string;
     text: string;
@@ -21,7 +22,7 @@ const AssistantContent: React.FC = () => {
                     content: message.text
                 }));
 
-                const response = await fetch('http://localhost:3001/api/chatbot/prompts', {
+                const response = await fetch(`${API_BASE}/api/chatbot/prompts`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
