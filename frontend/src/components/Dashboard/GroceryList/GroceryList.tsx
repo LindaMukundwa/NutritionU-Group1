@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import styles from './GroceryList.module.css';
+import { Icon } from '../../ui/Icon';
 
 // Types based on Prisma schema
 interface GroceryItem {
@@ -787,7 +788,8 @@ const addRecipeIngredients = async () => {
                     onClick={generateFromMealPlan}
                     className={styles.generateButton}
                   >
-                    📅 From Meal Plan
+                    <Icon name="sparkles" size={18} />
+                    <span style={{ marginLeft: '6px' }}>From Meal Plan</span>
                   </button>
 
                   <button
