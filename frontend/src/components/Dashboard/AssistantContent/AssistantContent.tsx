@@ -79,7 +79,7 @@ const AssistantContent: React.FC = () => {
             });
 
             // Call backend API
-            const response = await fetch('http://localhost:3001/api/chatbot/generate', {
+            const response = await fetch(`${API_BASE}/api/chatbot/generate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
