@@ -32,7 +32,7 @@ interface GroceryListProps {
   setPendingRecipeForGrocery: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
 const GroceryList: React.FC<GroceryListProps> = ({
   isOpen,
