@@ -486,6 +486,7 @@ export default function Profile() {
                         id="height"
                         type="number"
                         min="0"
+                        step={profileForm.units === 'imperial' ? '0.1' : '1'}
                         value={profileForm.height}
                         onChange={(e) => handleProfileInputChange('height', e.target.value)}
                         className={styles.formInput}

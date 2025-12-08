@@ -1595,7 +1595,7 @@ function NutritionContent({
       </div>
 
       <div className={styles.nutritionTracker}>
-        <div className={styles.nutritionItem}>
+        <div className={`${styles.nutritionItem} ${styles.nutritionItemCalories}`}>
           <div className={styles.nutritionHeader}>
             <div className={styles.nutritionLabel}>
               <span className={styles.nutritionIcon}>
@@ -1604,7 +1604,7 @@ function NutritionContent({
               <span>Calories</span>
             </div>
             <span className={styles.nutritionValue}>
-              {nutritionData.calories.consumed} / {nutritionData.calories.target}
+              {Math.round(nutritionData.calories.consumed)} / {nutritionData.calories.target}
             </span>
           </div>
           {renderProgressBar(nutritionData.calories.consumed, nutritionData.calories.target, "oklch(0.7 0.05 264)")}
@@ -1634,7 +1634,7 @@ function NutritionContent({
               <span>Carbohydrates</span>
             </div>
             <span className={styles.nutritionValue}>
-              {nutritionData.carbs.consumed}g / {nutritionData.carbs.target}g
+              {Math.round(nutritionData.carbs.consumed)}g / {nutritionData.carbs.target}g
             </span>
           </div>
           {renderProgressBar(nutritionData.carbs.consumed, nutritionData.carbs.target, "oklch(0.70 0.10 180)")}

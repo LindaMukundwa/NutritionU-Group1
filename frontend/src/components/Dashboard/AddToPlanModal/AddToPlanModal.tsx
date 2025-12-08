@@ -112,14 +112,7 @@ const AddToPlanModal: React.FC<AddToPlanModalProps> = ({
                         className={`${styles.mealTypeButton} ${
                           selectedMealType === type.value ? styles.mealTypeButtonActive : ''
                         }`}
-                        style={{
-                          borderColor: selectedMealType === type.value ? type.color : '#e5e7eb',
-                          backgroundColor: selectedMealType === type.value 
-                            ? (type.color.includes('oklch') 
-                                ? type.color.replace(')', ' / 0.15)') 
-                                : `${type.color}15`)
-                            : '#f9fafb',
-                        }}
+                        data-meal-type={type.value}
                         onClick={() => setSelectedMealType(type.value)}
                       >
                         {type.label}
