@@ -7,6 +7,14 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+  pool: true,
+  maxConnections: 1,
+  maxMessages: 3,
+  rateDelta: 1000,
+  rateLimit: 3,
+  socketTimeout: 60000,  // 60 seconds
+  greetingTimeout: 30000, // 30 seconds
+  connectionTimeout: 60000, // 60 seconds
 });
 
 // Welcome email template
