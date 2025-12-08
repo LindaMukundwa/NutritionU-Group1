@@ -289,7 +289,7 @@ export const generateMacros = async (req: Request, res: Response) => {
 
     // Query OpenAI
     const completion = await openai.chat.completions.create({
-      model: "gpt-5-mini",
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
@@ -299,7 +299,9 @@ export const generateMacros = async (req: Request, res: Response) => {
           role: "user",
           content: prompt
         }
-      ]
+      ],
+      temperature: 0.3,
+      response_format: { type: "json_object" }
     });
 
     const responseMessage = completion.choices[0].message?.content;
