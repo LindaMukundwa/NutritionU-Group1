@@ -5,6 +5,8 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 /* Soft mesh gradient background - matching dashboard with animation */
@@ -111,6 +113,57 @@
   }
 }
 
+/* Dark mode background gradients */
+[data-theme="dark"] .landing-page::before {
+  background: 
+    radial-gradient(
+      circle at 0% 0%,
+      oklch(0.25 0.08 268) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 0%,
+      oklch(0.23 0.10 264) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      oklch(0.24 0.09 270) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      oklch(0.26 0.06 266) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      oklch(0.20 0.04 264),
+      oklch(0.22 0.05 268),
+      oklch(0.21 0.04 272)
+    );
+}
+
+[data-theme="dark"] .landing-page::after {
+  background: 
+    radial-gradient(
+      ellipse 600px 600px at 30% 30%,
+      oklch(0.24 0.06 260) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 70% 60%,
+      oklch(0.22 0.08 268) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 500px 600px at 50% 80%,
+      oklch(0.23 0.07 272) 0%,
+      transparent 60%
+    );
+  opacity: 0.5;
+}
+
 /* Navigation Styles */
 .navbar {
   display: flex;
@@ -132,6 +185,13 @@
   top: 0;
   z-index: 1000;
   flex-shrink: 0;
+}
+
+[data-theme="dark"] .navbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.3),
+    0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .logo {
@@ -227,6 +287,18 @@
   overflow: hidden;
 }
 
+[data-theme="dark"] .get-started-btn {
+  background: linear-gradient(
+    135deg,
+    var(--bg-light) 0%,
+    var(--bg) 100%
+  );
+  color: var(--primary);
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px var(--bg-light);
+}
+
 .get-started-btn::before {
   content: '';
   position: absolute;
@@ -260,10 +332,26 @@
   transform: translateY(-1px);
 }
 
+[data-theme="dark"] .get-started-btn:hover {
+  background: linear-gradient(
+    135deg,
+    var(--bg-light) 0%,
+    var(--bg-dark) 100%
+  );
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px var(--bg-light);
+}
+
 .get-started-btn:active,
 .get-started-btn:focus {
   background: rgba(255, 255, 255, 0.9);
   outline: none;
+}
+
+[data-theme="dark"] .get-started-btn:active,
+[data-theme="dark"] .get-started-btn:focus {
+  background: var(--bg);
 }
 
 /* Hero Section Styles */
@@ -291,6 +379,17 @@
     135deg,
     oklch(0.60 0.18 266) 0%,
     oklch(0.62 0.18 268) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="dark"] .hero-subtitle {
+  background: linear-gradient(
+    135deg,
+    oklch(0.65 0.18 266) 0%,
+    oklch(0.67 0.18 268) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -362,6 +461,15 @@
   transition: transform 0.6s ease;
 }
 
+[data-theme="dark"] .primary-btn::before {
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+}
+
 .primary-btn:hover::before {
   transform: translateX(100%);
 }
@@ -376,6 +484,12 @@
     0 12px 32px rgba(92, 107, 204, 0.4),
     0 6px 16px rgba(92, 107, 204, 0.3);
   transform: translateY(-2px);
+}
+
+[data-theme="dark"] .primary-btn:hover {
+  box-shadow: 
+    0 12px 32px rgba(92, 107, 204, 0.5),
+    0 6px 16px rgba(92, 107, 204, 0.4);
 }
 
 .primary-btn:active,
@@ -405,6 +519,18 @@
     inset 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
+[data-theme="dark"] .secondary-btn {
+  background: linear-gradient(
+    135deg,
+    var(--bg-light) 0%,
+    var(--bg) 100%
+  );
+  border: 1px solid var(--border);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px var(--bg-light);
+}
+
 .secondary-btn:hover {
   background: linear-gradient(
     135deg,
@@ -416,6 +542,18 @@
     0 6px 16px rgba(0, 0, 0, 0.12),
     inset 0 1px 2px rgba(255, 255, 255, 0.9);
   transform: translateY(-2px);
+}
+
+[data-theme="dark"] .secondary-btn:hover {
+  background: linear-gradient(
+    135deg,
+    var(--bg-light) 0%,
+    var(--bg-dark) 100%
+  );
+  border-color: var(--primary);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px var(--bg-light);
 }
 
 .secondary-btn:active,
